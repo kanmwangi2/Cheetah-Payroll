@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { StaffMember, CustomFieldDefinition } from '@/types'
-import { db } from '@/lib/supabase-enhanced'
+import { db } from '@/lib/supabase'
 import { objectToCamelCase } from '@/lib/case-converter'
 import { formatDate } from '@/lib/utils'
 

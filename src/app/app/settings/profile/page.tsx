@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/use-auth'
-import { db } from '@/lib/supabase-enhanced'
+import { db } from '@/lib/supabase'
 import { objectToCamelCase } from '@/lib/case-converter'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { Company, CompanyContextType, UserRole, Permission } from '@/types'
 import { useAuth } from './use-auth'
-import { db } from '@/lib/supabase-enhanced'
+import { db } from '@/lib/supabase'
 
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined)
 

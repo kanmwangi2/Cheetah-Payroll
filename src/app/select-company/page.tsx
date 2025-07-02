@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Company } from '@/types'
-import { db } from '@/lib/supabase-enhanced'
+import { db } from '@/lib/supabase'
 
 export default function SelectCompanyPage() {
   const [companies, setCompanies] = useState<Company[]>([])

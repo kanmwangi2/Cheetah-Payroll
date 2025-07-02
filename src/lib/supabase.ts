@@ -7,8 +7,18 @@ import { createClient } from '@supabase/supabase-js'
 import { Database } from '../types/supabase'
 import { objectToCamelCase, objectToSnakeCase } from './case-converter'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Environment variable validation
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!supabaseUrl) {
+  throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable')
+}
+
+if (!supabaseKey) {
+  throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable')
+}
 
 // Create the base Supabase client with auth configuration
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
@@ -20,16 +30,16 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
 })
 
 // Server-side client with service role key
-export const supabaseAdmin = createClient<Database>(
+export const supabaseAdmin = serviceRoleKey ? createClient<Database>(
   supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  serviceRoleKey,
   {
     auth: {
       autoRefreshToken: false,
       persistSession: false
     }
   }
-)
+) : null
 
 /**
  * Database helper functions with case conversion

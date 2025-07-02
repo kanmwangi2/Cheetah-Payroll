@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { useCompany } from '@/hooks/use-company'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DashboardStats, PayrollRun } from '@/types'
-import { db } from '@/lib/supabase-enhanced'
+import { db } from '@/lib/supabase'
 import { objectToCamelCase } from '@/lib/case-converter'
 import { formatCurrency, getMonthName } from '@/lib/utils'
 
