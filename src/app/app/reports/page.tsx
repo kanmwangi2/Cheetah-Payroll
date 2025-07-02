@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useCompany } from '@/hooks/use-company'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -68,23 +68,21 @@ export default function ReportsPage() {
   const fetchData = async () => {
     try {
       // Fetch payroll runs
-      const { data: runs, error: runsError } = await supabase
+      const { data: runs } = await db.raw
         .from('payroll_runs')
         .select('*')
         .eq('company_id', company?.id)
         .order('period_start', { ascending: false })
 
-      if (runsError) throw runsError
       setPayrollRuns(runs || [])
 
       // Fetch staff members
-      const { data: staff, error: staffError } = await supabase
+      const { data: staff } = await db.raw
         .from('staff_members')
         .select('*')
         .eq('company_id', company?.id)
         .eq('is_active', true)
 
-      if (staffError) throw staffError
       setStaffMembers(staff || [])
 
       // Calculate summary data
@@ -140,7 +138,7 @@ export default function ReportsPage() {
 
     try {
       // Fetch payroll data for the selected period
-      const { data: calculations, error } = await supabase
+      const { data: calculations } = await db.raw
         .from('payroll_calculations')
         .select(`
           *,
@@ -149,8 +147,6 @@ export default function ReportsPage() {
         `)
         .gte('payroll_run.period_start', selectedPeriod.start)
         .lte('payroll_run.period_end', selectedPeriod.end)
-
-      if (error) throw error
 
       // Generate CSV content
       const csvContent = generatePayrollCSV(calculations || [])
@@ -342,10 +338,9 @@ export default function ReportsPage() {
                 <TableBody>
                   {payrollRuns.slice(0, 5).map((run) => (
                     <TableRow key={run.id}>
-                      <TableCell>
-                        {run.period_start && run.period_end ? 
-                          `${new Date(run.period_start).toLocaleDateString()} - ${new Date(run.period_end).toLocaleDateString()}` :
-                          `${run.month}/${run.year}`
+                      <TableCell>                        {run.periodStart && run.periodEnd ?
+                          `${new Date(run.periodStart).toLocaleDateString()} - ${new Date(run.periodEnd).toLocaleDateString()}` :
+                          'No Period Set'
                         }
                       </TableCell>
                       <TableCell>
@@ -357,7 +352,7 @@ export default function ReportsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>{payrollSummary.totalEmployees}</TableCell>
-                      <TableCell>{new Date(run.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(run.createdAt).toLocaleDateString()}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -469,13 +464,13 @@ export default function ReportsPage() {
                   {staffMembers.map((staff) => (
                     <TableRow key={staff.id}>
                       <TableCell className="font-medium">
-                        {staff.first_name} {staff.last_name}
+                        {staff.firstName} {staff.lastName}
                       </TableCell>
-                      <TableCell>{staff.staff_number}</TableCell>
+                      <TableCell>{staff.staffNumber}</TableCell>
                       <TableCell>{staff.designation}</TableCell>
                       <TableCell>
-                        {staff.employment_date ? 
-                          new Date(staff.employment_date).toLocaleDateString() : 
+                        {staff.employmentDate ? 
+                          new Date(staff.employmentDate).toLocaleDateString() : 
                           'N/A'
                         }
                       </TableCell>

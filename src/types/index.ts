@@ -1,29 +1,239 @@
 import { Database } from './supabase'
 
-// Database row types
-export type Profile = Database['public']['Tables']['profiles']['Row']
-export type Company = Database['public']['Tables']['companies']['Row']
-export type UserCompanyRole = Database['public']['Tables']['user_company_roles']['Row']
-export type Department = Database['public']['Tables']['departments']['Row']
-export type StaffMember = Database['public']['Tables']['staff_members']['Row']
-export type CustomFieldDefinition = Database['public']['Tables']['custom_field_definitions']['Row']
-export type StaffCustomField = Database['public']['Tables']['staff_custom_fields']['Row']
-export type PaymentType = Database['public']['Tables']['payment_types']['Row']
-export type StaffPayment = Database['public']['Tables']['staff_payments']['Row']
-export type DeductionType = Database['public']['Tables']['deduction_types']['Row']
-export type StaffDeduction = Database['public']['Tables']['staff_deductions']['Row']
-export type PayrollRun = Database['public']['Tables']['payroll_runs']['Row']
-export type PayrollCalculation = Database['public']['Tables']['payroll_calculations']['Row']
-export type GlobalTaxSettings = Database['public']['Tables']['global_tax_settings']['Row']
-export type CompanyTaxExemptions = Database['public']['Tables']['company_tax_exemptions']['Row']
+// Frontend types using camelCase conventions
+export interface Profile {
+  id: string
+  firstName: string | null
+  lastName: string | null
+  email: string
+  phone: string | null
+  avatarUrl: string | null
+  createdAt: string
+  updatedAt: string
+}
 
-// Insert types
-export type CompanyInsert = Database['public']['Tables']['companies']['Insert']
-export type StaffMemberInsert = Database['public']['Tables']['staff_members']['Insert']
-export type PaymentTypeInsert = Database['public']['Tables']['payment_types']['Insert']
-export type DeductionTypeInsert = Database['public']['Tables']['deduction_types']['Insert']
-export type StaffDeductionInsert = Database['public']['Tables']['staff_deductions']['Insert']
-export type PayrollRunInsert = Database['public']['Tables']['payroll_runs']['Insert']
+export interface Company {
+  id: string
+  name: string
+  description: string | null
+  phoneNumber: string | null
+  email: string | null
+  address: string | null
+  tinNumber: string | null
+  registrationNumber: string | null
+  logo: string | null
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface UserCompanyRole {
+  id: string
+  userId: string
+  companyId: string
+  role: 'primary_admin' | 'app_admin' | 'company_admin' | 'payroll_preparer' | 'payroll_approver'
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Department {
+  id: string
+  companyId: string
+  name: string
+  description: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface StaffMember {
+  id: string
+  companyId: string
+  departmentId: string | null
+  staffNumber: string
+  firstName: string
+  lastName: string
+  email: string | null
+  phone: string | null
+  rssbNumber: string | null
+  employeeCategory: string | null
+  gender: string | null
+  birthDate: string | null
+  designation: string | null
+  employmentDate: string | null
+  nationality: string | null
+  idPassportNo: string | null
+  province: string | null
+  district: string | null
+  sector: string | null
+  cell: string | null
+  village: string | null
+  bankName: string | null
+  bankCode: string | null
+  accountNo: string | null
+  branch: string | null
+  emergencyContactName: string | null
+  emergencyContactRelationship: string | null
+  emergencyContactPhone: string | null
+  status: 'active' | 'inactive'
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CustomFieldDefinition {
+  id: string
+  companyId: string
+  fieldName: string
+  fieldType: 'text' | 'number' | 'date' | 'select'
+  fieldOptions: string | null
+  isRequired: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface StaffCustomField {
+  id: string
+  staffMemberId: string
+  fieldId: string
+  fieldValue: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PaymentType {
+  id: string
+  companyId: string
+  name: string
+  description: string | null
+  amount: number | null
+  taxable: boolean
+  calculationMethod: 'fixed' | 'percentage' | 'formula'
+  formula: string | null
+  isActive: boolean
+  order: number
+  type: 'gross' | 'net' | 'deduction'
+  createdAt: string
+  updatedAt: string
+}
+
+export interface StaffPayment {
+  id: string
+  staffMemberId: string
+  paymentTypeId: string
+  amount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DeductionType {
+  id: string
+  companyId: string
+  name: string
+  description: string | null
+  amount: number | null
+  calculationMethod: 'fixed' | 'percentage' | 'formula'
+  formula: string | null
+  isMandatory: boolean
+  affectsTax: boolean
+  isActive: boolean
+  order: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface StaffDeduction {
+  id: string
+  staffMemberId: string
+  deductionTypeId: string
+  description: string | null
+  originalAmount: number
+  monthlyDeduction: number
+  deductedSoFar: number
+  startDate: string
+  status: 'active' | 'inactive' | 'completed' | 'cancelled'
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PayrollRun {
+  id: string
+  companyId: string
+  periodStart: string
+  periodEnd: string
+  payDate: string | null
+  description: string | null
+  status: 'draft' | 'calculated' | 'approved' | 'rejected' | 'processed'
+  createdBy: string | null
+  approvedBy: string | null
+  approvedAt: string | null
+  processedAt: string | null
+  rejectionReason: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PayrollCalculation {
+  id: string
+  payrollRunId: string
+  staffMemberId: string
+  basicPayGross: number
+  transportAllowanceGross: number
+  totalGrossSalary: number
+  employerPension: number
+  employeePension: number
+  employerMaternity: number
+  employeeMaternity: number
+  employerRama: number
+  employeeRama: number
+  paye: number
+  cbhiDeduction: number
+  totalAppliedDeductions: number
+  finalNetPay: number
+  grossPay: number
+  taxAmount: number
+  totalDeductions: number
+  netPay: number
+  status: 'calculated' | 'pending' | 'approved' | 'paid'
+  paymentBreakdown: Record<string, number>
+  deductionBreakdown: Record<string, number>
+  createdAt: string
+  updatedAt: string
+}
+
+export interface GlobalTaxSettings {
+  id: string
+  pensionRate: number
+  pensionEmployerRate: number
+  pensionEmployeeRate: number
+  maternityRate: number
+  maternityEmployerRate: number
+  maternityEmployeeRate: number
+  cbhiRate: number
+  ramaRate: number
+  ramaEmployerRate: number
+  ramaEmployeeRate: number
+  payeTaxBands: any[]
+  updatedAt: string
+}
+
+export interface CompanyTaxExemptions {
+  id: string
+  companyId: string
+  pensionExempt: boolean
+  maternityExempt: boolean
+  cbhiExempt: boolean
+  ramaExempt: boolean
+  payeExempt: boolean
+  updatedAt: string
+}
+
+// Insert types (using camelCase)
+export type CompanyInsert = Omit<Company, 'id' | 'createdAt' | 'updatedAt'>
+export type StaffMemberInsert = Omit<StaffMember, 'id' | 'createdAt' | 'updatedAt'>
+export type PaymentTypeInsert = Omit<PaymentType, 'id' | 'createdAt' | 'updatedAt'>
+export type DeductionTypeInsert = Omit<DeductionType, 'id' | 'createdAt' | 'updatedAt'>
+export type StaffDeductionInsert = Omit<StaffDeduction, 'id' | 'createdAt' | 'updatedAt'>
+export type PayrollRunInsert = Omit<PayrollRun, 'id' | 'createdAt' | 'updatedAt'>
 
 // User roles
 export type UserRole = 'primary_admin' | 'app_admin' | 'company_admin' | 'payroll_preparer' | 'payroll_approver'
@@ -34,21 +244,21 @@ export interface StaffMemberWithDepartment extends StaffMember {
 }
 
 export interface StaffMemberWithPayments extends StaffMember {
-  staff_payments: (StaffPayment & { payment_type: PaymentType })[]
+  staffPayments: (StaffPayment & { paymentType: PaymentType })[]
 }
 
 export interface StaffMemberWithDeductions extends StaffMember {
-  staff_deductions: (StaffDeduction & { deduction_type: DeductionType })[]
+  staffDeductions: (StaffDeduction & { deductionType: DeductionType })[]
 }
 
 export interface PayrollCalculationWithStaff extends PayrollCalculation {
-  staff_member: StaffMember
+  staffMember: StaffMember
 }
 
 export interface PayrollRunWithDetails extends PayrollRun {
-  payroll_calculations: PayrollCalculationWithStaff[]
-  created_by_profile: Profile
-  approved_by_profile?: Profile
+  payrollCalculations: PayrollCalculationWithStaff[]
+  createdByProfile: Profile
+  approvedByProfile?: Profile
 }
 
 // Payroll calculation types

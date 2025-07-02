@@ -74,7 +74,7 @@ export class PayrollCalculationEngine {
     const otherPayments: Record<string, number> = {}
 
     for (const paymentType of sortedPaymentTypes) {
-      const staffPayment = staffPayments.find(sp => sp.payment_type_id === paymentType.id)
+      const staffPayment = staffPayments.find(sp => sp.paymentTypeId === paymentType.id)
       if (!staffPayment || staffPayment.amount === 0) continue
 
       let grossAmount = 0
@@ -115,15 +115,15 @@ export class PayrollCalculationEngine {
     transportAllowance: number
   ) {
     // Calculate RSSB components
-    const employerPension = totalGrossSalary * (this.taxSettings.pension_employer_rate / 100)
-    const employeePension = totalGrossSalary * (this.taxSettings.pension_employee_rate / 100)
+    const employerPension = totalGrossSalary * (this.taxSettings.pensionEmployerRate / 100)
+    const employeePension = totalGrossSalary * (this.taxSettings.pensionEmployeeRate / 100)
 
     const maternityBase = totalGrossSalary - transportAllowance
-    const employerMaternity = maternityBase * (this.taxSettings.maternity_employer_rate / 100)
-    const employeeMaternity = maternityBase * (this.taxSettings.maternity_employee_rate / 100)
+    const employerMaternity = maternityBase * (this.taxSettings.maternityEmployerRate / 100)
+    const employeeMaternity = maternityBase * (this.taxSettings.maternityEmployeeRate / 100)
 
-    const employerRAMA = basicPay * (this.taxSettings.rama_employer_rate / 100)
-    const employeeRAMA = basicPay * (this.taxSettings.rama_employee_rate / 100)
+    const employerRAMA = basicPay * (this.taxSettings.ramaEmployerRate / 100)
+    const employeeRAMA = basicPay * (this.taxSettings.ramaEmployeeRate / 100)
 
     // Calculate PAYE
     const paye = this.calculatePAYE(totalGrossSalary)
@@ -133,7 +133,7 @@ export class PayrollCalculationEngine {
     const netPayBeforeCBHI = totalGrossSalary - totalEmployeeRSSB - paye
 
     // Calculate CBHI
-    const cbhi = netPayBeforeCBHI * (this.taxSettings.cbhi_rate / 100)
+    const cbhi = netPayBeforeCBHI * (this.taxSettings.cbhiRate / 100)
     const netPayAfterCBHI = netPayBeforeCBHI - cbhi
 
     return {
@@ -153,7 +153,7 @@ export class PayrollCalculationEngine {
   private calculatePAYE(grossSalary: number): number {
     if (this.taxExemptions?.paye_exempt) return 0
 
-    const payeBands = this.taxSettings.paye_bands as unknown as PayeTaxBand[]
+    const payeBands = this.taxSettings.payeTaxBands as unknown as PayeTaxBand[]
     let paye = 0
     let remainingIncome = grossSalary
 
@@ -190,9 +190,9 @@ export class PayrollCalculationEngine {
     for (const deduction of sortedDeductions) {
       if (remaining <= 0) break
 
-      const remainingBalance = deduction.original_amount - deduction.deducted_so_far
+      const remainingBalance = deduction.originalAmount - deduction.deductedSoFar
       const maxDeductible = Math.min(
-        deduction.monthly_deduction,
+        deduction.monthlyDeduction,
         remainingBalance,
         remaining
       )
@@ -228,7 +228,7 @@ export class PayrollCalculationEngine {
       const testStatutory = this.calculateStatutoryDeductions(testGross, 0, 0)
       const testNetIncrement = mid - (testStatutory.paye - this.calculatePAYE(currentGross))
         - (testStatutory.employeePension + testStatutory.employeeMaternity + testStatutory.employeeRAMA)
-        + (currentGross * (this.taxSettings.pension_employee_rate + this.taxSettings.maternity_employee_rate + this.taxSettings.rama_employee_rate) / 100)
+        + (currentGross * (this.taxSettings.pensionEmployeeRate + this.taxSettings.maternityEmployeeRate + this.taxSettings.ramaEmployeeRate) / 100)
 
       if (testNetIncrement < targetNetIncrement) {
         low = mid
@@ -244,90 +244,95 @@ export class PayrollCalculationEngine {
 }
 
 // Utility functions for payroll calculations
-export function createDefaultPaymentTypes(companyId: string): Omit<PaymentType, 'id' | 'created_at' | 'updated_at'>[] {
+export function createDefaultPaymentTypes(companyId: string): Omit<PaymentType, 'id' | 'createdAt' | 'updatedAt'>[] {
   return [
     {
-      company_id: companyId,
+      companyId: companyId,
       name: 'Basic Pay',
       description: 'Basic salary',
       type: 'gross',
-      calculation_method: 'fixed',
+      calculationMethod: 'fixed',
       amount: null,
       formula: null,
       taxable: true,
-      is_active: true,
+      isActive: true,
       order: 1
     },
     {
-      company_id: companyId,
+      companyId: companyId,
       name: 'Transport Allowance',
       description: 'Transportation allowance',
       type: 'gross',
-      calculation_method: 'fixed',
+      calculationMethod: 'fixed',
       amount: null,
       formula: null,
       taxable: true,
-      is_active: true,
+      isActive: true,
       order: 2
     }
   ]
 }
 
-export function createDefaultDeductionTypes(companyId: string): Omit<DeductionType, 'id' | 'created_at' | 'updated_at'>[] {
+export function createDefaultDeductionTypes(companyId: string): Omit<DeductionType, 'id' | 'createdAt' | 'updatedAt'>[] {
   return [
     {
-      company_id: companyId,
+      companyId: companyId,
       name: 'Loan',
       description: 'Staff loan deduction',
-      calculation_method: 'fixed',
+      calculationMethod: 'fixed',
       amount: null,
       formula: null,
-      is_mandatory: false,
-      is_active: true,
-      affects_tax: false,
+      isMandatory: false,
+      isActive: true,
+      affectsTax: false,
       order: 1
     },
     {
-      company_id: companyId,
+      companyId: companyId,
       name: 'Advance',
       description: 'Salary advance deduction',
-      calculation_method: 'fixed',
+      calculationMethod: 'fixed',
       amount: null,
       formula: null,
-      is_mandatory: false,
-      is_active: true,
-      affects_tax: false,
+      isMandatory: false,
+      isActive: true,
+      affectsTax: false,
       order: 2
     },
     {
-      company_id: companyId,
+      companyId: companyId,
       name: 'Staff Welfare',
       description: 'Staff welfare contribution',
-      calculation_method: 'fixed',
+      calculationMethod: 'fixed',
       amount: null,
       formula: null,
-      is_mandatory: false,
-      is_active: true,
-      affects_tax: false,
+      isMandatory: false,
+      isActive: true,
+      affectsTax: false,
       order: 3
     }
   ]
 }
 
-export function getDefaultTaxSettings(): Omit<GlobalTaxSettings, 'id' | 'created_at' | 'updated_at'> {
+export function getDefaultTaxSettings(): Omit<GlobalTaxSettings, 'id' | 'updatedAt'> {
   return {
-    paye_bands: [
+    payeTaxBands: [
       { min: 0, max: 60000, rate: 0 },
-      { min: 60000, max: 100000, rate: 20 },
-      { min: 100000, max: null, rate: 30 }
+      { min: 60001, max: 130000, rate: 0.2 },
+      { min: 130001, max: 200000, rate: 0.25 },
+      { min: 200001, max: 300000, rate: 0.3 },
+      { min: 300001, max: Infinity, rate: 0.3 }
     ],
-    pension_employee_rate: 3,
-    pension_employer_rate: 5,
-    maternity_employee_rate: 0.25,
-    maternity_employer_rate: 0.25,
-    rama_employee_rate: 7.5,
-    rama_employer_rate: 7.5,
-    cbhi_rate: 2.5
+    pensionEmployerRate: 5,
+    pensionEmployeeRate: 3,
+    maternityEmployerRate: 0.3,
+    maternityEmployeeRate: 0.3,
+    ramaEmployerRate: 1,
+    ramaEmployeeRate: 1,
+    cbhiRate: 7.5,
+    pensionRate: 8,
+    maternityRate: 0.6,
+    ramaRate: 2
   }
 }
 

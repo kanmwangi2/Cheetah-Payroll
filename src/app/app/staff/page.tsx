@@ -12,7 +12,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { StaffMember, CustomFieldDefinition } from '@/types'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
+import { objectToCamelCase } from '@/lib/case-converter'
 import { formatDate } from '@/lib/utils'
 
 export default function StaffPage() {
@@ -36,8 +37,8 @@ export default function StaffPage() {
     if (!company) return
 
     try {
-      // Load staff members
-      const { data: staffData } = await supabase
+      // Load staff members with departments
+      const { data: staffDataRaw } = await db.raw
         .from('staff_members')
         .select(`
           *,
@@ -49,12 +50,16 @@ export default function StaffPage() {
         .eq('company_id', company.id)
         .order('created_at', { ascending: false })
 
+      const staffData = staffDataRaw?.map(staff => objectToCamelCase(staff)) as StaffMember[]
+
       // Load custom field definitions
-      const { data: customFieldsData } = await supabase
+      const { data: customFieldsDataRaw } = await db.raw
         .from('custom_field_definitions')
         .select('*')
         .eq('company_id', company.id)
         .order('field_name')
+
+      const customFieldsData = customFieldsDataRaw?.map(field => objectToCamelCase(field)) as CustomFieldDefinition[]
 
       setStaff(staffData || [])
       setCustomFields(customFieldsData || [])
@@ -66,9 +71,9 @@ export default function StaffPage() {
   }
 
   const filteredStaff = staff.filter(member =>
-    member.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.staff_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.staffNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
@@ -83,16 +88,12 @@ export default function StaffPage() {
   }
 
   const handleDeleteStaff = async (staffMember: StaffMember) => {
-    if (!confirm(`Are you sure you want to delete ${staffMember.first_name} ${staffMember.last_name}?`)) {
+    if (!confirm(`Are you sure you want to delete ${staffMember.firstName} ${staffMember.lastName}?`)) {
       return
     }
 
     try {
-      await supabase
-        .from('staff_members')
-        .delete()
-        .eq('id', staffMember.id)
-
+      await db.delete('staffMembers', { id: staffMember.id })
       await loadData()
     } catch (error) {
       console.error('Error deleting staff member:', error)
@@ -108,13 +109,12 @@ export default function StaffPage() {
     }
 
     try {
-      await supabase
-        .from('custom_field_definitions')
-        .insert({
-          company_id: company!.id,
-          field_name: fieldName,
-          field_type: fieldType as 'text' | 'number' | 'date'
-        })
+      await db.insert('customFieldDefinitions', {
+        companyId: company!.id,
+        fieldName: fieldName,
+        fieldType: fieldType as 'text' | 'number' | 'date',
+        isRequired: false
+      })
 
       await loadData()
     } catch (error) {
@@ -195,10 +195,10 @@ export default function StaffPage() {
                     {filteredStaff.map((member) => (
                       <TableRow key={member.id}>
                         <TableCell className="font-medium">
-                          {member.staff_number}
+                          {member.staffNumber}
                         </TableCell>
                         <TableCell>
-                          {member.first_name} {member.last_name}
+                          {member.firstName} {member.lastName}
                         </TableCell>
                         <TableCell>{member.email || '-'}</TableCell>
                         <TableCell>
@@ -214,7 +214,7 @@ export default function StaffPage() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          {member.employment_date ? formatDate(member.employment_date) : '-'}
+                          {member.employmentDate ? formatDate(member.employmentDate) : '-'}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
@@ -279,24 +279,21 @@ export default function StaffPage() {
                     {customFields.map((field) => (
                       <TableRow key={field.id}>
                         <TableCell className="font-medium">
-                          {field.field_name}
+                          {field.fieldName}
                         </TableCell>
                         <TableCell>
-                          <span className="capitalize">{field.field_type}</span>
+                          <span className="capitalize">{field.fieldType}</span>
                         </TableCell>
                         <TableCell>
-                          {formatDate(field.created_at)}
+                          {formatDate(field.createdAt)}
                         </TableCell>
                         <TableCell>
                           <Button
                             variant="destructive"
                             size="sm"
                             onClick={async () => {
-                              if (confirm(`Delete custom field "${field.field_name}"?`)) {
-                                await supabase
-                                  .from('custom_field_definitions')
-                                  .delete()
-                                  .eq('id', field.id)
+                              if (confirm(`Delete custom field "${field.fieldName}"?`)) {
+                                await db.delete('customFieldDefinitions', { id: field.id })
                                 await loadData()
                               }
                             }}

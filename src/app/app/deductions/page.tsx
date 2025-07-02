@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useCompany } from '@/hooks/use-company'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,11 +28,11 @@ export default function DeductionsPage() {
     name: '',
     description: '',
     amount: '',
-    calculation_method: 'fixed' as 'fixed' | 'percentage' | 'formula',
+    calculationMethod: 'fixed' as 'fixed' | 'percentage' | 'formula',
     formula: '',
-    is_mandatory: false,
-    affects_tax: true,
-    is_active: true
+    isMandatory: false,
+    affectsTax: true,
+    isActive: true
   })
 
   useEffect(() => {
@@ -44,11 +44,10 @@ export default function DeductionsPage() {
 
   const fetchDeductions = async () => {
     try {
-      const { data, error } = await supabase
-        .from('deduction_types')
-        .select('*')
-        .eq('company_id', company?.id)
-        .order('name')
+      const { data, error } = await db.select('deduction_types', {
+        filters: { companyId: company?.id },
+        order: { column: 'name', ascending: true }
+      })
 
       if (error) throw error
       setDeductions(data || [])
@@ -68,26 +67,23 @@ export default function DeductionsPage() {
         name: formData.name,
         description: formData.description,
         amount: formData.amount ? parseFloat(formData.amount) : null,
-        calculation_method: formData.calculation_method,
+        calculationMethod: formData.calculationMethod,
         formula: formData.formula || null,
-        is_mandatory: formData.is_mandatory,
-        affects_tax: formData.affects_tax,
-        is_active: formData.is_active,
-        company_id: company?.id
+        isMandatory: formData.isMandatory,
+        affectsTax: formData.affectsTax,
+        isActive: formData.isActive,
+        companyId: company?.id
       }
 
       if (editingDeduction) {
-        const { error } = await supabase
-          .from('deduction_types')
-          .update(deductionData)
-          .eq('id', editingDeduction.id)
+        const { error } = await db.update('deduction_types', deductionData, {
+          filters: { id: editingDeduction.id }
+        })
 
         if (error) throw error
         toast.success('Deduction type updated successfully')
       } else {
-        const { error } = await supabase
-          .from('deduction_types')
-          .insert(deductionData)
+        const { error } = await db.insert('deduction_types', deductionData)
 
         if (error) throw error
         toast.success('Deduction type created successfully')
@@ -107,10 +103,9 @@ export default function DeductionsPage() {
     if (!confirm('Are you sure you want to delete this deduction type?')) return
 
     try {
-      const { error } = await supabase
-        .from('deduction_types')
-        .delete()
-        .eq('id', deduction.id)
+      const { error } = await db.delete('deduction_types', {
+        filters: { id: deduction.id }
+      })
 
       if (error) throw error
       toast.success('Deduction type deleted successfully')
@@ -127,11 +122,11 @@ export default function DeductionsPage() {
       name: deduction.name,
       description: deduction.description || '',
       amount: deduction.amount?.toString() || '',
-      calculation_method: deduction.calculation_method,
+      calculationMethod: deduction.calculationMethod,
       formula: deduction.formula || '',
-      is_mandatory: deduction.is_mandatory,
-      affects_tax: deduction.affects_tax,
-      is_active: deduction.is_active
+      isMandatory: deduction.isMandatory,
+      affectsTax: deduction.affectsTax,
+      isActive: deduction.isActive
     })
     setIsAddDialogOpen(true)
   }
@@ -141,11 +136,11 @@ export default function DeductionsPage() {
       name: '',
       description: '',
       amount: '',
-      calculation_method: 'fixed',
+      calculationMethod: 'fixed',
       formula: '',
-      is_mandatory: false,
-      affects_tax: true,
-      is_active: true
+      isMandatory: false,
+      affectsTax: true,
+      isActive: true
     })
   }
 
@@ -209,8 +204,8 @@ export default function DeductionsPage() {
                 <Label htmlFor="calculation_method">Calculation Method</Label>
                 <select
                   id="calculation_method"
-                  value={formData.calculation_method}
-                  onChange={(e) => setFormData({ ...formData, calculation_method: e.target.value as any })}
+                  value={formData.calculationMethod}
+                  onChange={(e) => setFormData({ ...formData, calculationMethod: e.target.value as any })}
                   className="w-full px-3 py-2 border border-input bg-background rounded-md"
                 >
                   <option value="fixed">Fixed Amount</option>
@@ -219,7 +214,7 @@ export default function DeductionsPage() {
                 </select>
               </div>
 
-              {formData.calculation_method === 'fixed' && (
+              {formData.calculationMethod === 'fixed' && (
                 <div className="space-y-2">
                   <Label htmlFor="amount">Amount (RWF)</Label>
                   <Input
@@ -233,7 +228,7 @@ export default function DeductionsPage() {
                 </div>
               )}
 
-              {formData.calculation_method === 'percentage' && (
+              {formData.calculationMethod === 'percentage' && (
                 <div className="space-y-2">
                   <Label htmlFor="amount">Percentage (%)</Label>
                   <Input
@@ -249,7 +244,7 @@ export default function DeductionsPage() {
                 </div>
               )}
 
-              {formData.calculation_method === 'formula' && (
+              {formData.calculationMethod === 'formula' && (
                 <div className="space-y-2">
                   <Label htmlFor="formula">Formula</Label>
                   <Input
@@ -268,8 +263,8 @@ export default function DeductionsPage() {
                 <input
                   id="is_mandatory"
                   type="checkbox"
-                  checked={formData.is_mandatory}
-                  onChange={(e) => setFormData({ ...formData, is_mandatory: e.target.checked })}
+                  checked={formData.isMandatory}
+                  onChange={(e) => setFormData({ ...formData, isMandatory: e.target.checked })}
                 />
                 <Label htmlFor="is_mandatory">Mandatory (applies to all employees)</Label>
               </div>
@@ -278,8 +273,8 @@ export default function DeductionsPage() {
                 <input
                   id="affects_tax"
                   type="checkbox"
-                  checked={formData.affects_tax}
-                  onChange={(e) => setFormData({ ...formData, affects_tax: e.target.checked })}
+                  checked={formData.affectsTax}
+                  onChange={(e) => setFormData({ ...formData, affectsTax: e.target.checked })}
                 />
                 <Label htmlFor="affects_tax">Affects Tax Calculation</Label>
               </div>
@@ -288,8 +283,8 @@ export default function DeductionsPage() {
                 <input
                   id="is_active"
                   type="checkbox"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                 />
                 <Label htmlFor="is_active">Active</Label>
               </div>
@@ -349,30 +344,30 @@ export default function DeductionsPage() {
                   <TableCell>{deduction.description}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {deduction.calculation_method === 'fixed' ? 'Fixed' :
-                       deduction.calculation_method === 'percentage' ? 'Percentage' : 'Formula'}
+                      {deduction.calculationMethod === 'fixed' ? 'Fixed' :
+                       deduction.calculationMethod === 'percentage' ? 'Percentage' : 'Formula'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {deduction.calculation_method === 'fixed' && deduction.amount
+                    {deduction.calculationMethod === 'fixed' && deduction.amount
                       ? `${deduction.amount.toLocaleString()} RWF`
-                      : deduction.calculation_method === 'percentage' && deduction.amount
+                      : deduction.calculationMethod === 'percentage' && deduction.amount
                       ? `${deduction.amount}%`
                       : deduction.formula || 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={deduction.is_mandatory ? "default" : "secondary"}>
-                      {deduction.is_mandatory ? 'Yes' : 'No'}
+                    <Badge variant={deduction.isMandatory ? "default" : "secondary"}>
+                      {deduction.isMandatory ? 'Yes' : 'No'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={deduction.affects_tax ? "default" : "secondary"}>
-                      {deduction.affects_tax ? 'Yes' : 'No'}
+                    <Badge variant={deduction.affectsTax ? "default" : "secondary"}>
+                      {deduction.affectsTax ? 'Yes' : 'No'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={deduction.is_active ? "default" : "secondary"}>
-                      {deduction.is_active ? 'Active' : 'Inactive'}
+                    <Badge variant={deduction.isActive ? "default" : "secondary"}>
+                      {deduction.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

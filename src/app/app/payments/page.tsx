@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useCompany } from '@/hooks/use-company'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -29,9 +29,9 @@ export default function PaymentsPage() {
     description: '',
     amount: '',
     taxable: true,
-    calculation_method: 'fixed' as 'fixed' | 'percentage' | 'formula',
+    calculationMethod: 'fixed' as 'fixed' | 'percentage' | 'formula',
     formula: '',
-    is_active: true
+    isActive: true
   })
 
   useEffect(() => {
@@ -43,11 +43,10 @@ export default function PaymentsPage() {
 
   const fetchPayments = async () => {
     try {
-      const { data, error } = await supabase
-        .from('payment_types')
-        .select('*')
-        .eq('company_id', company?.id)
-        .order('name')
+      const { data, error } = await db.select('payment_types', {
+        filters: { companyId: company?.id },
+        order: { column: 'name', ascending: true }
+      })
 
       if (error) throw error
       setPayments(data || [])
@@ -68,24 +67,21 @@ export default function PaymentsPage() {
         description: formData.description,
         amount: formData.amount ? parseFloat(formData.amount) : null,
         taxable: formData.taxable,
-        calculation_method: formData.calculation_method,
+        calculationMethod: formData.calculationMethod,
         formula: formData.formula || null,
-        is_active: formData.is_active,
-        company_id: company?.id
+        isActive: formData.isActive,
+        companyId: company?.id
       }
 
       if (editingPayment) {
-        const { error } = await supabase
-          .from('payment_types')
-          .update(paymentData)
-          .eq('id', editingPayment.id)
+        const { error } = await db.update('payment_types', paymentData, {
+          filters: { id: editingPayment.id }
+        })
 
         if (error) throw error
         toast.success('Payment type updated successfully')
       } else {
-        const { error } = await supabase
-          .from('payment_types')
-          .insert(paymentData)
+        const { error } = await db.insert('payment_types', paymentData)
 
         if (error) throw error
         toast.success('Payment type created successfully')
@@ -105,10 +101,9 @@ export default function PaymentsPage() {
     if (!confirm('Are you sure you want to delete this payment type?')) return
 
     try {
-      const { error } = await supabase
-        .from('payment_types')
-        .delete()
-        .eq('id', payment.id)
+      const { error } = await db.delete('payment_types', {
+        filters: { id: payment.id }
+      })
 
       if (error) throw error
       toast.success('Payment type deleted successfully')
@@ -126,9 +121,9 @@ export default function PaymentsPage() {
       description: payment.description || '',
       amount: payment.amount?.toString() || '',
       taxable: payment.taxable,
-      calculation_method: payment.calculation_method,
+      calculationMethod: payment.calculationMethod,
       formula: payment.formula || '',
-      is_active: payment.is_active
+      isActive: payment.isActive
     })
     setIsAddDialogOpen(true)
   }
@@ -139,9 +134,9 @@ export default function PaymentsPage() {
       description: '',
       amount: '',
       taxable: true,
-      calculation_method: 'fixed',
+      calculationMethod: 'fixed',
       formula: '',
-      is_active: true
+      isActive: true
     })
   }
 
@@ -205,8 +200,8 @@ export default function PaymentsPage() {
                 <Label htmlFor="calculation_method">Calculation Method</Label>
                 <select
                   id="calculation_method"
-                  value={formData.calculation_method}
-                  onChange={(e) => setFormData({ ...formData, calculation_method: e.target.value as any })}
+                  value={formData.calculationMethod}
+                  onChange={(e) => setFormData({ ...formData, calculationMethod: e.target.value as any })}
                   className="w-full px-3 py-2 border border-input bg-background rounded-md"
                 >
                   <option value="fixed">Fixed Amount</option>
@@ -215,7 +210,7 @@ export default function PaymentsPage() {
                 </select>
               </div>
 
-              {formData.calculation_method === 'fixed' && (
+              {formData.calculationMethod === 'fixed' && (
                 <div className="space-y-2">
                   <Label htmlFor="amount">Amount (RWF)</Label>
                   <Input
@@ -229,7 +224,7 @@ export default function PaymentsPage() {
                 </div>
               )}
 
-              {formData.calculation_method === 'percentage' && (
+              {formData.calculationMethod === 'percentage' && (
                 <div className="space-y-2">
                   <Label htmlFor="amount">Percentage (%)</Label>
                   <Input
@@ -245,7 +240,7 @@ export default function PaymentsPage() {
                 </div>
               )}
 
-              {formData.calculation_method === 'formula' && (
+              {formData.calculationMethod === 'formula' && (
                 <div className="space-y-2">
                   <Label htmlFor="formula">Formula</Label>
                   <Input
@@ -274,8 +269,8 @@ export default function PaymentsPage() {
                 <input
                   id="is_active"
                   type="checkbox"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                 />
                 <Label htmlFor="is_active">Active</Label>
               </div>
@@ -334,14 +329,14 @@ export default function PaymentsPage() {
                   <TableCell>{payment.description}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {payment.calculation_method === 'fixed' ? 'Fixed' :
-                       payment.calculation_method === 'percentage' ? 'Percentage' : 'Formula'}
+                      {payment.calculationMethod === 'fixed' ? 'Fixed' :
+                       payment.calculationMethod === 'percentage' ? 'Percentage' : 'Formula'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {payment.calculation_method === 'fixed' && payment.amount
+                    {payment.calculationMethod === 'fixed' && payment.amount
                       ? `${payment.amount.toLocaleString()} RWF`
-                      : payment.calculation_method === 'percentage' && payment.amount
+                      : payment.calculationMethod === 'percentage' && payment.amount
                       ? `${payment.amount}%`
                       : payment.formula || 'N/A'}
                   </TableCell>
@@ -351,8 +346,8 @@ export default function PaymentsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={payment.is_active ? "default" : "secondary"}>
-                      {payment.is_active ? 'Active' : 'Inactive'}
+                    <Badge variant={payment.isActive ? "default" : "secondary"}>
+                      {payment.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

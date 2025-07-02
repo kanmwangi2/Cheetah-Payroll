@@ -8,7 +8,8 @@ import { useAuth } from '@/hooks/use-auth'
 import { useCompany } from '@/hooks/use-company'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DashboardStats, PayrollRun } from '@/types'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
+import { objectToCamelCase } from '@/lib/case-converter'
 import { formatCurrency, getMonthName } from '@/lib/utils'
 
 export default function DashboardPage() {
@@ -29,60 +30,57 @@ export default function DashboardPage() {
 
     try {
       // Get total active employees
-      const { count: totalActiveEmployees } = await supabase
-        .from('staff_members')
-        .select('*', { count: 'exact', head: true })
-        .eq('company_id', company.id)
-        .eq('status', 'active')
+      const { data: allStaff } = await db.select('staffMembers', {
+        select: '*',
+        filters: { companyId: company.id, status: 'active' }
+      })
+      const totalActiveEmployees = allStaff?.length || 0
 
       // Get next payroll run (most recent draft or calculated)
-      const { data: nextPayrollRun } = await supabase
-        .from('payroll_runs')
-        .select('*')
-        .eq('company_id', company.id)
-        .in('status', ['draft', 'calculated'])
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
+      const { data: nextPayrollRuns } = await db.select('payrollRuns', {
+        select: '*',
+        filters: { companyId: company.id },
+        order: { column: 'createdAt', ascending: false },
+        limit: 1
+      })
+      const nextPayrollRun = nextPayrollRuns?.[0]
 
       // Get total payroll cost from most recent approved run
-      const { data: recentPayroll } = await supabase
-        .from('payroll_runs')
-        .select(`
+      const { data: recentPayrollRuns } = await db.select('payrollRuns', {
+        select: `
           *,
-          payroll_calculations (
-            final_net_pay
+          payrollCalculations (
+            finalNetPay
           )
-        `)
-        .eq('company_id', company.id)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
+        `,
+        filters: { companyId: company.id, status: 'approved' },
+        order: { column: 'createdAt', ascending: false },
+        limit: 1
+      })
+      const recentPayrollRun = recentPayrollRuns?.[0]
 
-      const totalPayrollCost = recentPayroll?.payroll_calculations?.reduce(
-        (sum: number, calc: any) => sum + calc.final_net_pay, 0
+      const totalPayrollCost = recentPayrollRun?.payrollCalculations?.reduce(
+        (sum: number, calc: any) => sum + calc.finalNetPay, 0
       ) || 0
 
       // Get total active deductions
-      const { data: activeDeductions } = await supabase
-        .from('staff_deductions')
-        .select(`
-          monthly_deduction,
-          staff_members!inner (
-            company_id
+      const { data: activeDeductions } = await db.select('staffDeductions', {
+        select: `
+          monthlyDeduction,
+          staffMembers!inner (
+            companyId
           )
-        `)
-        .eq('staff_members.company_id', company.id)
-        .eq('status', 'active')
+        `,
+        filters: { 'staffMembers.companyId': company.id, status: 'active' }
+      })
 
       const totalDeductions = activeDeductions?.reduce(
-        (sum, deduction) => sum + deduction.monthly_deduction, 0
+        (sum: number, deduction: any) => sum + deduction.monthlyDeduction, 0
       ) || 0
 
       setStats({
         totalActiveEmployees: totalActiveEmployees || 0,
-        nextPayrollRun: nextPayrollRun || undefined,
+        nextPayrollRun,
         totalPayrollCost,
         totalDeductions
       })
@@ -164,7 +162,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">
               {stats?.nextPayrollRun 
-                ? `${getMonthName(stats.nextPayrollRun.month)} ${stats.nextPayrollRun.year}`
+                ? `${stats.nextPayrollRun.periodStart} - ${stats.nextPayrollRun.periodEnd}`
                 : 'None'
               }
             </div>

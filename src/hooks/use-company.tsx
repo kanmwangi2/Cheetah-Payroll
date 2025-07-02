@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { Company, CompanyContextType, UserRole, Permission } from '@/types'
 import { useAuth } from './use-auth'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
 
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined)
 
@@ -19,11 +19,10 @@ export function CompanyProvider({ children }: { children: React.ReactNode }) {
 
   const loadCompany = async (companyId: string) => {
     try {
-      const { data } = await supabase
-        .from('companies')
-        .select('*')
-        .eq('id', companyId)
-        .single()
+      const { data } = await db.select('companies', {
+        filters: { id: companyId },
+        single: true
+      })
 
       setCompany(data)
     } catch (error) {
@@ -36,7 +35,7 @@ export function CompanyProvider({ children }: { children: React.ReactNode }) {
     if (!user || !company) return null
 
     const roleRecord = user.roles.find(role => 
-      role.company_id === company.id || 
+      role.companyId === company.id || 
       ['primary_admin', 'app_admin'].includes(role.role)
     )
 

@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Company } from '@/types'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
 
 export default function SelectCompanyPage() {
   const [companies, setCompanies] = useState<Company[]>([])
@@ -32,19 +32,29 @@ export default function SelectCompanyPage() {
 
     try {
       // Get companies the user has access to
-      const companyIds = user.roles.map(role => role.company_id)
+      const companyIds = user.roles.map(role => role.companyId)
       const isGlobalAdmin = user.roles.some(role => 
         ['primary_admin', 'app_admin'].includes(role.role)
       )
 
-      let query = supabase.from('companies').select('*')
+      let companies: Company[]
       
-      if (!isGlobalAdmin) {
-        query = query.in('id', companyIds)
+      if (isGlobalAdmin) {
+        const { data } = await db.select('companies', {
+          select: '*',
+          order: { column: 'name', ascending: true }
+        })
+        companies = data || []
+      } else {
+        const { data } = await db.select('companies', {
+          select: '*',
+          filters: { id: { in: companyIds } },
+          order: { column: 'name', ascending: true }
+        })
+        companies = data || []
       }
 
-      const { data } = await query.order('name')
-      setCompanies(data || [])
+      setCompanies(companies)
     } catch (error) {
       console.error('Error loading companies:', error)
     } finally {
@@ -105,19 +115,19 @@ export default function SelectCompanyPage() {
               <CardHeader>
                 <CardTitle className="text-lg">{company.name}</CardTitle>
                 <CardDescription>
-                  {company.primary_business || 'Business type not specified'}
+                  {company.description || 'Business type not specified'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm text-muted-foreground">
-                  {company.tin_number && (
-                    <div>TIN: {company.tin_number}</div>
+                  {company.tinNumber && (
+                    <div>TIN: {company.tinNumber}</div>
                   )}
                   {company.email && (
                     <div>Email: {company.email}</div>
                   )}
-                  {company.phone && (
-                    <div>Phone: {company.phone}</div>
+                  {company.phoneNumber && (
+                    <div>Phone: {company.phoneNumber}</div>
                   )}
                 </div>
               </CardContent>

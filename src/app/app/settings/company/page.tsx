@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useCompany } from '@/hooks/use-company'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,11 +21,11 @@ export default function CompanySettingsPage() {
   const [formData, setFormData] = useState({
     name: '',
     address: '',
-    phone: '',
+    phoneNumber: '',
     email: '',
-    tin_number: '',
-    registration_number: '',
-    primary_business: ''
+    tinNumber: '',
+    registrationNumber: '',
+    description: ''
   })
 
   useEffect(() => {
@@ -33,11 +33,11 @@ export default function CompanySettingsPage() {
       setFormData({
         name: company.name || '',
         address: company.address || '',
-        phone: company.phone || '',
+        phoneNumber: company.phoneNumber || '',
         email: company.email || '',
-        tin_number: company.tin_number || '',
-        registration_number: company.registration_number || '',
-        primary_business: company.primary_business || ''
+        tinNumber: company.tinNumber || '',
+        registrationNumber: company.registrationNumber || '',
+        description: company.description || ''
       })
       setLoading(false)
     }
@@ -48,20 +48,15 @@ export default function CompanySettingsPage() {
     setSaving(true)
 
     try {
-      const { error } = await supabase
-        .from('companies')
-        .update({
-          name: formData.name,
-          address: formData.address,
-          phone: formData.phone,
-          email: formData.email,
-          tin_number: formData.tin_number,
-          registration_number: formData.registration_number,
-          primary_business: formData.primary_business
-        })
-        .eq('id', company?.id)
-
-      if (error) throw error
+      await db.update('companies', { id: company?.id }, {
+        name: formData.name,
+        address: formData.address,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email,
+        tinNumber: formData.tinNumber,
+        registrationNumber: formData.registrationNumber,
+        description: formData.description
+      })
 
       toast.success('Company information updated successfully')
     } catch (error) {
@@ -103,11 +98,11 @@ export default function CompanySettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="primary_business">Primary Business</Label>
+                <Label htmlFor="description">Description</Label>
                 <Input
-                  id="primary_business"
-                  value={formData.primary_business}
-                  onChange={(e) => setFormData({ ...formData, primary_business: e.target.value })}
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="e.g., Technology, Healthcare, etc."
                 />
               </div>
@@ -147,8 +142,8 @@ export default function CompanySettingsPage() {
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                     className="pl-10"
                     placeholder="+250 XXX XXX XXX"
                   />
@@ -184,8 +179,8 @@ export default function CompanySettingsPage() {
                   <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="registration_number"
-                    value={formData.registration_number}
-                    onChange={(e) => setFormData({ ...formData, registration_number: e.target.value })}
+                    value={formData.registrationNumber}
+                    onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
                     className="pl-10"
                     placeholder="Company registration number"
                   />
@@ -198,8 +193,8 @@ export default function CompanySettingsPage() {
                   <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="tin_number"
-                    value={formData.tin_number}
-                    onChange={(e) => setFormData({ ...formData, tin_number: e.target.value })}
+                    value={formData.tinNumber}
+                    onChange={(e) => setFormData({ ...formData, tinNumber: e.target.value })}
                     className="pl-10"
                     placeholder="Tax identification number"
                   />
@@ -236,7 +231,7 @@ export default function CompanySettingsPage() {
               </div>
               <div className="text-center p-4 border rounded-lg">
                 <div className="text-2xl font-bold text-primary">
-                  {new Date(company.created_at).getFullYear()}
+                  {new Date(company.createdAt).getFullYear()}
                 </div>
                 <div className="text-muted-foreground">Member Since</div>
               </div>
@@ -261,11 +256,11 @@ export default function CompanySettingsPage() {
               </div>
               <div>
                 <label className="font-medium text-muted-foreground">Created</label>
-                <p>{new Date(company.created_at).toLocaleDateString()}</p>
+                <p>{new Date(company.createdAt).toLocaleDateString()}</p>
               </div>
               <div>
                 <label className="font-medium text-muted-foreground">Last Updated</label>
-                <p>{new Date(company.updated_at).toLocaleDateString()}</p>
+                <p>{new Date(company.updatedAt).toLocaleDateString()}</p>
               </div>
               <div>
                 <label className="font-medium text-muted-foreground">Status</label>

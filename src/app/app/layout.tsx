@@ -170,7 +170,7 @@ export default function AppLayout({
               <div>
                 <h2 className="font-semibold">{company.name}</h2>
                 <p className="text-sm text-muted-foreground">
-                  {user.profile?.first_name} {user.profile?.last_name}
+                  {user.profile?.firstName} {user.profile?.lastName}
                 </p>
               </div>
             </div>

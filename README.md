@@ -183,6 +183,36 @@ To regenerate TypeScript types from your Supabase schema:
 npm run db:generate-types
 ```
 
+### Case Conversion Utilities
+
+The application includes a comprehensive case conversion system in `src/lib/case-converter.ts` to handle differences between TypeScript (camelCase) and PostgreSQL (snake_case) naming conventions.
+
+#### Usage Examples
+
+```typescript
+import { DatabaseAdapter, toSnakeCase, toCamelCase } from '@/lib/case-converter'
+
+// Convert single field names
+const dbField = toSnakeCase('firstName') // 'first_name'
+const jsField = toCamelCase('first_name') // 'firstName'
+
+// Convert entire objects for database operations
+const userData = { firstName: 'John', lastName: 'Doe', companyId: '123' }
+const dbData = DatabaseAdapter.prepareInsert(userData)
+// Result: { first_name: 'John', last_name: 'Doe', company_id: '123' }
+
+// Convert response data from database
+const responseData = DatabaseAdapter.processResponse(dbData)
+// Result: { firstName: 'John', lastName: 'Doe', companyId: '123' }
+```
+
+#### Current Convention
+
+- **Database Schema**: Uses snake_case consistently (e.g., `company_id`, `first_name`)
+- **TypeScript Code**: Primarily uses snake_case to match database, with some camelCase for local variables
+- **API Responses**: Return snake_case to match Supabase conventions
+- **Form Data**: Uses snake_case for direct database compatibility
+
 ## Features in Detail
 
 ### Staff Management

@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/use-auth'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
+import { objectToCamelCase } from '@/lib/case-converter'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,12 +21,11 @@ export default function ProfileSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
-    full_name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
-    title: '',
-    department: '',
-    address: ''
+    avatarUrl: ''
   })
 
   useEffect(() => {
@@ -37,23 +37,22 @@ export default function ProfileSettingsPage() {
 
   const fetchProfile = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user?.id)
-        .single()
-
-      if (error) throw error
-      
-      setProfile(data)
-      setFormData({
-        full_name: data.full_name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        title: data.title || '',
-        department: data.department || '',
-        address: data.address || ''
+      const { data: profileData } = await db.select('profiles', {
+        select: '*',
+        filters: { id: user?.id },
+        single: true
       })
+
+      if (profileData) {
+        setProfile(profileData)
+        setFormData({
+          firstName: profileData.firstName || '',
+          lastName: profileData.lastName || '',
+          email: profileData.email || '',
+          phone: profileData.phone || '',
+          avatarUrl: profileData.avatarUrl || ''
+        })
+      }
     } catch (error) {
       console.error('Error fetching profile:', error)
       toast.error('Failed to load profile information')
@@ -67,18 +66,12 @@ export default function ProfileSettingsPage() {
     setSaving(true)
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: formData.full_name,
-          phone: formData.phone,
-          title: formData.title,
-          department: formData.department,
-          address: formData.address
-        })
-        .eq('id', user?.id)
-
-      if (error) throw error
+      await db.update('profiles', { id: user?.id }, {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        avatarUrl: formData.avatarUrl
+      })
 
       toast.success('Profile updated successfully')
       fetchProfile()
@@ -92,7 +85,7 @@ export default function ProfileSettingsPage() {
 
   const handleChangePassword = async () => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(
+      const { error } = await db.raw.auth.resetPasswordForEmail(
         user?.email || '',
         { redirectTo: `${window.location.origin}/auth/reset-password` }
       )
@@ -125,12 +118,22 @@ export default function ProfileSettingsPage() {
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="full_name">Full Name</Label>
+                <Label htmlFor="firstName">First Name</Label>
                 <Input
-                  id="full_name"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  placeholder="Enter your full name"
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  placeholder="Enter your first name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  placeholder="Enter your last name"
                 />
               </div>
 
@@ -167,37 +170,13 @@ export default function ProfileSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="title">Job Title</Label>
+                <Label htmlFor="avatarUrl">Avatar URL</Label>
                 <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Your position or role"
+                  id="avatarUrl"
+                  value={formData.avatarUrl}
+                  onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
+                  placeholder="Profile picture URL (optional)"
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
-                <Input
-                  id="department"
-                  value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  placeholder="Your department"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="pl-10"
-                    placeholder="Your physical address"
-                  />
-                </div>
               </div>
             </div>
 
@@ -261,11 +240,11 @@ export default function ProfileSettingsPage() {
               </div>
               <div>
                 <label className="font-medium text-muted-foreground">Created</label>
-                <p>{new Date(profile.created_at).toLocaleDateString()}</p>
+                <p>{new Date(profile.createdAt).toLocaleDateString()}</p>
               </div>
               <div>
                 <label className="font-medium text-muted-foreground">Last Updated</label>
-                <p>{new Date(profile.updated_at).toLocaleDateString()}</p>
+                <p>{new Date(profile.updatedAt).toLocaleDateString()}</p>
               </div>
               <div>
                 <label className="font-medium text-muted-foreground">Account Type</label>

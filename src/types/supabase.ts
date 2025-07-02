@@ -449,14 +449,12 @@ export interface Database {
         Row: {
           id: string
           company_id: string
-          month: number
-          year: number
-          period_start: string | null
-          period_end: string | null
+          period_start: string
+          period_end: string
           pay_date: string | null
           description: string | null
           status: 'draft' | 'calculated' | 'approved' | 'rejected' | 'processed'
-          created_by: string
+          created_by: string | null
           approved_by: string | null
           approved_at: string | null
           processed_at: string | null
@@ -467,14 +465,12 @@ export interface Database {
         Insert: {
           id?: string
           company_id: string
-          month?: number
-          year?: number
-          period_start?: string | null
-          period_end?: string | null
+          period_start: string
+          period_end: string
           pay_date?: string | null
           description?: string | null
           status?: 'draft' | 'calculated' | 'approved' | 'rejected' | 'processed'
-          created_by: string
+          created_by?: string | null
           approved_by?: string | null
           approved_at?: string | null
           processed_at?: string | null
@@ -485,14 +481,12 @@ export interface Database {
         Update: {
           id?: string
           company_id?: string
-          month?: number
-          year?: number
-          period_start?: string | null
-          period_end?: string | null
+          period_start?: string
+          period_end?: string
           pay_date?: string | null
           description?: string | null
           status?: 'draft' | 'calculated' | 'approved' | 'rejected' | 'processed'
-          created_by?: string
+          created_by?: string | null
           approved_by?: string | null
           approved_at?: string | null
           processed_at?: string | null

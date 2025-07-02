@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
 import { AuthUser, UserCompanyRole, Profile } from '@/types'
 
 interface AuthContextType {
@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial session
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session } } = await db.raw.auth.getSession()
       if (session?.user) {
         await loadUserData(session.user)
       }
@@ -32,8 +32,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getSession()
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+    const { data: { subscription } } = db.raw.auth.onAuthStateChange(
+      async (event: any, session: any) => {
         if (session?.user) {
           await loadUserData(session.user)
         } else {
@@ -49,23 +49,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loadUserData = async (authUser: User) => {
     try {
       // Get user profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authUser.id)
-        .single()
+      const { data: profile } = await db.select('profiles', {
+        filters: { id: authUser.id },
+        single: true
+      })
 
       // Get user roles and company assignments
-      const { data: roles } = await supabase
-        .from('user_company_roles')
-        .select(`
+      const { data: roles } = await db.select('userCompanyRoles', {
+        select: `
           *,
           companies (
             id,
             name
           )
-        `)
-        .eq('user_id', authUser.id)
+        `,
+        filters: { userId: authUser.id }
+      })
 
       const userData: AuthUser = {
         id: authUser.id,
@@ -84,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await db.raw.auth.signInWithPassword({
         email,
         password
       })
@@ -101,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     localStorage.removeItem('selectedCompanyId')
-    await supabase.auth.signOut()
+    await db.raw.auth.signOut()
     setUser(null)
   }
 

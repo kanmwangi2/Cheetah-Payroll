@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useCompany } from '@/hooks/use-company'
-import { supabase } from '@/lib/supabase'
+import { db } from '@/lib/supabase-enhanced'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -29,9 +29,9 @@ export default function PayrollPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isNewRunDialogOpen, setIsNewRunDialogOpen] = useState(false)
   const [formData, setFormData] = useState({
-    period_start: '',
-    period_end: '',
-    pay_date: '',
+    periodStart: '',
+    periodEnd: '',
+    payDate: '',
     description: ''
   })
 
@@ -44,7 +44,7 @@ export default function PayrollPage() {
 
   const fetchPayrollRuns = async () => {
     try {
-      const { data, error } = await supabase
+      const { data } = await db.raw
         .from('payroll_runs')
         .select(`
           *,
@@ -53,8 +53,16 @@ export default function PayrollPage() {
         .eq('company_id', company?.id)
         .order('period_start', { ascending: false })
 
-      if (error) throw error
-      setPayrollRuns(data || [])
+      const convertedRuns = data?.map(run => ({
+        ...run,
+        periodStart: run.period_start,
+        periodEnd: run.period_end,
+        payDate: run.pay_date,
+        createdAt: run.created_at,
+        updatedAt: run.updated_at
+      })) as PayrollRun[]
+
+      setPayrollRuns(convertedRuns || [])
     } catch (error) {
       console.error('Error fetching payroll runs:', error)
       toast.error('Failed to load payroll runs')
@@ -65,7 +73,7 @@ export default function PayrollPage() {
 
   const fetchPayrollCalculations = async (payrollRunId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data } = await db.raw
         .from('payroll_calculations')
         .select(`
           *,
@@ -74,8 +82,48 @@ export default function PayrollPage() {
         .eq('payroll_run_id', payrollRunId)
         .order('staff_member(last_name)')
 
-      if (error) throw error
-      setCalculations(data || [])
+      // Convert to camelCase
+      const convertedData = data?.map(calc => ({
+        ...calc,
+        staffMemberId: calc.staff_member_id,
+        payrollRunId: calc.payroll_run_id,
+        totalGrossSalary: calc.total_gross_salary,
+        basicPayGross: calc.basic_pay_gross,
+        transportAllowanceGross: calc.transport_allowance_gross,
+        employerPension: calc.employer_pension,
+        employeePension: calc.employee_pension,
+        employerMaternity: calc.employer_maternity,
+        employeeMaternity: calc.employee_maternity,
+        employerRama: calc.employer_rama,
+        employeeRama: calc.employee_rama,
+        cbhiDeduction: calc.cbhi_deduction,
+        totalAppliedDeductions: calc.total_applied_deductions,
+        finalNetPay: calc.final_net_pay,
+        paymentBreakdown: calc.payment_breakdown,
+        deductionBreakdown: calc.deduction_breakdown,
+        createdAt: calc.created_at,
+        updatedAt: calc.updated_at,
+        staff_member: calc.staff_member ? {
+          ...calc.staff_member,
+          staffNumber: calc.staff_member.staff_number,
+          firstName: calc.staff_member.first_name,
+          lastName: calc.staff_member.last_name,
+          companyId: calc.staff_member.company_id,
+          departmentId: calc.staff_member.department_id,
+          employeeCategory: calc.staff_member.employee_category,
+          birthDate: calc.staff_member.birth_date,
+          employmentDate: calc.staff_member.employment_date,
+          idPassportNo: calc.staff_member.id_passport_no,
+          emergencyContactName: calc.staff_member.emergency_contact_name,
+          emergencyContactRelationship: calc.staff_member.emergency_contact_relationship,
+          emergencyContactPhone: calc.staff_member.emergency_contact_phone,
+          isActive: calc.staff_member.is_active,
+          createdAt: calc.staff_member.created_at,
+          updatedAt: calc.staff_member.updated_at
+        } : calc.staff_member
+      }))
+
+      setCalculations(convertedData || [])
     } catch (error) {
       console.error('Error fetching payroll calculations:', error)
       toast.error('Failed to load payroll calculations')
@@ -88,29 +136,27 @@ export default function PayrollPage() {
     try {
       setProcessing(true)
       
-      const { data: user } = await supabase.auth.getUser()
+      const { data: user } = await db.raw.auth.getUser()
       if (!user.user) throw new Error('User not authenticated')
 
       const payrollData = {
         company_id: company?.id,
-        period_start: formData.period_start,
-        period_end: formData.period_end,
-        pay_date: formData.pay_date,
+        period_start: formData.periodStart,
+        period_end: formData.periodEnd,
+        pay_date: formData.payDate,
         description: formData.description,
         status: 'draft',
         created_by: user.user.id
       }
 
-      const { data: newRun, error } = await supabase
+      const { data: newRun } = await db.raw
         .from('payroll_runs')
         .insert(payrollData)
         .select()
         .single()
 
-      if (error) throw error
-
       // Get all active staff members
-      const { data: staffMembers, error: staffError } = await supabase
+      const { data: staffMembers } = await db.raw
         .from('staff_members')
         .select(`
           *,
@@ -120,13 +166,11 @@ export default function PayrollPage() {
         .eq('company_id', company?.id)
         .eq('is_active', true)
 
-      if (staffError) throw staffError
-
       // Calculate payroll for each staff member
       const calculations = []
       for (const staff of staffMembers || []) {
         try {
-          const result = await calculatePayroll(staff, formData.period_start, formData.period_end)
+          const result = await calculatePayroll(staff, formData.periodStart, formData.periodEnd)
           calculations.push({
             payroll_run_id: newRun.id,
             staff_member_id: staff.id,
@@ -159,7 +203,7 @@ export default function PayrollPage() {
 
       // Insert calculations
       if (calculations.length > 0) {
-        const { error: calcError } = await supabase
+        const { error: calcError } = await db.raw
           .from('payroll_calculations')
           .insert(calculations)
 
@@ -184,7 +228,7 @@ export default function PayrollPage() {
     try {
       setProcessing(true)
       
-      const { error } = await supabase
+      const { error } = await db.raw
         .from('payroll_runs')
         .update({ 
           status: 'processed',
@@ -211,9 +255,9 @@ export default function PayrollPage() {
 
   const resetForm = () => {
     setFormData({
-      period_start: '',
-      period_end: '',
-      pay_date: '',
+      periodStart: '',
+      periodEnd: '',
+      payDate: '',
       description: ''
     })
   }
@@ -225,8 +269,8 @@ export default function PayrollPage() {
 
   const filteredPayrollRuns = payrollRuns.filter(run =>
     run.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    run.period_start?.includes(searchQuery) ||
-    run.period_end?.includes(searchQuery)
+    run.periodStart?.includes(searchQuery) ||
+    run.periodEnd?.includes(searchQuery)
   )
 
   if (loading) {
@@ -262,8 +306,8 @@ export default function PayrollPage() {
                 <Input
                   id="period_start"
                   type="date"
-                  value={formData.period_start}
-                  onChange={(e) => setFormData({ ...formData, period_start: e.target.value })}
+                  value={formData.periodStart}
+                  onChange={(e) => setFormData({ ...formData, periodStart: e.target.value })}
                   required
                 />
               </div>
@@ -273,8 +317,8 @@ export default function PayrollPage() {
                 <Input
                   id="period_end"
                   type="date"
-                  value={formData.period_end}
-                  onChange={(e) => setFormData({ ...formData, period_end: e.target.value })}
+                  value={formData.periodEnd}
+                  onChange={(e) => setFormData({ ...formData, periodEnd: e.target.value })}
                   required
                 />
               </div>
@@ -284,8 +328,8 @@ export default function PayrollPage() {
                 <Input
                   id="pay_date"
                   type="date"
-                  value={formData.pay_date}
-                  onChange={(e) => setFormData({ ...formData, pay_date: e.target.value })}
+                  value={formData.payDate}
+                  onChange={(e) => setFormData({ ...formData, payDate: e.target.value })}
                   required
                 />
               </div>
@@ -322,7 +366,7 @@ export default function PayrollPage() {
           <TabsTrigger value="runs">Payroll Runs</TabsTrigger>
           {currentRun && (
             <TabsTrigger value="details">
-              Run Details - {currentRun.period_start ? new Date(currentRun.period_start).toLocaleDateString() : `${currentRun.month}/${currentRun.year}`}
+              Run Details - {new Date(currentRun.periodStart).toLocaleDateString()} to {new Date(currentRun.periodEnd).toLocaleDateString()}
             </TabsTrigger>
           )}
         </TabsList>
@@ -362,14 +406,11 @@ export default function PayrollPage() {
                   {filteredPayrollRuns.map((run) => (
                     <TableRow key={run.id}>
                       <TableCell className="font-medium">
-                        {run.period_start && run.period_end ? 
-                          `${new Date(run.period_start).toLocaleDateString()} - ${new Date(run.period_end).toLocaleDateString()}` :
-                          `${run.month}/${run.year}`
-                        }
+                        {`${new Date(run.periodStart).toLocaleDateString()} - ${new Date(run.periodEnd).toLocaleDateString()}`}
                       </TableCell>
                       <TableCell>{run.description}</TableCell>
                       <TableCell>
-                        {run.pay_date ? new Date(run.pay_date).toLocaleDateString() : 'N/A'}
+                        {run.payDate ? new Date(run.payDate).toLocaleDateString() : 'N/A'}
                       </TableCell>
                       <TableCell>
                         <Badge variant={
@@ -450,7 +491,7 @@ export default function PayrollPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {calculations.reduce((sum, calc) => sum + calc.gross_pay, 0).toLocaleString()} RWF
+                    {calculations.reduce((sum, calc) => sum + calc.grossPay, 0).toLocaleString()} RWF
                   </div>
                 </CardContent>
               </Card>
@@ -461,7 +502,7 @@ export default function PayrollPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {calculations.reduce((sum, calc) => sum + calc.total_deductions, 0).toLocaleString()} RWF
+                    {calculations.reduce((sum, calc) => sum + calc.totalDeductions, 0).toLocaleString()} RWF
                   </div>
                 </CardContent>
               </Card>
@@ -472,7 +513,7 @@ export default function PayrollPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {calculations.reduce((sum, calc) => sum + calc.net_pay, 0).toLocaleString()} RWF
+                    {calculations.reduce((sum, calc) => sum + calc.netPay, 0).toLocaleString()} RWF
                   </div>
                 </CardContent>
               </Card>
@@ -501,12 +542,12 @@ export default function PayrollPage() {
                     {calculations.map((calc) => (
                       <TableRow key={calc.id}>
                         <TableCell className="font-medium">
-                          {calc.staff_member.first_name} {calc.staff_member.last_name}
+                          {calc.staff_member.firstName} {calc.staff_member.lastName}
                         </TableCell>
-                        <TableCell>{calc.gross_pay.toLocaleString()} RWF</TableCell>
-                        <TableCell>{calc.tax_amount.toLocaleString()} RWF</TableCell>
-                        <TableCell>{calc.total_deductions.toLocaleString()} RWF</TableCell>
-                        <TableCell className="font-medium">{calc.net_pay.toLocaleString()} RWF</TableCell>
+                        <TableCell>{calc.grossPay.toLocaleString()} RWF</TableCell>
+                        <TableCell>{calc.taxAmount.toLocaleString()} RWF</TableCell>
+                        <TableCell>{calc.totalDeductions.toLocaleString()} RWF</TableCell>
+                        <TableCell className="font-medium">{calc.netPay.toLocaleString()} RWF</TableCell>
                         <TableCell>
                           <Badge variant={calc.status === 'calculated' ? 'default' : 'destructive'}>
                             {calc.status}
