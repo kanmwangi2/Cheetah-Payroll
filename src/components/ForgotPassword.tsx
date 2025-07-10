@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { login } from '../auth';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 import '../App.css';
 
-const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
+const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -12,11 +12,12 @@ const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setMessage(null);
     try {
-      await login(email, password);
-      onSuccess();
+      await sendPasswordResetEmail(getAuth(), email);
+      setMessage('Password reset email sent.');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Failed to send reset email');
     } finally {
       setLoading(false);
     }
@@ -24,7 +25,7 @@ const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
 
   return (
     <form className="login-container" onSubmit={handleSubmit}>
-      <h2>Login</h2>
+      <h2>Forgot Password</h2>
       <input
         type="email"
         placeholder="Email"
@@ -32,21 +33,11 @@ const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
         onChange={e => setEmail(e.target.value)}
         required
       />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
+      <button type="submit" disabled={loading}>{loading ? 'Sending...' : 'Send Reset Email'}</button>
+      {message && <div className="success">{message}</div>}
       {error && <div className="error">{error}</div>}
-      <div className="login-links">
-        <a href="/signup">Sign Up</a>
-        <a href="/forgot-password">Forgot Password?</a>
-      </div>
     </form>
   );
 };
 
-export default Login;
+export default ForgotPassword;

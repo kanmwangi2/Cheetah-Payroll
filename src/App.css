@@ -1,3 +1,56 @@
+/* Theme support */
+body.theme-dark {
+  background: #181a1b;
+  color: #f4f6fb;
+}
+body.theme-dark .login-container,
+body.theme-dark .dashboard-container,
+body.theme-dark .staff-list-container,
+body.theme-dark .staff-form,
+body.theme-dark .staff-import-export,
+body.theme-dark .staff-profile-card {
+  background: #23272a;
+  color: #f4f6fb;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+body.theme-dark input,
+body.theme-dark select,
+body.theme-dark textarea {
+  background: #23272a;
+  color: #f4f6fb;
+  border: 1px solid #444;
+}
+body.theme-dark input:focus,
+body.theme-dark select:focus {
+  background: #23272a;
+  color: #fff;
+  border: 1.5px solid #90caf9;
+}
+body.theme-dark button,
+body.theme-dark .primary-btn,
+body.theme-dark .staff-profile-btn,
+body.theme-dark .staff-import-btn {
+  background: linear-gradient(90deg, #333 60%, #1976d2 100%);
+  color: #fff;
+}
+body.theme-dark .staff-table,
+body.theme-dark .payroll-table {
+  background: #23272a;
+  color: #f4f6fb;
+}
+body.theme-dark th {
+  background: #23272a;
+  color: #90caf9;
+}
+body.theme-dark .error {
+  color: #ff6b6b;
+}
+body.theme-dark .success {
+  color: #90ee90;
+}
+body.theme-dark hr {
+  border-color: #333;
+}
 body {
   background: #f4f6fb;
   font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;

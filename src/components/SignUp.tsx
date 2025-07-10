@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { login } from '../auth';
+import { signUp } from '../auth';
 import '../App.css';
 
-const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
+const SignUp: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -13,10 +13,10 @@ const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     setLoading(true);
     setError(null);
     try {
-      await login(email, password);
+      await signUp(email, password); // This should assign primary admin if first user
       onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Sign up failed');
     } finally {
       setLoading(false);
     }
@@ -24,7 +24,7 @@ const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
 
   return (
     <form className="login-container" onSubmit={handleSubmit}>
-      <h2>Login</h2>
+      <h2>Sign Up</h2>
       <input
         type="email"
         placeholder="Email"
@@ -39,14 +39,10 @@ const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
         onChange={e => setPassword(e.target.value)}
         required
       />
-      <button type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
+      <button type="submit" disabled={loading}>{loading ? 'Signing up...' : 'Sign Up'}</button>
       {error && <div className="error">{error}</div>}
-      <div className="login-links">
-        <a href="/signup">Sign Up</a>
-        <a href="/forgot-password">Forgot Password?</a>
-      </div>
     </form>
   );
 };
 
-export default Login;
+export default SignUp;
