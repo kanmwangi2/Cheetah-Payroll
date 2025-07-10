@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy, createContext, useContext } from 'react';
 import './App.css';
-import Login from './components/Login';
+// import Login from './components/Login';
 import CompanySelector from './components/CompanySelector';
 import { onUserChanged } from './auth';
 import { getUserProfile } from './userUtils';
@@ -57,8 +57,9 @@ const App: React.FC = () => {
   }, []);
 
 
+
   if (loading) return <div>Loading...</div>;
-  if (!user) return <Login onSuccess={() => window.location.reload()} />;
+  if (!user) return null;
   if (!company) return <CompanySelector onSelect={setCompany} />;
 
   return (
