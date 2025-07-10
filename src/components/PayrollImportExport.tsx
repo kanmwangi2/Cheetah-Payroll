@@ -1,19 +1,14 @@
-
 import React, { useRef, useState } from 'react';
 import Papa from 'papaparse';
-import { createStaff } from '../staff';
+import { createPayroll } from '../payroll';
 
-const staffTemplate = [
-  'firstName,lastName,idNumber,rssbNumber,dateOfBirth,gender,maritalStatus,phone,email,address,emergencyContact,startDate,position,employmentType,department,bankName,accountNumber',
-  'John,Doe,123456789,RSSB123,1990-01-01,male,single,0780000000,john@example.com,123 Main St,Jane Doe,2022-01-01,Manager,Full-time,HR,Bank of Kigali,1234567890',
+const payrollTemplate = [
+  'gross,basic,transport,otherDeductions',
+  '500000,300000,50000,20000',
+  '400000,250000,40000,10000',
 ].join('\n');
 
-
-const REQUIRED_FIELDS = [
-  'firstName', 'lastName', 'idNumber', 'rssbNumber', 'dateOfBirth', 'gender', 'maritalStatus',
-  'phone', 'email', 'address', 'emergencyContact', 'startDate', 'position', 'employmentType',
-  'department', 'bankName', 'accountNumber',
-];
+const REQUIRED_FIELDS = ['gross', 'basic', 'transport', 'otherDeductions'];
 
 interface ImportHistoryEntry {
   date: string;
@@ -24,11 +19,7 @@ interface ImportHistoryEntry {
   errors: { row: number; error: string }[];
 }
 
-const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; staff: any[] }> = ({
-  companyId,
-  onImported,
-  staff,
-}) => {
+const PayrollImportExport: React.FC<{ companyId: string; onImported: () => void; payrolls: any[] }> = ({ companyId, onImported, payrolls }) => {
   const fileInput = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
   const [importProgress, setImportProgress] = useState<{ processed: number; total: number }>({ processed: 0, total: 0 });
@@ -38,33 +29,31 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
   const [showHistory, setShowHistory] = useState(false);
   const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>([]);
 
-  // Enhanced validation for imported rows
-  function validateRow(row: any, idx: number, idNumbers: Set<string>): string | null {
+  function validateRow(row: any, idx: number, grossSet: Set<string>): string | null {
     for (const field of REQUIRED_FIELDS) {
       if (!row[field] || String(row[field]).trim() === '') {
         return `Missing required field "${field}"`;
       }
     }
-    // Duplicate ID number in file
-    if (idNumbers.has(row.idNumber)) {
-      return `Duplicate ID number in file (${row.idNumber})`;
+    // Numeric checks
+    if (isNaN(Number(row.gross)) || Number(row.gross) <= 0) {
+      return `Invalid gross (must be positive number)`;
     }
-    idNumbers.add(row.idNumber);
-    // Date format check (YYYY-MM-DD)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(row.dateOfBirth)) {
-      return `Invalid dateOfBirth format (expected YYYY-MM-DD)`;
+    if (isNaN(Number(row.basic)) || Number(row.basic) < 0) {
+      return `Invalid basic (must be non-negative number)`;
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(row.startDate)) {
-      return `Invalid startDate format (expected YYYY-MM-DD)`;
+    if (isNaN(Number(row.transport)) || Number(row.transport) < 0) {
+      return `Invalid transport (must be non-negative number)`;
     }
-    // Email format check
-    if (!/^\S+@\S+\.\S+$/.test(row.email)) {
-      return `Invalid email address`;
+    if (isNaN(Number(row.otherDeductions)) || Number(row.otherDeductions) < 0) {
+      return `Invalid otherDeductions (must be non-negative number)`;
     }
-    // Phone format (Rwanda: 07XXXXXXXX)
-    if (!/^07\d{8}$/.test(row.phone)) {
-      return `Invalid phone number (expected 07XXXXXXXX)`;
+    // Duplicate gross+basic+transport+otherDeductions in file
+    const key = `${row.gross}-${row.basic}-${row.transport}-${row.otherDeductions}`;
+    if (grossSet.has(key)) {
+      return `Duplicate payroll row in file`;
     }
+    grossSet.add(key);
     return null;
   }
 
@@ -82,13 +71,13 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
       skipEmptyLines: true,
       complete: async (results) => {
         const rows = results.data as any[];
-        const idNumbers = new Set<string>();
+        const grossSet = new Set<string>();
         const errors: { row: number; error: string }[] = [];
         setImportProgress({ processed: 0, total: rows.length });
         let success = 0;
         for (let i = 0; i < rows.length; i++) {
           const row = rows[i];
-          const validationError = validateRow(row, i, idNumbers);
+          const validationError = validateRow(row, i, grossSet);
           if (validationError) {
             errors.push({ row: i + 2, error: validationError });
             setRowErrors([...errors]);
@@ -96,7 +85,7 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
             continue;
           }
           try {
-            await createStaff(companyId, row);
+            await createPayroll(companyId, row);
             success++;
           } catch (err: any) {
             errors.push({ row: i + 2, error: err.message || 'Import failed' });
@@ -133,12 +122,12 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
   // Export CSV
   const handleExport = () => {
     setExporting(true);
-    const csv = Papa.unparse(staff);
+    const csv = Papa.unparse(payrolls);
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'staff_export.csv';
+    a.download = 'payrolls_export.csv';
     a.click();
     URL.revokeObjectURL(url);
     setExporting(false);
@@ -146,56 +135,51 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
 
   // Download template
   const handleTemplate = () => {
-    const blob = new Blob([staffTemplate], { type: 'text/csv' });
+    const blob = new Blob([payrollTemplate], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'staff_import_template.csv';
+    a.download = 'payrolls_import_template.csv';
     a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="staff-import-export">
-      <h4>Import/Export Staff</h4>
-      <div className="staff-import-row" role="group" aria-label="Import/Export Actions">
-        <label htmlFor="staff-import-file" className="visually-hidden">Import Staff CSV</label>
+    <div className="payroll-import-export">
+      <h4>Import/Export Payrolls</h4>
+      <div className="payroll-import-row">
         <input
-          id="staff-import-file"
           type="file"
           accept=".csv"
           ref={fileInput}
           onChange={handleImport}
           disabled={importing}
-          aria-busy={importing}
         />
         <button
-          className="staff-import-btn"
+          className="payroll-import-btn"
           onClick={handleExport}
-          disabled={exporting || staff.length === 0}
-          aria-disabled={exporting || staff.length === 0}
+          disabled={exporting || payrolls.length === 0}
         >
-          {exporting ? 'Exporting...' : 'Export CSV'}
+          Export CSV
         </button>
-        <button className="staff-import-btn" onClick={handleTemplate}>
+        <button className="payroll-import-btn" onClick={handleTemplate}>
           Download Template
         </button>
         <button
-          className="staff-import-btn"
+          className="payroll-import-btn"
           onClick={() => setShowHistory((h) => !h)}
-          aria-pressed={showHistory}
         >
           Import History
         </button>
       </div>
       {importing && (
-        <div className="staff-import-progress" aria-live="polite">
-          Importing: {importProgress.processed} / {importProgress.total}
+        <div className="payroll-import-progress">
+          <span>Importing: {importProgress.processed} / {importProgress.total}</span>
         </div>
       )}
-      {error && <div className="staff-import-error" role="alert">{error}</div>}
+      {error && <div className="payroll-import-error">{error}</div>}
       {rowErrors.length > 0 && (
-        <div className="staff-import-row-errors">
+        <div className="payroll-import-row-errors">
           <b>Row Errors:</b>
           <ul>
             {rowErrors.map((e, i) => (
@@ -207,12 +191,12 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
         </div>
       )}
       {showHistory && (
-        <div className="staff-import-history">
+        <div className="payroll-import-history">
           <h5>Import History</h5>
           {importHistory.length === 0 ? (
             <div>No imports yet.</div>
           ) : (
-            <table className="staff-import-history-table">
+            <table className="payroll-import-history-table">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -258,4 +242,4 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
   );
 };
 
-export default StaffImportExport;
+export default PayrollImportExport;

@@ -1,5 +1,59 @@
+// Payroll approval workflow
+import { serverTimestamp } from 'firebase/firestore';
+
+export type PayrollStatus = 'draft' | 'submitted' | 'approved' | 'rejected';
+
+export async function submitPayroll(companyId: string, payrollId: string, userId: string) {
+  const ref = doc(db, 'companies', companyId, 'payrolls', payrollId);
+  await updateDoc(ref, {
+    status: 'submitted',
+    submittedBy: userId,
+    submittedAt: serverTimestamp(),
+  });
+  await logAuditAction({
+    userId,
+    entityType: 'payroll',
+    entityId: payrollId,
+    action: 'submit',
+    details: {},
+  });
+}
+
+export async function approvePayroll(companyId: string, payrollId: string, userId: string) {
+  const ref = doc(db, 'companies', companyId, 'payrolls', payrollId);
+  await updateDoc(ref, {
+    status: 'approved',
+    approvedBy: userId,
+    approvedAt: serverTimestamp(),
+  });
+  await logAuditAction({
+    userId,
+    entityType: 'payroll',
+    entityId: payrollId,
+    action: 'approve',
+    details: {},
+  });
+}
+
+export async function rejectPayroll(companyId: string, payrollId: string, userId: string, reason: string) {
+  const ref = doc(db, 'companies', companyId, 'payrolls', payrollId);
+  await updateDoc(ref, {
+    status: 'rejected',
+    rejectedBy: userId,
+    rejectedAt: serverTimestamp(),
+    rejectionReason: reason,
+  });
+  await logAuditAction({
+    userId,
+    entityType: 'payroll',
+    entityId: payrollId,
+    action: 'reject',
+    details: { reason },
+  });
+}
 // Payroll engine logic (Rwanda tax, payroll creation, review, approval)
 import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { logAuditAction } from './auditTrailUtils';
 
 const db = getFirestore();
 
@@ -70,7 +124,18 @@ export async function getPayrolls(companyId: string) {
 }
 
 export async function createPayroll(companyId: string, data: any) {
-  return addDoc(collection(db, 'companies', companyId, 'payrolls'), data);
+  const res = await addDoc(collection(db, 'companies', companyId, 'payrolls'), data);
+  // Audit log (assumes data.userId is set by caller)
+  if (data.userId) {
+    await logAuditAction({
+      userId: data.userId,
+      entityType: 'payroll',
+      entityId: res.id,
+      action: 'create',
+      details: data,
+    });
+  }
+  return res;
 }
 
 export async function updatePayroll(companyId: string, payrollId: string, data: any) {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { login } from '../auth';
+import '../App.css';
 
 const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
@@ -22,7 +23,7 @@ const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="login-container" onSubmit={handleSubmit}>
       <h2>Login</h2>
       <input
         type="email"
@@ -39,7 +40,7 @@ const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
         required
       />
       <button type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {error && <div className="error">{error}</div>}
     </form>
   );
 };

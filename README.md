@@ -1,12 +1,57 @@
+
 # Cheetah Payroll
 
-A unified, full-stack payroll management application for Rwanda, with all backend, frontend, and shared code in a single repository root. See Blueprint.md for product details.
+A unified, full-stack payroll management application for Rwanda, with all backend, frontend, and shared code in a single repository root.
 
-## Structure
-- /src: All source code (API, UI, shared logic)
-- /public: Static assets (for frontend)
-- /scripts: Utilities (import/export, backup, etc.)
-- package.json: Project dependencies and scripts
-- tsconfig.json: TypeScript configuration
-- .env: Environment variables (not committed)
-- Blueprint.md: Product blueprint
+- See [Blueprint.md](./Blueprint.md) for full product/business requirements.
+- See [Deployment.md](./Deployment.md) for deployment instructions.
+
+## Project Structure
+- `/src`: All source code (API, UI, shared logic)
+- `/public`: Static assets (for frontend)
+- `package.json`: Project dependencies and scripts
+- `tsconfig.json`: TypeScript configuration
+- `.env`: Environment variables (not committed)
+- `Blueprint.md`: Product blueprint
+- `Deployment.md`: Deployment guide
+
+## Getting Started
+
+1. **Install dependencies:**
+   ```sh
+   npm install
+   ```
+2. **Configure environment:**
+   - Copy `.env.example` to `.env` and fill in your Firebase config (see Firebase console).
+3. **Run in development:**
+   ```sh
+   npm run frontend
+   # or
+   npm run dev
+   ```
+4. **Build for production:**
+   ```sh
+   npm run build:frontend
+   ```
+5. **Run tests:**
+   ```sh
+   npm test
+   ```
+
+## Testing
+- Uses **Jest** and **React Testing Library** for unit and integration tests.
+- All major flows (auth, company selection, staff/payments/deductions/payroll CRUD, import/export, reporting) should be covered.
+- To add tests, create files in `src/__tests__` with `.test.tsx` or `.test.ts` extension.
+
+## Accessibility & Security
+- Follows WCAG and ARIA best practices for forms, modals, and navigation.
+- Firestore security rules enforce strict RBAC and company-level access.
+- No sensitive secrets are exposed to the frontend; only public Firebase config is used.
+
+## Deployment
+- See [Deployment.md](./Deployment.md) for Firebase Hosting and Cloud Functions deployment steps.
+- Production build uses Webpack with code splitting, compression, and environment variable support.
+
+---
+
+For full technical and business requirements, see [Blueprint.md](./Blueprint.md).

@@ -1,4 +1,3 @@
-
 # Firebase Deployment Guide for Cheetah Payroll
 
 Follow these step-by-step instructions to deploy your Cheetah Payroll app (React SPA and optional Node/Express API) to Firebase Hosting and Cloud Functions.
@@ -73,11 +72,9 @@ Follow these step-by-step instructions to deploy your Cheetah Payroll app (React
 ### If you do NOT need a custom backend (recommended for most apps):
 Firebase provides built-in Authentication and Database services you can use directly from your frontend code. You do NOT need Express or Cloud Functions unless you have custom backend logic.
 
-
 #### 1. Set up Authentication
 
 Follow these steps to enable and use Firebase Authentication in your app:
-
 
 1. **Enable Authentication in Firebase Console**
    a. Go to the [Firebase Console](https://console.firebase.google.com/) for your project.
@@ -89,7 +86,6 @@ Follow these steps to enable and use Firebase Authentication in your app:
    b. Copy the Firebase config object (apiKey, authDomain, etc.).
    c. Add these values to your `.env` file as environment variables (see the Environment Variables section below for details).
 
-
 3. **Connect Authentication in your code**
 
    a. Open the file `src/auth.ts` in your code editor.
@@ -99,21 +95,20 @@ Follow these steps to enable and use Firebase Authentication in your app:
       2. Set up Firebase Authentication.
       3. Export functions for logging in, logging out, and listening for user state changes.
 
-
-   c. For this project, the file `src/auth.ts` is already set up for you. You do NOT need to change anything unless you want to customize the logic. Here’s what it should look like for a Vite + TypeScript project:
+   c. For this project, the file `src/auth.ts` is already set up for you. You do NOT need to change anything unless you want to customize the logic. Here’s what it should look like for a Webpack + TypeScript project:
 
    ```typescript
    import { initializeApp } from 'firebase/app';
    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
 
    const firebaseConfig = {
-     apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string,
-     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string,
-     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID as string,
-     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET as string,
-     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID as string,
-     appId: import.meta.env.VITE_FIREBASE_APP_ID as string,
-     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID as string,
+     apiKey: process.env.FIREBASE_API_KEY,
+     authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+     projectId: process.env.FIREBASE_PROJECT_ID,
+     storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+     messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+     appId: process.env.FIREBASE_APP_ID,
+     measurementId: process.env.FIREBASE_MEASUREMENT_ID,
    };
 
    const app = initializeApp(firebaseConfig);
@@ -133,9 +128,9 @@ Follow these steps to enable and use Firebase Authentication in your app:
    ```
 
    **Important:**
-   - Your environment variables in `.env` must use the `VITE_` prefix (e.g., `VITE_FIREBASE_API_KEY`).
-   - Your `vite-env.d.ts` file must be at the project root and contain `/// <reference types="vite/client" />`.
-   - Your `tsconfig.json` should include `["vite-env.d.ts", "src/**/*"]` in the `include` array.
+   - Your environment variables in `.env` must NOT use the `VITE_` prefix. Use `FIREBASE_` (e.g., `FIREBASE_API_KEY`).
+   - You must use a tool like `dotenv-webpack` to load environment variables at build time (see below).
+   - Your `tsconfig.json` should include `src/**/*` in the `include` array.
 
    d. You can now use these exported functions (`login`, `logout`, `onUserChanged`) in your React components to handle authentication.
 
@@ -194,12 +189,12 @@ login(email, password)
 1. Create a `.env` file in your project root (do NOT commit secrets to version control).
 2. Add your Firebase config (from Project Settings > General > Your apps > SDK setup and config):
    ```env
-   VITE_FIREBASE_API_KEY=your-api-key
-   VITE_FIREBASE_AUTH_DOMAIN=your-auth-domain
-   VITE_FIREBASE_PROJECT_ID=your-project-id
-   VITE_FIREBASE_STORAGE_BUCKET=your-storage-bucket
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
-   VITE_FIREBASE_APP_ID=your-app-id
+   FIREBASE_API_KEY=your-api-key
+   FIREBASE_AUTH_DOMAIN=your-auth-domain
+   FIREBASE_PROJECT_ID=your-project-id
+   FIREBASE_STORAGE_BUCKET=your-storage-bucket
+   FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+   FIREBASE_APP_ID=your-app-id
    ```
 3. In your code, load these variables using `import.meta.env` (Vite) or `process.env` (Webpack/Node). For this project, see how environment variables are loaded in `src/auth.ts` and `src/index.tsx`.
 

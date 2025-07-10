@@ -1,6 +1,8 @@
 const path = require('path');
 
 const CompressionPlugin = require('compression-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: './src/index.tsx',
@@ -21,6 +23,11 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+        exclude: /node_modules/,
+      },
     ],
   },
   optimization: {
@@ -38,8 +45,13 @@ module.exports = {
       algorithm: 'gzip',
       test: /\.(js|css|html|svg)$/,
       threshold: 10240,
-      minRatio: 0.8,
     }),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, 'public', 'index.html'),
+      filename: 'index.html',
+      inject: 'body',
+    }),
+    new Dotenv(),
   ],
   devServer: {
     static: {
