@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "commonjs",
+    "module": "esnext",
+    "moduleResolution": "node",
     "lib": ["ES2020", "DOM"],
     "outDir": "dist",
     "rootDir": "src",
@@ -11,6 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx"
   },
-  "include": ["src/**/*"],
+  "include": ["vite-env.d.ts", "src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

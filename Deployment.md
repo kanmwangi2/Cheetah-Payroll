@@ -73,33 +73,92 @@ Follow these step-by-step instructions to deploy your Cheetah Payroll app (React
 ### If you do NOT need a custom backend (recommended for most apps):
 Firebase provides built-in Authentication and Database services you can use directly from your frontend code. You do NOT need Express or Cloud Functions unless you have custom backend logic.
 
-#### 1. Set up Authentication
-1. Go to the [Firebase Console](https://console.firebase.google.com/) for your project.
-2. In the left menu, click **Authentication** > **Get started**.
-3. Enable the sign-in providers you want (e.g., Email/Password, Google, etc.).
-4. In your frontend code, use the Firebase Auth SDK to sign up, sign in, and manage users. For this project, authentication logic is implemented in:
-   - `src/auth.ts` (handles authentication logic and helpers, including initializing Firebase Auth and providing helper functions for login, logout, and user state)
-   - `src/components/Login.tsx` (user login form and UI, calls the login helper from `src/auth.ts`)
 
-   Example from `src/auth.ts`:
-   ```ts
-   // src/auth.ts
-   import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-   const auth = getAuth();
+#### 1. Set up Authentication
+
+Follow these steps to enable and use Firebase Authentication in your app:
+
+
+1. **Enable Authentication in Firebase Console**
+   a. Go to the [Firebase Console](https://console.firebase.google.com/) for your project.
+   b. In the left menu, click **Authentication** > **Get started**.
+   c. Under the **Sign-in method** tab, enable the providers you want (e.g., Email/Password, Google, etc.).
+
+2. **Add Firebase config to your project**
+   a. In the Firebase Console, go to **Project Settings** > **General** > **Your apps**.
+   b. Copy the Firebase config object (apiKey, authDomain, etc.).
+   c. Add these values to your `.env` file as environment variables (see the Environment Variables section below for details).
+
+
+3. **Connect Authentication in your code**
+
+   a. Open the file `src/auth.ts` in your code editor.
+
+   b. Make sure the file contains code to:
+      1. Import and initialize Firebase using your config (from your `.env` file).
+      2. Set up Firebase Authentication.
+      3. Export functions for logging in, logging out, and listening for user state changes.
+
+
+   c. For this project, the file `src/auth.ts` is already set up for you. You do NOT need to change anything unless you want to customize the logic. Here’s what it should look like for a Vite + TypeScript project:
+
+   ```typescript
+   import { initializeApp } from 'firebase/app';
+   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
+
+   const firebaseConfig = {
+     apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string,
+     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string,
+     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID as string,
+     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET as string,
+     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID as string,
+     appId: import.meta.env.VITE_FIREBASE_APP_ID as string,
+     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID as string,
+   };
+
+   const app = initializeApp(firebaseConfig);
+   const auth = getAuth(app);
+
    export function login(email: string, password: string) {
      return signInWithEmailAndPassword(auth, email, password);
    }
+
+   export function logout() {
+     return signOut(auth);
+   }
+
+   export function onUserChanged(callback: (user: FirebaseUser | null) => void) {
+     return onAuthStateChanged(auth, callback);
+   }
    ```
 
-   Example usage in `src/components/Login.tsx`:
-   ```tsx
-   // src/components/Login.tsx
-   import { login } from '../auth';
-   // ... inside your form submit handler:
-   login(email, password)
-     .then(user => { /* handle success */ })
-     .catch(error => { /* handle error */ });
-   ```
+   **Important:**
+   - Your environment variables in `.env` must use the `VITE_` prefix (e.g., `VITE_FIREBASE_API_KEY`).
+   - Your `vite-env.d.ts` file must be at the project root and contain `/// <reference types="vite/client" />`.
+   - Your `tsconfig.json` should include `["vite-env.d.ts", "src/**/*"]` in the `include` array.
+
+   d. You can now use these exported functions (`login`, `logout`, `onUserChanged`) in your React components to handle authentication.
+
+4. **Use the login helper in your UI**
+   a. In your login form component (e.g., `src/components/Login.tsx`), import the `login` function from `src/auth.ts`.
+   b. Call `login(email, password)` when the user submits the form. Handle success and error as needed.
+
+**Example:**
+
+```tsx
+// src/components/Login.tsx
+import { login } from '../auth';
+// ... inside your form submit handler:
+login(email, password)
+  .then(user => { /* handle success, e.g., redirect */ })
+  .catch(error => { /* show error message */ });
+```
+
+**Summary:**
+- Enable providers in Firebase Console
+- Add your config to `.env`
+- Use the provided helpers in `src/auth.ts` to log in/out and track user state
+- Call these helpers from your UI components
 
 #### 2. Set up Firestore or Realtime Database
 1. In the Firebase Console, click **Firestore Database** or **Realtime Database** in the left menu.
