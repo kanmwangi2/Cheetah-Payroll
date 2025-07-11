@@ -48,9 +48,9 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const validate = () => {
     const p = form.personalDetails;
     const e = form.employmentDetails;
-    if (!p.firstName || !p.lastName || !p.idNumber || !p.rssbNumber || !e.department) return false;
-    if (!e.startDate || !e.position || !e.employmentType) return false;
-    if (!p.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) return false;
+    if (!p.firstName || !p.lastName || !p.idNumber || !p.rssbNumber || !e.department) { return false; }
+    if (!e.startDate || !e.position || !e.employmentType) { return false; }
+    if (!p.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) { return false; }
     return true;
   };
 

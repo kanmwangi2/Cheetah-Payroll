@@ -97,7 +97,7 @@ export const createStaff = createServiceFunction(
     logOperation: 'Create staff member',
     validateInput: ({ companyId, data }) => {
       const companyError = validators.companyId(companyId);
-      if (companyError) return companyError;
+      if (companyError) {return companyError;}
       return validateStaffInput(data);
     },
     retries: 1,
@@ -118,7 +118,7 @@ export const updateStaff = createServiceFunction(
     logOperation: 'Update staff member',
     validateInput: ({ companyId, staffId, data }) => {
       const idsError = validateCompanyAndStaffIds(companyId, staffId);
-      if (idsError) return idsError;
+      if (idsError) {return idsError;}
       
       // Validate only provided fields
       if (data.email && validators.email(data.email)) {
@@ -126,7 +126,7 @@ export const updateStaff = createServiceFunction(
       }
       if (data.salary !== undefined) {
         const salaryError = validators.numeric(data.salary, 'Salary') || validators.positive(data.salary, 'Salary');
-        if (salaryError) return salaryError;
+        if (salaryError) {return salaryError;}
       }
       return null;
     },

@@ -109,13 +109,13 @@ export const useThemeValues = () => {
 
     // CSS custom property helpers
     getCSSVariable: (name: string) => {
-      if (typeof window === 'undefined') return '';
+      if (typeof window === 'undefined') { return ''; }
       return getComputedStyle(document.documentElement).getPropertyValue(name);
     },
 
     // Theme-aware color helpers
     getThemeColor: (colorName: string) => {
-      if (typeof window === 'undefined') return '';
+      if (typeof window === 'undefined') { return ''; }
       return getComputedStyle(document.documentElement).getPropertyValue(`--color-${colorName}`);
     },
 

@@ -1,3 +1,5 @@
+import { screen, waitFor } from '@testing-library/react';
+export { screen, waitFor };
 /**
  * Testing Utilities
  * Custom render functions and utilities for testing React components

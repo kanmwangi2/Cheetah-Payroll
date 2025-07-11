@@ -157,7 +157,7 @@ export const validators = {
   combine: (...validationFunctions: Array<() => string | null>): string | null => {
     for (const validate of validationFunctions) {
       const error = validate();
-      if (error) return error;
+      if (error) {return error;}
     }
     return null;
   },

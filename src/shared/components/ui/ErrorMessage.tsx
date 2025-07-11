@@ -41,7 +41,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
   };
 
   const getDefaultHint = () => {
-    if (hint) return hint;
+    if (hint) {return hint;}
     
     switch (type) {
       case 'network':

@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen, waitFor } from '../../../shared/utils/test-utils';
 import { AuthProvider, useAuthContext } from '../../../core/providers/AuthProvider';
 import { auth } from '../../../core/config/firebase.config';
-import { onUserChanged } from '../../../core/providers/auth.provider';
+// Removed unused import: onUserChanged
 import { getUserProfile } from '../../../shared/services/user.service';
 
 // Mock the auth provider service
@@ -23,7 +23,6 @@ jest.mock('../../../core/config/firebase.config', () => {
   };
 });
 
-const mockOnUserChanged = onUserChanged as jest.MockedFunction<typeof onUserChanged>;
 const mockGetUserProfile = getUserProfile as jest.MockedFunction<typeof getUserProfile>;
 const mockOnAuthStateChanged = (auth.onAuthStateChanged as jest.Mock);
 
@@ -31,9 +30,9 @@ const mockOnAuthStateChanged = (auth.onAuthStateChanged as jest.Mock);
 const TestComponent = () => {
   const { user, loading, error } = useAuthContext();
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!user) return <div>No user</div>;
+  if (loading) { return <div>Loading...</div>; }
+  if (error) { return <div>Error: {error}</div>; }
+  if (!user) { return <div>No user</div>; }
 
   return <div>User: {user.email}</div>;
 };
@@ -134,7 +133,7 @@ describe('AuthProvider', () => {
     });
     // Use a matcher function to find the error text even if split across elements
     expect(
-      screen.getByText((content, element) =>
+      screen.getByText((content: string) =>
         content.includes('Error: Profile loading failed')
       )
     ).toBeInTheDocument();

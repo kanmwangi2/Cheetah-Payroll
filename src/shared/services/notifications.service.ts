@@ -15,7 +15,7 @@ const db = getFirestore();
 export function useNotifications(userId: string) {
   const [notifications, setNotifications] = useState<any[]>([]);
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {return;}
     const q = query(
       collection(db, 'notifications'),
       where('userId', '==', userId),

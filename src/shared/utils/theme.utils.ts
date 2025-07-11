@@ -9,7 +9,7 @@ import { Theme, ResolvedTheme } from '../hooks/useTheme';
  * Get CSS custom property value
  */
 export const getCSSVariable = (name: string): string => {
-  if (typeof window === 'undefined') return '';
+  if (typeof window === 'undefined') {return '';}
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 };
 
@@ -17,7 +17,7 @@ export const getCSSVariable = (name: string): string => {
  * Set CSS custom property value
  */
 export const setCSSVariable = (name: string, value: string): void => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
   document.documentElement.style.setProperty(name, value);
 };
 
@@ -60,7 +60,7 @@ export const getThemeShadow = (size: string): string => {
  * Check if current theme is dark
  */
 export const isDarkTheme = (): boolean => {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
   return document.documentElement.classList.contains('theme-dark');
 };
 
@@ -68,7 +68,7 @@ export const isDarkTheme = (): boolean => {
  * Check if current theme is light
  */
 export const isLightTheme = (): boolean => {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
   return document.documentElement.classList.contains('theme-light');
 };
 
@@ -76,7 +76,7 @@ export const isLightTheme = (): boolean => {
  * Get current resolved theme
  */
 export const getCurrentTheme = (): ResolvedTheme => {
-  if (typeof window === 'undefined') return 'light';
+  if (typeof window === 'undefined') {return 'light';}
   return isDarkTheme() ? 'dark' : 'light';
 };
 
@@ -132,7 +132,7 @@ export const applyThemeToElement = (element: HTMLElement, theme: ResolvedTheme):
  * Detect system theme preference
  */
 export const getSystemTheme = (): ResolvedTheme => {
-  if (typeof window === 'undefined') return 'light';
+  if (typeof window === 'undefined') {return 'light';}
 
   try {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -145,7 +145,7 @@ export const getSystemTheme = (): ResolvedTheme => {
  * Check if system supports dark mode
  */
 export const supportsSystemTheme = (): boolean => {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
 
   try {
     return window.matchMedia('(prefers-color-scheme: dark)').media !== 'not all';
@@ -158,7 +158,7 @@ export const supportsSystemTheme = (): boolean => {
  * Get stored theme preference
  */
 export const getStoredTheme = (storageKey: string = 'theme'): Theme | null => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined') {return null;}
 
   try {
     const stored = localStorage.getItem(storageKey) as Theme;
@@ -173,7 +173,7 @@ export const getStoredTheme = (storageKey: string = 'theme'): Theme | null => {
  * Store theme preference
  */
 export const storeTheme = (theme: Theme, storageKey: string = 'theme'): void => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
 
   try {
     localStorage.setItem(storageKey, theme);
@@ -221,7 +221,7 @@ export const rgbToHex = (r: number, g: number, b: number): string => {
  */
 export const getContrastColor = (backgroundColor: string): string => {
   const rgb = hexToRgb(backgroundColor);
-  if (!rgb) return '#000000';
+  if (!rgb) {return '#000000';}
 
   // Calculate relative luminance
   const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;

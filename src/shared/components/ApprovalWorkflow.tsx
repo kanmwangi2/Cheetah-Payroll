@@ -4,7 +4,6 @@ import {
   submitPayroll,
   approvePayroll,
   rejectPayroll,
-  PayrollStatus,
 } from '../../features/payroll/services/payroll.service';
 
 // TODO: Replace with real user/role context
@@ -25,7 +24,7 @@ export default function ApprovalWorkflow({
   const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
-    if (!payrollId || !companyId) return;
+    if (!payrollId || !companyId) {return;}
     setLoading(true);
     fetchPayroll(companyId, payrollId)
       .then(setPayroll)

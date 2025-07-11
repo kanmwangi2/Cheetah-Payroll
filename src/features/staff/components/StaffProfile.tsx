@@ -26,11 +26,11 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
     // Focus first focusable element in modal
     const focusFirst = () => {
       const modal = modalRef.current;
-      if (!modal) return;
+      if (!modal) {return;}
       const focusable = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      if (focusable.length) focusable[0].focus();
+      if (focusable.length) {focusable[0].focus();}
     };
     setTimeout(focusFirst, 0);
   }, [companyId, staffId]);
@@ -59,25 +59,25 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
     }
   };
 
-  if (loading) return <div aria-live="polite">Loading profile...</div>;
+  if (loading) {return <div aria-live="polite">Loading profile...</div>;}
   if (error)
-    return (
+    {return (
       <div style={{ color: 'red' }} role="alert" aria-live="assertive">
         {error}
       </div>
-    );
-  if (!profile) return <div aria-live="polite">Profile not found.</div>;
+    );}
+  if (!profile) {return <div aria-live="polite">Profile not found.</div>;}
 
   // Focus trap logic
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Escape') onClose();
+    if (e.key === 'Escape') {onClose();}
     if (e.key === 'Tab') {
       const modal = modalRef.current;
-      if (!modal) return;
+      if (!modal) {return;}
       const focusable = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      if (!focusable.length) return;
+      if (!focusable.length) {return;}
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (e.shiftKey) {

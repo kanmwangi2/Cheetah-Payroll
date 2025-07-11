@@ -45,7 +45,7 @@ export const useTheme = (config: ThemeConfig = {}): ThemeState => {
   // Initialize theme from storage or default
   const [theme, setThemeState] = useState<Theme>(() => {
     try {
-      if (typeof window === 'undefined') return defaultTheme;
+      if (typeof window === 'undefined') {return defaultTheme;}
 
       const savedTheme = localStorage.getItem(storageKey) as Theme;
       const validThemes: Theme[] = ['light', 'dark', 'system'];
@@ -63,7 +63,7 @@ export const useTheme = (config: ThemeConfig = {}): ThemeState => {
 
   // Initialize system theme detection
   const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(() => {
-    if (typeof window === 'undefined') return 'light';
+    if (typeof window === 'undefined') {return 'light';}
 
     try {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -75,7 +75,7 @@ export const useTheme = (config: ThemeConfig = {}): ThemeState => {
 
   // Listen for system theme changes
   useEffect(() => {
-    if (!enableSystem || typeof window === 'undefined') return;
+    if (!enableSystem || typeof window === 'undefined') {return;}
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -115,7 +115,7 @@ export const useTheme = (config: ThemeConfig = {}): ThemeState => {
 
   // Apply theme to document
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {return;}
 
     const applyTheme = () => {
       const root = document.documentElement;
@@ -163,7 +163,7 @@ export const useTheme = (config: ThemeConfig = {}): ThemeState => {
 
   // Persist theme to storage
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {return;}
 
     try {
       localStorage.setItem(storageKey, theme);
@@ -175,7 +175,7 @@ export const useTheme = (config: ThemeConfig = {}): ThemeState => {
   // Set theme function
   const setTheme = useCallback(
     (newTheme: Theme) => {
-      if (newTheme === theme) return;
+      if (newTheme === theme) {return;}
 
       const validThemes: Theme[] = ['light', 'dark', 'system'];
       if (!validThemes.includes(newTheme)) {

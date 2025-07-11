@@ -39,7 +39,7 @@ export async function createUserProfile(userData: {
 }
 
 export async function getCompaniesByIds(companyIds: string[]): Promise<Company[]> {
-  if (!companyIds.length) return [];
+  if (!companyIds.length) {return [];}
   const companiesRef = collection(db, 'companies');
   const allCompaniesSnap = await getDocs(companiesRef);
   return allCompaniesSnap.docs

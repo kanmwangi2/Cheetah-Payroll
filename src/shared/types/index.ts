@@ -13,16 +13,28 @@ export interface User {
   name: string;
   role: UserRole;
   companyIds: string[];
-  profileData: any;
+  profileData?: any;
+  phone?: string;
+  department?: string;
+  uid?: string;
+  status?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Company {
   id: string;
   name: string;
-  settings: any;
-  taxConfig: any;
-  createdAt: string;
-  updatedAt: string;
+  settings?: any;
+  taxConfig?: any;
+  email?: string;
+  phone?: string;
+  address?: string;
+  taxId?: string;
+  sector?: string;
+  status?: string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 
 export interface Staff {
@@ -35,4 +47,163 @@ export interface Staff {
   updatedAt: string;
 }
 
-// ...add more types as needed for payments, deductions, payroll, etc.
+// Payment Types
+export type PaymentType = 
+  | 'basic_salary'
+  | 'transport_allowance'
+  | 'overtime_allowance'
+  | 'bonus'
+  | 'commission'
+  | 'other_allowance';
+
+export interface Payment {
+  id: string;
+  companyId: string;
+  staffId: string;
+  type: PaymentType;
+  amount: number;
+  isGross: boolean;
+  isRecurring: boolean;
+  effectiveDate: string;
+  endDate?: string;
+  description?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Deduction Types
+export type DeductionType = 
+  | 'advance'
+  | 'loan'
+  | 'other_charge'
+  | 'disciplinary_deduction';
+
+export interface Deduction {
+  id: string;
+  companyId: string;
+  staffId: string;
+  type: DeductionType;
+  originalAmount: number;
+  remainingBalance: number;
+  monthlyInstallment?: number;
+  numberOfInstallments?: number;
+  remainingInstallments?: number;
+  description?: string;
+  status: 'active' | 'completed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Tax Configuration Types
+export interface PayeTaxBracket {
+  min: number;
+  max: number | null;
+  rate: number;
+}
+
+export interface TaxRates {
+  employee: number;
+  employer: number;
+}
+
+export interface TaxConfiguration {
+  payeBrackets: PayeTaxBracket[];
+  pensionRates: TaxRates;
+  maternityRates: TaxRates;
+  cbhiRates: TaxRates;
+  ramaRates: TaxRates;
+  effectiveDate: string;
+}
+
+// Payroll Types
+export interface PayrollCalculation {
+  grossPay: number;
+  basicPay: number;
+  transportAllowance: number;
+  otherAllowances: number;
+  payeBeforeReliefs: number;
+  pensionEmployee: number;
+  pensionEmployer: number;
+  maternityEmployee: number;
+  maternityEmployer: number;
+  ramaEmployee: number;
+  ramaEmployer: number;
+  netBeforeCBHI: number;
+  cbhiEmployee: number;
+  otherDeductions: number;
+  finalNetPay: number;
+}
+
+export interface StaffPayroll {
+  id: string;
+  payrollId: string;
+  staffId: string;
+  staffName: string;
+  calculations: PayrollCalculation;
+  status: 'draft' | 'calculated' | 'approved' | 'processed';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Payroll {
+  id: string;
+  companyId: string;
+  period: string;
+  status: 'draft' | 'pending_approval' | 'approved' | 'processed';
+  totalGrossPay: number;
+  totalNetPay: number;
+  totalEmployeeTax: number;
+  totalEmployerContributions: number;
+  staffCount: number;
+  createdBy: string;
+  approvedBy?: string;
+  processedBy?: string;
+  createdAt: string;
+  updatedAt: string;
+  approvedAt?: string;
+  processedAt?: string;
+}
+
+// Report Types
+export interface StatutoryReport {
+  id: string;
+  companyId: string;
+  type: 'paye' | 'pension' | 'maternity' | 'cbhi' | 'rama';
+  period: string;
+  data: any;
+  totalAmount: number;
+  status: 'draft' | 'generated' | 'submitted';
+  generatedAt: string;
+  submittedAt?: string;
+}
+
+// Audit Trail Types
+export interface AuditLog {
+  id: string;
+  entityType: 'staff' | 'payment' | 'deduction' | 'payroll' | 'company';
+  entityId: string;
+  action: 'create' | 'update' | 'delete' | 'approve' | 'process';
+  changes: any;
+  userId: string;
+  userName: string;
+  timestamp: string;
+  ip?: string;
+}
+
+// Import/Export Types
+export interface ImportResult {
+  success: boolean;
+  totalRows: number;
+  successCount: number;
+  errorCount: number;
+  errors: ImportError[];
+  data?: any[];
+}
+
+export interface ImportError {
+  row: number;
+  field: string;
+  message: string;
+  value: any;
+}

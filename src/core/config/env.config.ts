@@ -48,12 +48,12 @@ function validateEnv(): void {
     'REACT_APP_FIREBASE_APP_ID',
   ];
 
-  const missing = required.filter(key => !env[key as keyof typeof env]);
-  
-  if (missing.length > 0) {
-    console.warn(`Missing environment variables: ${missing.join(', ')}`);
-    console.warn('Using demo configuration. Please set up proper Firebase config for production.');
-  }
+  required.forEach(key => {
+    if (!env[key as keyof typeof env]) {
+      // eslint-disable-next-line no-console
+      console.warn(`Missing environment variable: ${key}`);
+    }
+  });
 }
 
 export function getConfig(): AppConfig {
@@ -73,8 +73,8 @@ export function getConfig(): AppConfig {
     },
     app: {
       name: 'Cheetah Payroll',
-      version: env.REACT_APP_VERSION!,
-      baseUrl: env.REACT_APP_BASE_URL!,
+      version: env.REACT_APP_VERSION || '1.0.0',
+      baseUrl: env.REACT_APP_BASE_URL || 'http://localhost:3000',
     },
     logging: {
       level: env.NODE_ENV === 'production' ? 'warn' : 'debug',

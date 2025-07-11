@@ -17,14 +17,6 @@ const ThrowError = ({ shouldThrow = false }: { shouldThrow?: boolean }) => {
 
 describe('ErrorBoundary', () => {
   // Suppress console.error for these tests
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-
-  afterAll(() => {
-    console.error = originalError;
-  });
 
   it('should render children when no error occurs', () => {
     render(

@@ -1,221 +1,511 @@
-/**
- * Staff List Component with Enhanced Error Handling and Modern UI
- * Displays staff members with search, filtering, and management capabilities
- */
-
 import React, { useEffect, useState } from 'react';
-import { getStaffLegacy } from '../services/staff.service';
-import { useService } from '../../../shared/hooks/useService';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { db } from '../../../core/config/firebase.config';
 import StaffForm from './StaffForm';
 import StaffProfile from './StaffProfile';
 import StaffImportExport from './StaffImportExport';
-import PageContainer from '../../../shared/components/ui/PageContainer';
-import Card from '../../../shared/components/ui/Card';
-import Button from '../../../shared/components/ui/Button';
-import LoadingSpinner from '../../../shared/components/ui/LoadingSpinner';
-import ErrorMessage from '../../../shared/components/ui/ErrorMessage';
-import FormField from '../../../shared/components/ui/FormField';
+
+interface StaffMember {
+  id: string;
+  firstName: string;
+  lastName: string;
+  idNumber: string;
+  rssbNumber: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: 'male' | 'female';
+  maritalStatus: 'single' | 'married' | 'divorced' | 'widowed';
+  address: string;
+  emergencyContact: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  bankDetails: {
+    bankName: string;
+    accountNumber: string;
+    accountName: string;
+  };
+  department: string;
+  position: string;
+  startDate: string;
+  employmentType: 'full-time' | 'part-time' | 'contract' | 'intern';
+  status: 'active' | 'inactive' | 'terminated';
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 interface StaffListProps {
   companyId: string;
 }
 
 const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
-  const [refresh, setRefresh] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [filteredStaff, setFilteredStaff] = useState<StaffMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
-
-  const { data: staff = [], loading, error, execute, reset } = useService<any[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [departments, setDepartments] = useState<string[]>([]);
 
   useEffect(() => {
     loadStaff();
-  }, [companyId, refresh]);
+  }, [companyId]);
+
+  useEffect(() => {
+    filterStaff();
+  }, [staff, searchTerm, departmentFilter, statusFilter]);
 
   const loadStaff = async () => {
-    await execute(async () => {
-      const data = await getStaffLegacy(companyId);
-      return { data, loading: false, success: true };
-    });
+    setLoading(true);
+    try {
+      const staffQuery = query(
+        collection(db, 'companies', companyId, 'staff'),
+        orderBy('createdAt', 'desc')
+      );
+      const staffSnapshot = await getDocs(staffQuery);
+      const staffData = staffSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as StaffMember[];
+      
+      setStaff(staffData);
+      
+      // Extract unique departments
+      const uniqueDepartments = [...new Set(staffData.map(s => s.department).filter(Boolean))];
+      setDepartments(uniqueDepartments);
+    } catch (error) {
+      console.error('Error loading staff:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRefresh = () => {
-    setRefresh(r => r + 1);
-    reset();
+  const filterStaff = () => {
+    let filtered = staff;
+
+    if (searchTerm) {
+      filtered = filtered.filter(s =>
+        s.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.idNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.position?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (departmentFilter) {
+      filtered = filtered.filter(s => s.department === departmentFilter);
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter(s => s.status === statusFilter);
+    }
+
+    setFilteredStaff(filtered);
   };
 
-  const handleStaffAdded = () => {
-    setShowForm(false);
-    handleRefresh();
+  const handleDeleteStaff = async (staffId: string) => {
+    if (!window.confirm('Are you sure you want to delete this staff member? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'companies', companyId, 'staff', staffId));
+      loadStaff();
+    } catch (error) {
+      console.error('Error deleting staff:', error);
+      alert('Error deleting staff member. Please try again.');
+    }
   };
 
-  const handleImportCompleted = () => {
-    setShowImportExport(false);
-    handleRefresh();
-  };
-
-  const filteredStaff = staff.filter(s => {
-    const searchTerm = search.toLowerCase();
+  if (loading) {
     return (
-      (s.personalDetails?.firstName || '').toLowerCase().includes(searchTerm) ||
-      (s.personalDetails?.lastName || '').toLowerCase().includes(searchTerm) ||
-      (s.personalDetails?.idNumber || '').toLowerCase().includes(searchTerm) ||
-      (s.employmentDetails?.department || '').toLowerCase().includes(searchTerm) ||
-      (s.employmentDetails?.position || '').toLowerCase().includes(searchTerm)
-    );
-  });
-
-  const headerActions = (
-    <div style={headerActionsStyles}>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setShowImportExport(true)}
-        disabled={loading}
-      >
-        Import/Export
-      </Button>
-      <Button
-        variant="primary"
-        size="sm"
-        onClick={() => setShowForm(true)}
-        disabled={loading}
-      >
-        Add Staff
-      </Button>
-    </div>
-  );
-
-  if (loading && staff.length === 0) {
-    return (
-      <PageContainer 
-        title="Staff Management" 
-        subtitle="Manage your team members and employee information"
-        headerActions={headerActions}
-      >
-        <LoadingSpinner message="Loading staff members..." size="large" />
-      </PageContainer>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontSize: '1.1rem',
+        color: '#666'
+      }}>
+        Loading staff members...
+      </div>
     );
   }
 
   return (
-    <PageContainer 
-      title="Staff Management" 
-      subtitle="Manage your team members and employee information"
-      headerActions={headerActions}
-    >
-      {/* Error Display */}
-      {error && (
-        <ErrorMessage
-          error={error}
-          type="network"
-          onRetry={loadStaff}
-        />
-      )}
+    <div>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        marginBottom: '24px'
+      }}>
+        <h1 style={{ 
+          margin: 0, 
+          color: '#333',
+          fontSize: '2rem',
+          fontWeight: 600
+        }}>
+          Staff Management
+        </h1>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={() => setShowImportExport(true)}
+            style={{
+              padding: '10px 20px',
+              borderRadius: 6,
+              border: '1px solid #1976d2',
+              background: '#fff',
+              color: '#1976d2',
+              cursor: 'pointer',
+              fontWeight: 500
+            }}
+          >
+            📥 Import/Export
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            style={{
+              padding: '10px 20px',
+              borderRadius: 6,
+              border: 'none',
+              background: '#1976d2',
+              color: '#fff',
+              cursor: 'pointer',
+              fontWeight: 500
+            }}
+          >
+            + Add Staff Member
+          </button>
+        </div>
+      </div>
 
       {/* Search and Filters */}
-      <Card style={searchCardStyles}>
-        <div style={searchContainerStyles}>
-          <FormField
-            id="staff-search"
-            label="Search Staff"
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, ID, department, or position..."
-            fieldClassName="search-field"
-          />
-          <div style={searchStatsStyles}>
-            {loading ? (
-              <span>Loading...</span>
-            ) : (
-              <span>
-                {filteredStaff.length} of {staff.length} staff members
-              </span>
-            )}
+      <div style={{
+        background: '#fff',
+        padding: '20px',
+        borderRadius: '8px',
+        border: '1px solid #e9ecef',
+        marginBottom: '24px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '2fr 1fr 1fr', 
+          gap: '16px',
+          alignItems: 'end'
+        }}>
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '6px', 
+              fontWeight: 500,
+              color: '#333'
+            }}>
+              Search Staff
+            </label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name, ID, email, phone..."
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                fontSize: '14px'
+              }}
+            />
+          </div>
+          
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '6px', 
+              fontWeight: 500,
+              color: '#333'
+            }}>
+              Department
+            </label>
+            <select
+              value={departmentFilter}
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                fontSize: '14px'
+              }}
+            >
+              <option value="">All Departments</option>
+              {departments.map(dept => (
+                <option key={dept} value={dept}>{dept}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '6px', 
+              fontWeight: 500,
+              color: '#333'
+            }}>
+              Status
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                fontSize: '14px'
+              }}
+            >
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="terminated">Terminated</option>
+            </select>
           </div>
         </div>
-      </Card>
+        
+        <div style={{ 
+          marginTop: '16px', 
+          fontSize: '14px', 
+          color: '#666',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span>Showing {filteredStaff.length} of {staff.length} staff members</span>
+          {(searchTerm || departmentFilter || statusFilter) && (
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setDepartmentFilter('');
+                setStatusFilter('');
+              }}
+              style={{
+                padding: '4px 8px',
+                borderRadius: 4,
+                border: '1px solid #ddd',
+                background: '#fff',
+                color: '#666',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Staff Table */}
-      <Card>
+      <div style={{
+        background: '#fff',
+        borderRadius: '8px',
+        border: '1px solid #e9ecef',
+        overflow: 'hidden',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}>
         {filteredStaff.length === 0 ? (
-          <div style={emptyStateStyles}>
-            {search ? (
+          <div style={{ 
+            padding: '60px 40px', 
+            textAlign: 'center',
+            color: '#666'
+          }}>
+            {staff.length === 0 ? (
               <>
-                <SearchIcon />
-                <h3>No staff members found</h3>
-                <p>Try adjusting your search criteria or add new staff members.</p>
-                <Button
-                  variant="primary"
+                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>👥</div>
+                <h3 style={{ margin: '0 0 8px 0', color: '#333' }}>No staff members yet</h3>
+                <p style={{ margin: '0 0 20px 0' }}>Get started by adding your first team member.</p>
+                <button
                   onClick={() => setShowForm(true)}
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: '#1976d2',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    fontWeight: 500
+                  }}
                 >
                   Add First Staff Member
-                </Button>
+                </button>
               </>
             ) : (
               <>
-                <UsersIcon />
-                <h3>No staff members yet</h3>
-                <p>Get started by adding your first team member.</p>
-                <Button
-                  variant="primary"
-                  onClick={() => setShowForm(true)}
-                >
-                  Add Staff Member
-                </Button>
+                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
+                <h3 style={{ margin: '0 0 8px 0', color: '#333' }}>No staff members found</h3>
+                <p style={{ margin: '0' }}>Try adjusting your search criteria or filters.</p>
               </>
             )}
           </div>
         ) : (
-          <div style={tableContainerStyles}>
-            <table style={tableStyles}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={tableHeaderRowStyles}>
-                  <th style={tableHeaderStyles}>Name</th>
-                  <th style={tableHeaderStyles}>ID/Passport</th>
-                  <th style={tableHeaderStyles}>Department</th>
-                  <th style={tableHeaderStyles}>Position</th>
-                  <th style={tableHeaderStyles}>Status</th>
-                  <th style={tableHeaderStyles}>Actions</th>
+                <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #e9ecef' }}>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'left', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    Employee Details
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'left', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    ID/RSSB Number
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'left', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    Department
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'left', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    Position
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'left', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    Status
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'left', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredStaff.map((staffMember) => (
-                  <tr key={staffMember.id} style={tableRowStyles}>
-                    <td style={tableCellStyles}>
-                      <div style={nameContainerStyles}>
-                        <div style={nameStyles}>
-                          {staffMember.personalDetails?.firstName || ''} {staffMember.personalDetails?.lastName || ''}
+                {filteredStaff.map((member) => (
+                  <tr 
+                    key={member.id}
+                    style={{ borderBottom: '1px solid #e9ecef' }}
+                  >
+                    <td style={{ padding: '16px' }}>
+                      <div>
+                        <div style={{ 
+                          fontWeight: 500, 
+                          color: '#333',
+                          marginBottom: '4px'
+                        }}>
+                          {member.firstName} {member.lastName}
                         </div>
-                        <div style={emailStyles}>
-                          {staffMember.personalDetails?.email || ''}
+                        <div style={{ 
+                          fontSize: '13px', 
+                          color: '#666'
+                        }}>
+                          {member.email}
+                        </div>
+                        <div style={{ 
+                          fontSize: '13px', 
+                          color: '#666'
+                        }}>
+                          {member.phone}
                         </div>
                       </div>
                     </td>
-                    <td style={tableCellStyles}>
-                      {staffMember.personalDetails?.idNumber || 'N/A'}
+                    <td style={{ padding: '16px' }}>
+                      <div style={{ fontSize: '14px', color: '#333' }}>
+                        ID: {member.idNumber}
+                      </div>
+                      <div style={{ fontSize: '13px', color: '#666' }}>
+                        RSSB: {member.rssbNumber}
+                      </div>
                     </td>
-                    <td style={tableCellStyles}>
-                      {staffMember.employmentDetails?.department || 'N/A'}
+                    <td style={{ padding: '16px', color: '#333' }}>
+                      {member.department}
                     </td>
-                    <td style={tableCellStyles}>
-                      {staffMember.employmentDetails?.position || 'N/A'}
+                    <td style={{ padding: '16px', color: '#333' }}>
+                      {member.position}
                     </td>
-                    <td style={tableCellStyles}>
-                      <span style={getStatusStyles(staffMember.employmentDetails?.status)}>
-                        {staffMember.employmentDetails?.status || 'Active'}
+                    <td style={{ padding: '16px' }}>
+                      <span style={{
+                        padding: '4px 12px',
+                        borderRadius: '16px',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        background: 
+                          member.status === 'active' ? '#e8f5e8' :
+                          member.status === 'inactive' ? '#fff3cd' : '#f8d7da',
+                        color: 
+                          member.status === 'active' ? '#2e7d32' :
+                          member.status === 'inactive' ? '#856404' : '#721c24'
+                      }}>
+                        {member.status}
                       </span>
                     </td>
-                    <td style={tableCellStyles}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelected(staffMember.id)}
-                      >
-                        View Profile
-                      </Button>
+                    <td style={{ padding: '16px' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => setSelectedStaff(member)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: 4,
+                            border: '1px solid #1976d2',
+                            background: '#fff',
+                            color: '#1976d2',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStaff(member.id)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: 4,
+                            border: '1px solid #dc3545',
+                            background: '#fff',
+                            color: '#dc3545',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -223,164 +513,39 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
             </table>
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Modals */}
       {showForm && (
-        <StaffForm 
-          companyId={companyId} 
-          onAdded={handleStaffAdded}
+        <StaffForm
+          companyId={companyId}
+          onAdded={() => {
+            setShowForm(false);
+            loadStaff();
+          }}
         />
       )}
 
       {showImportExport && (
         <StaffImportExport
           companyId={companyId}
-          onImported={handleImportCompleted}
+          onImported={() => {
+            setShowImportExport(false);
+            loadStaff();
+          }}
           staff={staff}
         />
       )}
 
-      {selected && (
-        <StaffProfile 
-          companyId={companyId} 
-          staffId={selected} 
-          onClose={() => setSelected(null)}
+      {selectedStaff && (
+        <StaffProfile
+          companyId={companyId}
+          staffId={selectedStaff.id}
+          onClose={() => setSelectedStaff(null)}
         />
       )}
-
-      {/* Loading Overlay */}
-      {loading && staff.length > 0 && (
-        <div style={loadingOverlayStyles}>
-          <LoadingSpinner message="Refreshing staff list..." size="small" />
-        </div>
-      )}
-    </PageContainer>
+    </div>
   );
-};
-
-// Icons
-const SearchIcon = () => (
-  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <circle cx="11" cy="11" r="8" />
-    <path d="m21 21-4.35-4.35" />
-  </svg>
-);
-
-const UsersIcon = () => (
-  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-);
-
-// Styles
-const headerActionsStyles: React.CSSProperties = {
-  display: 'flex',
-  gap: 'var(--spacing-sm)',
-};
-
-const searchCardStyles: React.CSSProperties = {
-  marginBottom: 'var(--spacing-lg)',
-};
-
-const searchContainerStyles: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'flex-end',
-  gap: 'var(--spacing-lg)',
-};
-
-const searchFieldStyles: React.CSSProperties = {
-  flex: 1,
-  marginBottom: 0,
-};
-
-const searchStatsStyles: React.CSSProperties = {
-  fontSize: 'var(--font-size-sm)',
-  color: 'var(--color-text-secondary)',
-  whiteSpace: 'nowrap',
-};
-
-const emptyStateStyles: React.CSSProperties = {
-  textAlign: 'center',
-  padding: 'var(--spacing-4xl)',
-  color: 'var(--color-text-secondary)',
-};
-
-const tableContainerStyles: React.CSSProperties = {
-  overflowX: 'auto',
-};
-
-const tableStyles: React.CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
-};
-
-const tableHeaderRowStyles: React.CSSProperties = {
-  borderBottom: '2px solid var(--color-border-primary)',
-};
-
-const tableHeaderStyles: React.CSSProperties = {
-  padding: 'var(--spacing-md)',
-  textAlign: 'left',
-  fontWeight: 'var(--font-weight-semibold)',
-  color: 'var(--color-text-primary)',
-  fontSize: 'var(--font-size-sm)',
-};
-
-const tableRowStyles: React.CSSProperties = {
-  borderBottom: '1px solid var(--color-border-secondary)',
-  transition: 'background-color var(--transition-normal)',
-};
-
-const tableCellStyles: React.CSSProperties = {
-  padding: 'var(--spacing-md)',
-  verticalAlign: 'middle',
-};
-
-const nameContainerStyles: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 'var(--spacing-xs)',
-};
-
-const nameStyles: React.CSSProperties = {
-  fontWeight: 'var(--font-weight-medium)',
-  color: 'var(--color-text-primary)',
-};
-
-const emailStyles: React.CSSProperties = {
-  fontSize: 'var(--font-size-sm)',
-  color: 'var(--color-text-secondary)',
-};
-
-const getStatusStyles = (status?: string): React.CSSProperties => {
-  const isActive = status?.toLowerCase() === 'active' || !status;
-  return {
-    padding: 'var(--spacing-xs) var(--spacing-sm)',
-    borderRadius: 'var(--border-radius-sm)',
-    fontSize: 'var(--font-size-xs)',
-    fontWeight: 'var(--font-weight-medium)',
-    backgroundColor: isActive ? 'var(--color-success-bg)' : 'var(--color-warning-bg)',
-    color: isActive ? 'var(--color-success-text)' : 'var(--color-warning-text)',
-    border: `1px solid ${isActive ? 'var(--color-success-border)' : 'var(--color-warning-border)'}`,
-  };
-};
-
-const loadingOverlayStyles: React.CSSProperties = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.1)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
 };
 
 export default StaffList;

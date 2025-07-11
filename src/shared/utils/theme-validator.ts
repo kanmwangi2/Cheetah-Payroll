@@ -9,7 +9,7 @@ import { logger } from './logger';
  * Validates that theme CSS variables are available
  */
 export const validateThemeCSS = (): boolean => {
-  if (typeof window === 'undefined') return true; // SSR
+  if (typeof window === 'undefined') {return true;} // SSR
 
   try {
     const computedStyle = getComputedStyle(document.documentElement);
@@ -34,7 +34,7 @@ export const validateThemeCSS = (): boolean => {
  * Applies fallback CSS if theme variables are missing
  */
 export const applyFallbackTheme = (): void => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
 
   const fallbackCSS = `
     :root {
@@ -97,7 +97,7 @@ export const applyFallbackTheme = (): void => {
 
   // Check if fallback CSS is already applied
   const existingStyle = document.getElementById('theme-fallback');
-  if (existingStyle) return;
+  if (existingStyle) {return;}
 
   // Create and inject fallback CSS
   const styleElement = document.createElement('style');
@@ -112,7 +112,7 @@ export const applyFallbackTheme = (): void => {
  * Ensures theme is properly initialized
  */
 export const ensureTheme = (): void => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {return;}
 
   // Wait for DOM to be ready
   if (document.readyState === 'loading') {

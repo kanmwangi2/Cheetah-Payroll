@@ -1,0 +1,1 @@
+export { default as CompanySettings } from './components/CompanySettings';

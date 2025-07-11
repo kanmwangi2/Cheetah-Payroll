@@ -49,23 +49,23 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const validate = () => {
     const errs: { [k: string]: string } = {};
     if (!form.gross || isNaN(Number(form.gross)) || Number(form.gross) <= 0)
-      errs.gross = 'Gross must be positive number';
+      {errs.gross = 'Gross must be positive number';}
     if (!form.basic || isNaN(Number(form.basic)) || Number(form.basic) < 0)
-      errs.basic = 'Basic must be non-negative number';
+      {errs.basic = 'Basic must be non-negative number';}
     if (form.transport && (isNaN(Number(form.transport)) || Number(form.transport) < 0))
-      errs.transport = 'Transport must be non-negative number';
+      {errs.transport = 'Transport must be non-negative number';}
     if (
       form.otherDeductions &&
       (isNaN(Number(form.otherDeductions)) || Number(form.otherDeductions) < 0)
     )
-      errs.otherDeductions = 'Other deductions must be non-negative number';
+      {errs.otherDeductions = 'Other deductions must be non-negative number';}
     return errs;
   };
 
   const handleCalculate = () => {
     const errs = validate();
     setFieldErrors(errs);
-    if (Object.keys(errs).length > 0) return;
+    if (Object.keys(errs).length > 0) {return;}
     const gross = parseFloat(form.gross);
     const basic = parseFloat(form.basic);
     const transport = parseFloat(form.transport) || 0;
@@ -95,13 +95,13 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
     }
   };
 
-  if (loading) return <div aria-live="polite">Loading payrolls...</div>;
+  if (loading) {return <div aria-live="polite">Loading payrolls...</div>;}
   if (error)
-    return (
+    {return (
       <div style={{ color: 'red' }} role="alert" aria-live="assertive">
         {error}
       </div>
-    );
+    );}
 
   const filtered = payrolls.filter(p => {
     return !search || String(p.gross).includes(search) || String(p.finalNet).includes(search);

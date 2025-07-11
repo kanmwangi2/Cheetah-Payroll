@@ -1,12 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPayment } from '../services/payments.service';
+import { getStaff } from '../../staff/services/staff.service';
+import { PaymentType, Payment, Staff } from '../../../shared/types';
+
+const PAYMENT_TYPES: { value: PaymentType; label: string }[] = [
+  { value: 'basic_salary', label: 'Basic Salary' },
+  { value: 'transport_allowance', label: 'Transport Allowance' },
+  { value: 'overtime_allowance', label: 'Overtime Allowance' },
+  { value: 'bonus', label: 'Bonus' },
+  { value: 'commission', label: 'Commission' },
+  { value: 'other_allowance', label: 'Other Allowance' },
+];
 
 const initialState = {
   type: '',
   amount: '',
-  staff_id: '',
-  is_gross: true,
-  effective_date: '',
+  staffId: '',
+  isGross: true,
+  isRecurring: false,
+  effectiveDate: '',
+  endDate: '',
+  description: '',
 };
 
 const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
@@ -17,15 +31,53 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{ [k: string]: string }>({});
+  const [staff, setStaff] = useState<Staff[]>([]);
+  const [loadingStaff, setLoadingStaff] = useState(true);
+
+  useEffect(() => {
+    const loadStaff = async () => {
+      try {
+        const staffData = await getStaff(companyId);
+        // Ensure staffData is cast to the shared Staff type
+        const sharedStaff: Staff[] = Array.isArray(staffData)
+          ? staffData.map(s => ({
+              id: s.id,
+              companyId: s.companyId,
+              personalDetails: s.personalDetails,
+              employmentDetails: s.employmentDetails,
+              bankDetails: s.bankDetails,
+              createdAt: s.createdAt,
+              updatedAt: s.updatedAt
+            }))
+          : (staffData.data ?? []).map((s: any) => ({
+              id: s.id,
+              companyId: s.companyId,
+              personalDetails: s.personalDetails,
+              employmentDetails: s.employmentDetails,
+              bankDetails: s.bankDetails,
+              createdAt: s.createdAt,
+              updatedAt: s.updatedAt
+            }));
+        setStaff(sharedStaff);
+      } catch (error) {
+        console.error('Failed to load staff:', error);
+      } finally {
+        setLoadingStaff(false);
+      }
+    };
+    loadStaff();
+  }, [companyId]);
 
   const validate = () => {
     const errs: { [k: string]: string } = {};
-    if (!form.type.trim()) errs.type = 'Type is required';
+    if (!form.type.trim()) {errs.type = 'Payment type is required';}
     if (!form.amount || isNaN(Number(form.amount)) || Number(form.amount) <= 0)
-      errs.amount = 'Amount must be a positive number';
-    if (!form.staff_id.trim()) errs.staff_id = 'Employee ID is required';
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(form.effective_date))
-      errs.effective_date = 'Date must be YYYY-MM-DD';
+      {errs.amount = 'Amount must be a positive number';}
+    if (!form.staffId.trim()) {errs.staffId = 'Employee is required';}
+    if (!form.effectiveDate) {errs.effectiveDate = 'Effective date is required';}
+    if (form.endDate && form.endDate <= form.effectiveDate) {
+      errs.endDate = 'End date must be after effective date';
+    }
     return errs;
   };
 
@@ -41,11 +93,18 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
     e.preventDefault();
     const errs = validate();
     setFieldErrors(errs);
-    if (Object.keys(errs).length > 0) return;
+    if (Object.keys(errs).length > 0) {return;}
     setLoading(true);
     setError(null);
     try {
-      await createPayment(companyId, form);
+      const paymentData = {
+        ...form,
+        amount: parseFloat(form.amount),
+        status: 'active' as const,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      await createPayment(companyId, paymentData);
       setForm(initialState);
       onAdded();
     } catch (err: any) {
@@ -60,16 +119,20 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
       <h3>Add Payment</h3>
       <div className="form-row">
         <label>
-          Type
-          <input
+          Payment Type
+          <select
             className={fieldErrors.type ? 'error' : ''}
-            placeholder="e.g. Salary, Bonus"
             value={form.type}
             onChange={e => handleChange('type', e.target.value)}
             required
             aria-invalid={!!fieldErrors.type}
             aria-describedby="type-error"
-          />
+          >
+            <option value="">Select payment type...</option>
+            {PAYMENT_TYPES.map(pt => (
+              <option key={pt.value} value={pt.value}>{pt.label}</option>
+            ))}
+          </select>
         </label>
         {fieldErrors.type && (
           <div className="field-error" id="type-error">
@@ -99,52 +162,103 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
       </div>
       <div className="form-row">
         <label>
-          Employee ID
-          <input
-            className={fieldErrors.staff_id ? 'error' : ''}
-            placeholder="e.g. EMP001"
-            value={form.staff_id}
-            onChange={e => handleChange('staff_id', e.target.value)}
+          Employee
+          <select
+            className={fieldErrors.staffId ? 'error' : ''}
+            value={form.staffId}
+            onChange={e => handleChange('staffId', e.target.value)}
             required
-            aria-invalid={!!fieldErrors.staff_id}
+            aria-invalid={!!fieldErrors.staffId}
             aria-describedby="staffid-error"
-          />
+            disabled={loadingStaff}
+          >
+            <option value="">
+              {loadingStaff ? 'Loading employees...' : 'Select employee...'}
+            </option>
+            {staff.map(s => (
+              <option key={s.id} value={s.id}>
+                {s.personalDetails?.firstName} {s.personalDetails?.lastName} ({s.personalDetails?.employeeId || s.id})
+              </option>
+            ))}
+          </select>
         </label>
-        {fieldErrors.staff_id && (
+        {fieldErrors.staffId && (
           <div className="field-error" id="staffid-error">
-            {fieldErrors.staff_id}
+            {fieldErrors.staffId}
           </div>
         )}
       </div>
       <div className="form-row">
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            checked={form.is_gross}
-            onChange={e => handleChange('is_gross', e.target.checked)}
-          />
-          Gross
-        </label>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={form.isGross}
+              onChange={e => handleChange('isGross', e.target.checked)}
+            />
+            Gross Amount
+          </label>
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={form.isRecurring}
+              onChange={e => handleChange('isRecurring', e.target.checked)}
+            />
+            Recurring Payment
+          </label>
+        </div>
+      </div>
+      <div className="form-row">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div>
+            <label>
+              Effective Date
+              <input
+                className={fieldErrors.effectiveDate ? 'error' : ''}
+                value={form.effectiveDate}
+                onChange={e => handleChange('effectiveDate', e.target.value)}
+                required
+                aria-invalid={!!fieldErrors.effectiveDate}
+                aria-describedby="effectivedate-error"
+                type="date"
+              />
+            </label>
+            {fieldErrors.effectiveDate && (
+              <div className="field-error" id="effectivedate-error">
+                {fieldErrors.effectiveDate}
+              </div>
+            )}
+          </div>
+          <div>
+            <label>
+              End Date (Optional)
+              <input
+                className={fieldErrors.endDate ? 'error' : ''}
+                value={form.endDate}
+                onChange={e => handleChange('endDate', e.target.value)}
+                aria-invalid={!!fieldErrors.endDate}
+                aria-describedby="enddate-error"
+                type="date"
+              />
+            </label>
+            {fieldErrors.endDate && (
+              <div className="field-error" id="enddate-error">
+                {fieldErrors.endDate}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
       <div className="form-row">
         <label>
-          Effective Date
-          <input
-            className={fieldErrors.effective_date ? 'error' : ''}
-            placeholder="YYYY-MM-DD"
-            value={form.effective_date}
-            onChange={e => handleChange('effective_date', e.target.value)}
-            required
-            aria-invalid={!!fieldErrors.effective_date}
-            aria-describedby="date-error"
-            type="date"
+          Description (Optional)
+          <textarea
+            value={form.description}
+            onChange={e => handleChange('description', e.target.value)}
+            placeholder="Additional details about this payment..."
+            rows={3}
           />
         </label>
-        {fieldErrors.effective_date && (
-          <div className="field-error" id="date-error">
-            {fieldErrors.effective_date}
-          </div>
-        )}
       </div>
       <div className="form-row">
         <button type="submit" className="primary-btn" disabled={loading} aria-busy={loading}>

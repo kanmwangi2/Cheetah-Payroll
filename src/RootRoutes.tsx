@@ -4,6 +4,7 @@ import App from './App';
 import Login from './features/auth/components/Login';
 import SignUp from './features/auth/components/SignUp';
 import ForgotPassword from './features/auth/components/ForgotPassword';
+import { AdminPanel } from './features/admin';
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -50,16 +51,16 @@ function SignUpWrapper() {
 }
 
 const RootRoutes: React.FC = () => {
-  console.log('RootRoutes component rendering...');
 
   return (
     <ErrorBoundary>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<App />} />
           <Route path="/login" element={<LoginWrapper />} />
           <Route path="/signup" element={<SignUpWrapper />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/*" element={<App />} />
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>
