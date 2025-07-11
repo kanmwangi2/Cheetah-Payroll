@@ -54,8 +54,30 @@ shared code in a single repository root.
 
 ## Deployment
 
-- See [Deployment.md](./Deployment.md) for Firebase Hosting and Cloud Functions deployment steps.
+### Quick Deploy Commands
+```sh
+# Full deployment workflow (recommended)
+npm run predeploy && npm run deploy
+
+# Individual deployment steps
+npm run build:frontend:clean  # Clean and build frontend
+npm run test:ci               # Run tests in CI mode
+npm run deploy                # Deploy to Firebase hosting
+npm run deploy:full           # Deploy everything (hosting + functions)
+```
+
+### Available Deploy Scripts
+- `npm run deploy` - Deploy frontend to Firebase hosting
+- `npm run deploy:full` - Deploy everything (hosting + functions + rules)
+- `npm run deploy:functions` - Deploy only Firebase functions
+- `npm run deploy:preview` - Deploy to preview channel
+- `npm run deploy:staging` - Deploy to staging channel
+- `npm run predeploy` - Run build and tests before deployment
+
+### Deployment Setup
+- See [Deployment.md](./Deployment.md) for complete Firebase setup instructions.
 - Production build uses Webpack with code splitting, compression, and environment variable support.
+- Firebase configuration is already set up in `firebase.json`.
 
 ---
 

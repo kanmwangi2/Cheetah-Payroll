@@ -26,41 +26,45 @@ export const useAuth = () => {
   });
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async firebaseUser => {
-      try {
-        if (firebaseUser) {
-          logger.info('User authenticated', { uid: firebaseUser.uid, email: firebaseUser.email });
-
-          // Get user profile from Firestore
-          const userProfile = await getUserProfile(firebaseUser.uid);
-
-          setAuthState({
-            user: userProfile,
-            firebaseUser,
-            loading: false,
-            error: null,
-          });
-        } else {
-          logger.info('User not authenticated');
+    let unsubscribe: (() => void) = () => {};
+    if (auth.onAuthStateChanged) {
+      unsubscribe = auth.onAuthStateChanged(async firebaseUser => {
+        try {
+          if (firebaseUser) {
+            logger.info('User authenticated', { uid: firebaseUser.uid, email: firebaseUser.email });
+            // Get user profile from Firestore
+            const userProfile = await getUserProfile(firebaseUser.uid);
+            setAuthState({
+              user: userProfile,
+              firebaseUser,
+              loading: false,
+              error: null,
+            });
+          } else {
+            logger.info('User not authenticated');
+            setAuthState({
+              user: null,
+              firebaseUser: null,
+              loading: false,
+              error: null,
+            });
+          }
+        } catch (error) {
+          logger.error('Error in auth state change', error as Error);
           setAuthState({
             user: null,
             firebaseUser: null,
             loading: false,
-            error: null,
+            error: (error as Error).message,
           });
         }
-      } catch (error) {
-        logger.error('Error in auth state change', error as Error);
-        setAuthState({
-          user: null,
-          firebaseUser: null,
-          loading: false,
-          error: (error as Error).message,
-        });
+      });
+    }
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
       }
-    });
-
-    return () => unsubscribe();
+    };
   }, []);
 
   return authState;

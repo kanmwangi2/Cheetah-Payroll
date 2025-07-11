@@ -1,19 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { login, onUserChanged } from '../../../core/providers/auth.provider';
-import '../../../App.css';
-import { Link } from 'react-router-dom';
+/**
+ * Professional Login Component
+ * Modern, accessible login page with theme support and enhanced UX
+ */
 
-const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { login, onUserChanged } from '../../../core/providers/auth.provider';
+import { useThemeContext } from '../../../core/providers/ThemeProvider';
+import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
+import LoadingSpinner from '../../../shared/components/ui/LoadingSpinner';
+import { logger } from '../../../shared/utils/logger';
+
+interface LoginProps {
+  onSuccess: () => void;
+}
+
+const Login: React.FC<LoginProps> = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const { isDark, resolvedTheme } = useThemeContext();
 
   useEffect(() => {
     const unsubscribe = onUserChanged(user => {
       if (user && loading) {
-        console.log('User authenticated, calling onSuccess');
+        logger.info('User authenticated successfully, redirecting...');
         setLoading(false);
         onSuccess();
       }
@@ -25,55 +40,388 @@ const Login: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
-      console.log('Attempting login...');
+      logger.info('Attempting user authentication');
       await login(email, password);
-      console.log('Login successful');
-      // Don't call onSuccess() immediately - let the auth state change handle the redirect
+      logger.info('Login successful');
+      // Auth state change will handle the redirect
     } catch (err: any) {
-      console.error('Login failed:', err);
-      setError(err.message || 'Login failed');
+      logger.error('Login failed', err);
+      setError(err.message || 'Login failed. Please check your credentials and try again.');
       setLoading(false);
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  if (loading) {
+    return (
+      <div style={containerStyles}>
+        <LoadingSpinner message="Signing you in..." size="large" />
+      </div>
+    );
+  }
+
   return (
-    <form className="login-container" onSubmit={handleSubmit}>
-      <h2>Login</h2>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        required
-      />
-      <div className="password-input-container">
-        <input
-          type={showPassword ? 'text' : 'password'}
-          placeholder="Password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
-        <button
-          type="button"
-          className="password-toggle"
-          onClick={() => setShowPassword(!showPassword)}
-          aria-label={showPassword ? 'Hide password' : 'Show password'}
-        >
-          {showPassword ? '👁️' : '👁️‍🗨️'}
-        </button>
+    <div style={containerStyles}>
+      {/* Theme Switcher */}
+      <div style={themeSwitcherStyles}>
+        <ThemeSwitcher variant="dropdown" size="sm" showLabels={false} />
       </div>
-      <button type="submit" disabled={loading}>
-        {loading ? 'Logging in...' : 'Login'}
-      </button>
-      {error && <div className="error">{error}</div>}
-      <div className="login-links">
-        <Link to="/signup">Sign Up</Link>
-        <Link to="/forgot-password">Forgot Password?</Link>
+
+      {/* Login Card */}
+      <div style={cardStyles}>
+        {/* Header */}
+        <div style={headerStyles}>
+          <div style={logoStyles}>
+            🐆
+          </div>
+          <h1 style={titleStyles}>
+            Welcome to Cheetah Payroll
+          </h1>
+          <p style={subtitleStyles}>
+            Sign in to your account to continue
+          </p>
+        </div>
+
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} style={formStyles}>
+          {/* Email Field */}
+          <div style={fieldGroupStyles}>
+            <label htmlFor="email" style={labelStyles}>
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              required
+              style={inputStyles}
+              aria-describedby={error ? 'error-message' : undefined}
+            />
+          </div>
+
+          {/* Password Field */}
+          <div style={fieldGroupStyles}>
+            <label htmlFor="password" style={labelStyles}>
+              Password
+            </label>
+            <div style={passwordContainerStyles}>
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                style={passwordInputStyles}
+                aria-describedby={error ? 'error-message' : undefined}
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                style={passwordToggleStyles}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? (
+                  <EyeOffIcon />
+                ) : (
+                  <EyeIcon />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Remember Me */}
+          <div style={checkboxGroupStyles}>
+            <label style={checkboxLabelStyles}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                style={checkboxStyles}
+              />
+              <span style={checkboxTextStyles}>Remember me</span>
+            </label>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div id="error-message" style={errorStyles} role="alert" aria-live="assertive">
+              <AlertIcon />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            style={submitButtonStyles}
+          >
+            {loading ? 'Signing In...' : 'Sign In'}
+          </button>
+        </form>
+
+        {/* Footer Links */}
+        <div style={footerStyles}>
+          <Link to="/forgot-password" style={linkStyles}>
+            Forgot your password?
+          </Link>
+          <div style={signupPromptStyles}>
+            <span style={signupTextStyles}>Don't have an account?</span>
+            <Link to="/signup" style={signupLinkStyles}>
+              Sign up
+            </Link>
+          </div>
+        </div>
       </div>
-    </form>
+
+      {/* Footer */}
+      <div style={pageFooterStyles}>
+        <p style={copyrightStyles}>
+          © 2025 Cheetah Payroll. Built for Rwanda's workforce.
+        </p>
+      </div>
+    </div>
   );
+};
+
+// SVG Icons
+const EyeIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOffIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+    <path d="M1 1l22 22" />
+  </svg>
+);
+
+const AlertIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+// Styles
+const containerStyles: React.CSSProperties = {
+  minHeight: '100vh',
+  backgroundColor: 'var(--color-bg-primary)',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 'var(--spacing-lg)',
+  position: 'relative',
+  transition: 'background-color var(--transition-normal)',
+};
+
+const themeSwitcherStyles: React.CSSProperties = {
+  position: 'absolute',
+  top: 'var(--spacing-lg)',
+  right: 'var(--spacing-lg)',
+  zIndex: 10,
+};
+
+const cardStyles: React.CSSProperties = {
+  backgroundColor: 'var(--color-bg-secondary)',
+  borderRadius: 'var(--border-radius-xl)',
+  padding: 'var(--spacing-4xl)',
+  boxShadow: 'var(--shadow-xl)',
+  border: '1px solid var(--color-border-primary)',
+  width: '100%',
+  maxWidth: '420px',
+  transition: 'background-color var(--transition-normal), border-color var(--transition-normal)',
+};
+
+const headerStyles: React.CSSProperties = {
+  textAlign: 'center',
+  marginBottom: 'var(--spacing-4xl)',
+};
+
+const logoStyles: React.CSSProperties = {
+  fontSize: '3rem',
+  marginBottom: 'var(--spacing-lg)',
+};
+
+const titleStyles: React.CSSProperties = {
+  fontSize: 'var(--font-size-3xl)',
+  fontWeight: 'var(--font-weight-bold)',
+  color: 'var(--color-text-primary)',
+  margin: '0 0 var(--spacing-sm) 0',
+  transition: 'color var(--transition-normal)',
+};
+
+const subtitleStyles: React.CSSProperties = {
+  fontSize: 'var(--font-size-base)',
+  color: 'var(--color-text-secondary)',
+  margin: 0,
+  transition: 'color var(--transition-normal)',
+};
+
+const formStyles: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'var(--spacing-xl)',
+};
+
+const fieldGroupStyles: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'var(--spacing-sm)',
+};
+
+const labelStyles: React.CSSProperties = {
+  fontSize: 'var(--font-size-sm)',
+  fontWeight: 'var(--font-weight-medium)',
+  color: 'var(--color-text-primary)',
+  transition: 'color var(--transition-normal)',
+};
+
+const inputStyles: React.CSSProperties = {
+  padding: 'var(--spacing-md) var(--spacing-lg)',
+  borderRadius: 'var(--border-radius-md)',
+  border: '1px solid var(--color-border-secondary)',
+  backgroundColor: 'var(--color-bg-primary)',
+  color: 'var(--color-text-primary)',
+  fontSize: 'var(--font-size-base)',
+  transition: 'all var(--transition-normal)',
+};
+
+const passwordContainerStyles: React.CSSProperties = {
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+};
+
+const passwordInputStyles: React.CSSProperties = {
+  ...inputStyles,
+  paddingRight: 'var(--spacing-5xl)',
+  width: '100%',
+};
+
+const passwordToggleStyles: React.CSSProperties = {
+  position: 'absolute',
+  right: 'var(--spacing-md)',
+  background: 'none',
+  border: 'none',
+  color: 'var(--color-text-tertiary)',
+  cursor: 'pointer',
+  padding: 'var(--spacing-xs)',
+  borderRadius: 'var(--border-radius-sm)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'color var(--transition-normal)',
+};
+
+const checkboxGroupStyles: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+};
+
+const checkboxLabelStyles: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 'var(--spacing-sm)',
+  cursor: 'pointer',
+  fontSize: 'var(--font-size-sm)',
+};
+
+const checkboxStyles: React.CSSProperties = {
+  width: '16px',
+  height: '16px',
+  cursor: 'pointer',
+};
+
+const checkboxTextStyles: React.CSSProperties = {
+  color: 'var(--color-text-secondary)',
+  transition: 'color var(--transition-normal)',
+};
+
+const errorStyles: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 'var(--spacing-sm)',
+  padding: 'var(--spacing-md)',
+  backgroundColor: 'var(--color-error-bg)',
+  color: 'var(--color-error-text)',
+  borderRadius: 'var(--border-radius-md)',
+  border: '1px solid var(--color-error-border)',
+  fontSize: 'var(--font-size-sm)',
+};
+
+const submitButtonStyles: React.CSSProperties = {
+  padding: 'var(--spacing-md) var(--spacing-lg)',
+  backgroundColor: 'var(--color-primary-500)',
+  color: 'var(--color-text-inverse)',
+  border: 'none',
+  borderRadius: 'var(--border-radius-md)',
+  fontSize: 'var(--font-size-base)',
+  fontWeight: 'var(--font-weight-medium)',
+  cursor: 'pointer',
+  transition: 'all var(--transition-normal)',
+  marginTop: 'var(--spacing-sm)',
+};
+
+const footerStyles: React.CSSProperties = {
+  marginTop: 'var(--spacing-4xl)',
+  textAlign: 'center',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'var(--spacing-lg)',
+};
+
+const linkStyles: React.CSSProperties = {
+  color: 'var(--color-primary-600)',
+  textDecoration: 'none',
+  fontSize: 'var(--font-size-sm)',
+  fontWeight: 'var(--font-weight-medium)',
+  transition: 'color var(--transition-normal)',
+};
+
+const signupPromptStyles: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: 'var(--spacing-xs)',
+  fontSize: 'var(--font-size-sm)',
+};
+
+const signupTextStyles: React.CSSProperties = {
+  color: 'var(--color-text-secondary)',
+  transition: 'color var(--transition-normal)',
+};
+
+const signupLinkStyles: React.CSSProperties = {
+  color: 'var(--color-primary-600)',
+  textDecoration: 'none',
+  fontWeight: 'var(--font-weight-medium)',
+  transition: 'color var(--transition-normal)',
+};
+
+const pageFooterStyles: React.CSSProperties = {
+  marginTop: 'var(--spacing-4xl)',
+  textAlign: 'center',
+};
+
+const copyrightStyles: React.CSSProperties = {
+  color: 'var(--color-text-tertiary)',
+  fontSize: 'var(--font-size-xs)',
+  margin: 0,
+  transition: 'color var(--transition-normal)',
 };
 
 export default Login;

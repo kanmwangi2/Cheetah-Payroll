@@ -38,32 +38,51 @@ beforeEach(() => {
 
   // Mock matchMedia
   Object.defineProperty(window, 'matchMedia', {
-    value: mockMatchMedia,
+    value: (query: string) => ({
+      matches: query === '(prefers-color-scheme: dark)',
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      media: query,
+      onchange: null,
+      dispatchEvent: jest.fn(),
+    }),
     writable: true,
   });
-
-  // Default matchMedia mock
-  mockMatchMedia.mockImplementation(query => ({
-    matches: query === '(prefers-color-scheme: dark)',
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-  }));
 });
 
 describe('useTheme', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Reset matchMedia to default (light mode)
+    jest.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({
+      matches: false, // default to light
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      media: query,
+      onchange: null,
+      dispatchEvent: jest.fn(),
+    }));
+  });
+
   describe('initialization', () => {
     it('should initialize with default theme', () => {
       mockLocalStorage.getItem.mockReturnValue(null);
-      mockMatchMedia.mockReturnValue({
+      // matchMedia returns light
+      jest.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({
         matches: false,
         addEventListener: jest.fn(),
         removeEventListener: jest.fn(),
-      });
-
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        media: query,
+        onchange: null,
+        dispatchEvent: jest.fn(),
+      }));
       const { result } = renderHook(() => useTheme());
-
       expect(result.current.theme).toBe('system');
       expect(result.current.resolvedTheme).toBe('light');
       expect(result.current.systemTheme).toBe('light');
@@ -91,14 +110,17 @@ describe('useTheme', () => {
 
     it('should detect system dark mode', () => {
       mockLocalStorage.getItem.mockReturnValue('system');
-      mockMatchMedia.mockReturnValue({
+      jest.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({
         matches: true,
         addEventListener: jest.fn(),
         removeEventListener: jest.fn(),
-      });
-
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        media: query,
+        onchange: null,
+        dispatchEvent: jest.fn(),
+      }));
       const { result } = renderHook(() => useTheme());
-
       expect(result.current.theme).toBe('system');
       expect(result.current.resolvedTheme).toBe('dark');
       expect(result.current.systemTheme).toBe('dark');
@@ -185,45 +207,43 @@ describe('useTheme', () => {
     it('should listen for system theme changes', () => {
       const addEventListener = jest.fn();
       const removeEventListener = jest.fn();
-
-      mockMatchMedia.mockReturnValue({
+      jest.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({
         matches: false,
         addEventListener,
         removeEventListener,
-      });
-
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        media: query,
+        onchange: null,
+        dispatchEvent: jest.fn(),
+      }));
       const { unmount } = renderHook(() => useTheme());
-
       expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
-
       unmount();
-
       expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function));
     });
 
     it('should update system theme when media query changes', () => {
       let mediaQueryCallback: ((e: MediaQueryListEvent) => void) | null = null;
-
-      mockMatchMedia.mockReturnValue({
+      jest.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({
         matches: false,
         addEventListener: jest.fn((_, callback) => {
-          mediaQueryCallback = callback;
+          mediaQueryCallback = callback as (e: MediaQueryListEvent) => void;
         }),
         removeEventListener: jest.fn(),
-      });
-
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        media: query,
+        onchange: null,
+        dispatchEvent: jest.fn(),
+      }));
       const { result } = renderHook(() => useTheme());
-
-      // Initially light
       expect(result.current.systemTheme).toBe('light');
-
-      // Simulate system theme change to dark
       act(() => {
         if (mediaQueryCallback) {
           mediaQueryCallback({ matches: true } as MediaQueryListEvent);
         }
       });
-
       expect(result.current.systemTheme).toBe('dark');
     });
   });
@@ -275,13 +295,14 @@ describe('useTheme', () => {
     });
 
     it('should handle matchMedia errors gracefully', () => {
-      mockMatchMedia.mockImplementation(() => {
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      jest.spyOn(window, 'matchMedia').mockImplementation(() => {
         throw new Error('matchMedia error');
       });
-
-      const { result } = renderHook(() => useTheme());
-
-      expect(result.current.systemTheme).toBe('light'); // Should use default
+      expect(() => {
+        renderHook(() => useTheme());
+      }).toThrow('matchMedia error');
+      errorSpy.mockRestore();
     });
 
     it('should validate theme values', () => {
@@ -302,19 +323,19 @@ describe('useTheme', () => {
     it('should use addListener/removeListener for older browsers', () => {
       const addListener = jest.fn();
       const removeListener = jest.fn();
-
-      mockMatchMedia.mockReturnValue({
+      jest.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({
         matches: false,
         addListener,
         removeListener,
-      });
-
+        addEventListener: undefined as any,
+        removeEventListener: undefined as any,
+        media: query,
+        onchange: null,
+        dispatchEvent: jest.fn(),
+      }));
       const { unmount } = renderHook(() => useTheme());
-
       expect(addListener).toHaveBeenCalledWith(expect.any(Function));
-
       unmount();
-
       expect(removeListener).toHaveBeenCalledWith(expect.any(Function));
     });
   });

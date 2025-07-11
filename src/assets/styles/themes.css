@@ -175,6 +175,11 @@
   --color-table-row-hover: #f9fafb;
   --color-table-row-selected: #eff6ff;
 
+  /* Error State Colors */
+  --color-error-bg: #fef2f2;
+  --color-error-text: #b91c1c;
+  --color-error-border: #ef4444;
+
   /* Status Colors */
   --color-status-approved: #10b981;
   --color-status-pending: #f59e0b;
@@ -279,6 +284,11 @@
   --color-table-border: #4b5563;
   --color-table-row-hover: #374151;
   --color-table-row-selected: #1e40af;
+
+  /* Error State Colors (Dark Theme) */
+  --color-error-bg: #1f1517;
+  --color-error-text: #fca5a5;
+  --color-error-border: #ef4444;
 
   /* Status Colors */
   --color-status-approved: #10b981;
