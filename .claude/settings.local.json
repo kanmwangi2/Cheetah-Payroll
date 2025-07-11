@@ -18,7 +18,13 @@
       "Bash(npm run lint)",
       "Bash(npm run build:frontend:*)",
       "Bash(npm run:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(grep:*)",
+      "Bash(pkill:*)",
+      "Bash(npx firebase deploy:*)",
+      "Bash(npx firebase login:*)",
+      "Bash(npx firebase projects:list:*)",
+      "Bash(npx firebase use:*)"
     ],
     "deny": []
   }
