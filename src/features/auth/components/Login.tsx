@@ -10,6 +10,7 @@ import { useThemeContext } from '../../../core/providers/ThemeProvider';
 import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
 import LoadingSpinner from '../../../shared/components/ui/LoadingSpinner';
 import { logger } from '../../../shared/utils/logger';
+import { getFirebaseErrorMessage, isCredentialError, isRetryableError } from '../../../shared/utils/firebase-errors';
 
 interface LoginProps {
   onSuccess: () => void;
@@ -20,6 +21,7 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<'credential' | 'network' | 'general'>('general');
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -48,7 +50,18 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
       // Auth state change will handle the redirect
     } catch (err: any) {
       logger.error('Login failed', err);
-      setError(err.message || 'Login failed. Please check your credentials and try again.');
+      const userFriendlyMessage = getFirebaseErrorMessage(err);
+      setError(userFriendlyMessage);
+      
+      // Set error type for appropriate styling/messaging
+      if (isCredentialError(err)) {
+        setErrorType('credential');
+      } else if (isRetryableError(err)) {
+        setErrorType('network');
+      } else {
+        setErrorType('general');
+      }
+      
       setLoading(false);
     }
   };
@@ -69,7 +82,7 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
     <div style={containerStyles}>
       {/* Theme Switcher */}
       <div style={themeSwitcherStyles}>
-        <ThemeSwitcher variant="dropdown" size="sm" showLabels={false} />
+        <ThemeSwitcher variant="dropdown" size="md" showLabels={true} />
       </div>
 
       {/* Login Card */}
@@ -152,9 +165,21 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 
           {/* Error Message */}
           {error && (
-            <div id="error-message" style={errorStyles} role="alert" aria-live="assertive">
+            <div id="error-message" style={getErrorStyles(errorType)} role="alert" aria-live="assertive">
               <AlertIcon />
-              <span>{error}</span>
+              <div style={errorContentStyles}>
+                <span>{error}</span>
+                {errorType === 'network' && (
+                  <small style={errorHintStyles}>
+                    Check your internet connection and try again.
+                  </small>
+                )}
+                {errorType === 'credential' && (
+                  <small style={errorHintStyles}>
+                    Double-check your email and password, or <Link to="/forgot-password" style={errorLinkStyles}>reset your password</Link>.
+                  </small>
+                )}
+              </div>
             </div>
           )}
 
@@ -229,10 +254,15 @@ const containerStyles: React.CSSProperties = {
 };
 
 const themeSwitcherStyles: React.CSSProperties = {
-  position: 'absolute',
-  top: 'var(--spacing-lg)',
-  right: 'var(--spacing-lg)',
-  zIndex: 10,
+  position: 'fixed',
+  top: 'var(--spacing-xl)',
+  right: 'var(--spacing-xl)',
+  zIndex: 50,
+  backgroundColor: 'var(--color-bg-secondary)',
+  padding: 'var(--spacing-sm)',
+  borderRadius: 'var(--border-radius-md)',
+  border: '1px solid var(--color-border-primary)',
+  boxShadow: 'var(--shadow-md)',
 };
 
 const cardStyles: React.CSSProperties = {
@@ -351,16 +381,36 @@ const checkboxTextStyles: React.CSSProperties = {
   transition: 'color var(--transition-normal)',
 };
 
-const errorStyles: React.CSSProperties = {
+const getErrorStyles = (errorType: 'credential' | 'network' | 'general'): React.CSSProperties => ({
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   gap: 'var(--spacing-sm)',
   padding: 'var(--spacing-md)',
-  backgroundColor: 'var(--color-error-bg)',
-  color: 'var(--color-error-text)',
+  backgroundColor: errorType === 'network' ? 'var(--color-warning-bg)' : 'var(--color-error-bg)',
+  color: errorType === 'network' ? 'var(--color-warning-text)' : 'var(--color-error-text)',
   borderRadius: 'var(--border-radius-md)',
-  border: '1px solid var(--color-error-border)',
+  border: `1px solid ${errorType === 'network' ? 'var(--color-warning-border)' : 'var(--color-error-border)'}`,
   fontSize: 'var(--font-size-sm)',
+});
+
+const errorContentStyles: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'var(--spacing-xs)',
+  flex: 1,
+};
+
+const errorHintStyles: React.CSSProperties = {
+  fontSize: 'var(--font-size-xs)',
+  opacity: 0.8,
+  marginTop: 'var(--spacing-xs)',
+  lineHeight: 1.4,
+};
+
+const errorLinkStyles: React.CSSProperties = {
+  color: 'inherit',
+  textDecoration: 'underline',
+  fontWeight: 'var(--font-weight-medium)',
 };
 
 const submitButtonStyles: React.CSSProperties = {

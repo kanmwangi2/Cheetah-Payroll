@@ -111,7 +111,7 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
             continue;
           }
           try {
-            await createStaff(companyId, row);
+            await createStaff({ companyId, data: row });
             success++;
           } catch (err: any) {
             errors.push({ row: i + 2, error: err.message || 'Import failed' });

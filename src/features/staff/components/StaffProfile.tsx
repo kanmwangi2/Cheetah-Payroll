@@ -15,7 +15,7 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
   // Focus trap for modal
   const modalRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    getStaffProfile(companyId, staffId)
+    getStaffProfile({ companyId, staffId })
       .then(data => {
         setProfile(data);
         setForm(data);
@@ -49,7 +49,7 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
     setLoading(true);
     setError(null);
     try {
-      await updateStaff(companyId, staffId, form);
+      await updateStaff({ companyId, staffId, data: form });
       setProfile(form);
       setEdit(false);
     } catch (err: any) {

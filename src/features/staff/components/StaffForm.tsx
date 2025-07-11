@@ -63,7 +63,7 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
     setLoading(true);
     setError(null);
     try {
-      await createStaff(companyId, form);
+      await createStaff({ companyId, data: form });
       setForm(initialState);
       onAdded();
     } catch (err: any) {
