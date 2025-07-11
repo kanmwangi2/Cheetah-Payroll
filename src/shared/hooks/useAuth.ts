@@ -27,39 +27,80 @@ export const useAuth = () => {
 
   useEffect(() => {
     let unsubscribe: (() => void) = () => {};
-    if (auth.onAuthStateChanged) {
-      unsubscribe = auth.onAuthStateChanged(async firebaseUser => {
-        try {
-          if (firebaseUser) {
-            logger.info('User authenticated', { uid: firebaseUser.uid, email: firebaseUser.email });
-            // Get user profile from Firestore
-            const userProfile = await getUserProfile(firebaseUser.uid);
-            setAuthState({
-              user: userProfile,
-              firebaseUser,
-              loading: false,
-              error: null,
-            });
-          } else {
-            logger.info('User not authenticated');
+    
+    try {
+      if (auth && auth.onAuthStateChanged) {
+        unsubscribe = auth.onAuthStateChanged(async firebaseUser => {
+          try {
+            if (firebaseUser) {
+              logger.info('User authenticated', { uid: firebaseUser.uid, email: firebaseUser.email });
+              
+              try {
+                // Get user profile from Firestore
+                const userProfile = await getUserProfile(firebaseUser.uid);
+                setAuthState({
+                  user: userProfile,
+                  firebaseUser,
+                  loading: false,
+                  error: null,
+                });
+              } catch (profileError) {
+                logger.warn('Could not load user profile, using basic user data', profileError as Error);
+                // Create basic user object if profile loading fails
+                const basicUser = {
+                  id: firebaseUser.uid,
+                  email: firebaseUser.email || '',
+                  name: firebaseUser.displayName || 'User',
+                  role: 'company_admin' as const,
+                  companyIds: [],
+                  profileData: {}
+                };
+                setAuthState({
+                  user: basicUser,
+                  firebaseUser,
+                  loading: false,
+                  error: 'Profile loading failed',
+                });
+              }
+            } else {
+              logger.info('User not authenticated');
+              setAuthState({
+                user: null,
+                firebaseUser: null,
+                loading: false,
+                error: null,
+              });
+            }
+          } catch (error) {
+            logger.error('Error in auth state change', error as Error);
             setAuthState({
               user: null,
               firebaseUser: null,
               loading: false,
-              error: null,
+              error: (error as Error).message,
             });
           }
-        } catch (error) {
-          logger.error('Error in auth state change', error as Error);
-          setAuthState({
-            user: null,
-            firebaseUser: null,
-            loading: false,
-            error: (error as Error).message,
-          });
-        }
+        });
+      } else {
+        // If Firebase auth is not available, set as not authenticated
+        logger.warn('Firebase auth not available, user will need to configure Firebase');
+        setAuthState({
+          user: null,
+          firebaseUser: null,
+          loading: false,
+          error: 'Firebase configuration required',
+        });
+      }
+    } catch (initError) {
+      logger.error('Failed to initialize auth listener', initError as Error);
+      setAuthState({
+        user: null,
+        firebaseUser: null,
+        loading: false,
+        error: 'Authentication system unavailable',
       });
     }
+    
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
