@@ -1,63 +1,54 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // User profile access
-    match /app_settings/users/{userId} {
+    // User profile access - allow users to read/write their own profile
+    match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow any authenticated user to create their profile (for first-time login)
+      allow create: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Global app settings (Primary/Admin only)
-    match /app_settings/{doc=**} {
-      allow read, write: if isPrimaryOrAppAdmin();
+    // Allow reading all users for role checking (needed for admin functions)
+    match /users/{userId} {
+      allow read: if request.auth != null;
     }
 
     // Company-level collections
     match /companies/{companyId} {
-      allow read: if isCompanyUser(companyId);
-      allow write: if isCompanyAdminOrHigher(companyId);
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && isCompanyAdminOrHigher(companyId);
+      allow create: if request.auth != null; // Allow creating companies
 
       // Company subcollections
-      match /users/{userId} {
-        allow read: if isCompanyUser(companyId);
-        allow write: if isCompanyAdminOrHigher(companyId);
-      }
-      match /staff/{staffId} {
-        allow read: if isCompanyUser(companyId);
-        allow write: if isCompanyAdminOrHigher(companyId);
-      }
-      match /payments/{paymentId} {
-        allow read: if isCompanyUser(companyId);
-        allow write: if isCompanyAdminOrHigher(companyId);
-      }
-      match /deductions/{deductionId} {
-        allow read: if isCompanyUser(companyId);
-        allow write: if isCompanyAdminOrHigher(companyId);
-      }
-      match /payrolls/{payrollId} {
-        allow read: if isCompanyUser(companyId);
-        allow write: if isPayrollPreparerOrHigher(companyId);
-        // Staff payroll subcollection
-        match /staff_payroll/{staffId} {
-          allow read: if isCompanyUser(companyId);
-          allow write: if isPayrollPreparerOrHigher(companyId);
-        }
+      match /{collection}/{docId} {
+        allow read, write: if request.auth != null && isCompanyUser(companyId);
       }
     }
 
+    // Helper functions
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
     function isPrimaryOrAppAdmin() {
-      return get(/databases/$(database)/documents/app_settings/users/$(request.auth.uid)).data.role in ['primary_admin', 'app_admin'];
+      return getUserData().role in ['primary_admin', 'app_admin'];
     }
+    
     function isCompanyAdminOrHigher(companyId) {
-      let user = get(/databases/$(database)/documents/app_settings/users/$(request.auth.uid)).data;
-      return user.role in ['primary_admin', 'app_admin', 'company_admin'] && companyId in user.accessible_companies;
+      let user = getUserData();
+      return user.role in ['primary_admin', 'app_admin', 'company_admin'] && 
+             (user.role in ['primary_admin', 'app_admin'] || companyId in user.companyIds);
     }
+    
     function isPayrollPreparerOrHigher(companyId) {
-      let user = get(/databases/$(database)/documents/app_settings/users/$(request.auth.uid)).data;
-      return user.role in ['primary_admin', 'app_admin', 'company_admin', 'payroll_preparer'] && companyId in user.accessible_companies;
+      let user = getUserData();
+      return user.role in ['primary_admin', 'app_admin', 'company_admin', 'payroll_preparer'] && 
+             (user.role in ['primary_admin', 'app_admin'] || companyId in user.companyIds);
     }
+    
     function isCompanyUser(companyId) {
-      let user = get(/databases/$(database)/documents/app_settings/users/$(request.auth.uid)).data;
-      return companyId in user.accessible_companies;
+      let user = getUserData();
+      return user.role in ['primary_admin', 'app_admin'] || companyId in user.companyIds;
     }
   }
 }
