@@ -1,12 +1,13 @@
-
 # Cheetah Payroll
 
-A unified, full-stack payroll management application for Rwanda, with all backend, frontend, and shared code in a single repository root.
+A unified, full-stack payroll management application for Rwanda, with all backend, frontend, and
+shared code in a single repository root.
 
 - See [Blueprint.md](./Blueprint.md) for full product/business requirements.
 - See [Deployment.md](./Deployment.md) for deployment instructions.
 
 ## Project Structure
+
 - `/src`: All source code (API, UI, shared logic)
 - `/public`: Static assets (for frontend)
 - `package.json`: Project dependencies and scripts
@@ -39,16 +40,20 @@ A unified, full-stack payroll management application for Rwanda, with all backen
    ```
 
 ## Testing
+
 - Uses **Jest** and **React Testing Library** for unit and integration tests.
-- All major flows (auth, company selection, staff/payments/deductions/payroll CRUD, import/export, reporting) should be covered.
+- All major flows (auth, company selection, staff/payments/deductions/payroll CRUD, import/export,
+  reporting) should be covered.
 - To add tests, create files in `src/__tests__` with `.test.tsx` or `.test.ts` extension.
 
 ## Accessibility & Security
+
 - Follows WCAG and ARIA best practices for forms, modals, and navigation.
 - Firestore security rules enforce strict RBAC and company-level access.
 - No sensitive secrets are exposed to the frontend; only public Firebase config is used.
 
 ## Deployment
+
 - See [Deployment.md](./Deployment.md) for Firebase Hosting and Cloud Functions deployment steps.
 - Production build uses Webpack with code splitting, compression, and environment variable support.
 

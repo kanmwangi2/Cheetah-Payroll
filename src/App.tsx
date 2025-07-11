@@ -1,107 +1,179 @@
-import React, { useState, useEffect, Suspense, lazy, createContext, useContext } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import './App.css';
-// import Login from './components/Login';
-import CompanySelector from './components/CompanySelector';
-import { onUserChanged } from './auth';
-import { getUserProfile } from './userUtils';
-import { User, Company } from './types';
-const StaffList = lazy(() => import('./components/StaffList'));
-const PaymentsList = lazy(() => import('./components/PaymentsList'));
-const DeductionsList = lazy(() => import('./components/DeductionsList'));
-const PayrollList = lazy(() => import('./components/PayrollList'));
-const Reports = lazy(() => import('./components/Reports'));
-const Utilities = lazy(() => import('./components/Utilities'));
-const Dashboard = lazy(() => import('./components/Dashboard'));
+import { AppProvider } from './core/providers/AppProvider';
+import { AuthGuard } from './core/guards/AuthGuard';
+import { useAuthContext } from './core/providers/AuthProvider';
+import { useThemeContext } from './core/providers/ThemeProvider';
+import CompanySelector from './features/auth/components/CompanySelector';
+import { Company } from './shared/types';
+import LoadingSpinner from './shared/components/ui/LoadingSpinner';
+import ThemeSwitcher from './shared/components/ui/ThemeSwitcher';
 
+// Lazy load feature modules
+const StaffList = lazy(() => import('./features/staff/components/StaffList'));
+const PaymentsList = lazy(() => import('./features/payments/components/PaymentsList'));
+const DeductionsList = lazy(() => import('./features/deductions/components/DeductionsList'));
+const PayrollList = lazy(() => import('./features/payroll/components/PayrollList'));
+const Reports = lazy(() => import('./features/reports/components/Reports'));
+const Utilities = lazy(() => import('./features/utilities/components/Utilities'));
+const Dashboard = lazy(() => import('./features/dashboard/components/Dashboard'));
 
-type Theme = 'light' | 'dark' | 'system';
-const ThemeContext = createContext<{theme: Theme, setTheme: (t: Theme) => void}>({ theme: 'system', setTheme: () => {} });
-
-function useSystemTheme() {
-  const getSystem = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  const [systemTheme, setSystemTheme] = useState<Theme>(getSystem());
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = () => setSystemTheme(getSystem());
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return systemTheme;
-}
-
-const App: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+// Main App Content Component
+const AppContent: React.FC = () => {
   const [company, setCompany] = useState<Company | null>(null);
-  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('theme') as Theme) || 'system');
-  const systemTheme = useSystemTheme();
+  const { user } = useAuthContext();
+  const { theme, resolvedTheme, isDark, isSystemTheme } = useThemeContext();
 
-  useEffect(() => {
-    const applied = theme === 'system' ? systemTheme : theme;
-    document.body.classList.remove('theme-light', 'theme-dark');
-    document.body.classList.add(`theme-${applied}`);
-    localStorage.setItem('theme', theme);
-  }, [theme, systemTheme]);
-
-  useEffect(() => {
-    const unsubscribe = onUserChanged(async u => {
-      if (u) {
-        const profile = await getUserProfile(u.uid);
-        setUser(profile);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
-
-
-  if (loading) return <div>Loading...</div>;
-  if (!user) return null;
+  if (!user) return null; // AuthGuard handles this case
   if (!company) return <CompanySelector onSelect={setCompany} />;
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      <div>
-        <ThemeSwitcher />
-        <h1>Welcome to Cheetah Payroll</h1>
-        <p>User: {user.email} <span style={{ color: '#1976d2', fontWeight: 600, marginLeft: 8 }}>{user.role.replace('_', ' ').toUpperCase()}</span></p>
-        <p>Company: {company.name}</p>
-        <Suspense fallback={<div>Loading module...</div>}>
-          <Dashboard companyId={company.id} />
-          <hr />
-          <StaffList companyId={company.id} />
-          <hr />
-          <PaymentsList companyId={company.id} />
-          <hr />
-          <DeductionsList companyId={company.id} />
-          <hr />
-          <PayrollList companyId={company.id} />
-          <hr />
-          <Reports companyId={company.id} />
-          <hr />
-          <Utilities />
-        </Suspense>
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: 'var(--color-bg-primary)',
+        color: 'var(--color-text-primary)',
+        transition: 'background-color var(--transition-normal), color var(--transition-normal)',
+      }}
+    >
+      {/* Theme Switcher */}
+      <ThemeSwitcher variant="dropdown" position="top-right" showLabels={true} />
+
+      {/* Main Content */}
+      <div
+        style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: 'var(--spacing-lg)',
+          paddingTop: 'var(--spacing-6xl)', // Space for theme switcher
+        }}
+      >
+        <header
+          style={{
+            marginBottom: 'var(--spacing-4xl)',
+            textAlign: 'center',
+          }}
+        >
+          <h1
+            style={{
+              fontSize: 'var(--font-size-4xl)',
+              fontWeight: 'var(--font-weight-bold)',
+              color: 'var(--color-text-primary)',
+              marginBottom: 'var(--spacing-lg)',
+            }}
+          >
+            Welcome to Cheetah Payroll
+          </h1>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 'var(--spacing-lg)',
+              flexWrap: 'wrap',
+              marginBottom: 'var(--spacing-lg)',
+            }}
+          >
+            <p
+              style={{
+                fontSize: 'var(--font-size-lg)',
+                color: 'var(--color-text-secondary)',
+                margin: 0,
+              }}
+            >
+              User:{' '}
+              <span
+                style={{
+                  color: 'var(--color-text-primary)',
+                  fontWeight: 'var(--font-weight-semibold)',
+                }}
+              >
+                {user.email}
+              </span>
+            </p>
+
+            <span
+              style={{
+                padding: 'var(--spacing-xs) var(--spacing-sm)',
+                backgroundColor: 'var(--color-primary-500)',
+                color: 'var(--color-text-inverse)',
+                borderRadius: 'var(--border-radius-md)',
+                fontSize: 'var(--font-size-sm)',
+                fontWeight: 'var(--font-weight-medium)',
+              }}
+            >
+              {user.role.replace('_', ' ').toUpperCase()}
+            </span>
+          </div>
+
+          <p
+            style={{
+              fontSize: 'var(--font-size-lg)',
+              color: 'var(--color-text-secondary)',
+              margin: 0,
+            }}
+          >
+            Company:{' '}
+            <span
+              style={{
+                color: 'var(--color-text-primary)',
+                fontWeight: 'var(--font-weight-semibold)',
+              }}
+            >
+              {company.name}
+            </span>
+          </p>
+
+          {/* Theme Status Indicator */}
+          <div
+            style={{
+              marginTop: 'var(--spacing-md)',
+              padding: 'var(--spacing-sm)',
+              backgroundColor: 'var(--color-bg-secondary)',
+              borderRadius: 'var(--border-radius-md)',
+              fontSize: 'var(--font-size-sm)',
+              color: 'var(--color-text-tertiary)',
+              display: 'inline-block',
+            }}
+          >
+            Theme: {theme} {isSystemTheme && `(${resolvedTheme})`} {isDark ? '🌙' : '☀️'}
+          </div>
+        </header>
+
+        <main>
+          <Suspense fallback={<LoadingSpinner message="Loading module..." />}>
+            <div
+              style={{
+                display: 'grid',
+                gap: 'var(--spacing-2xl)',
+                gridTemplateColumns: '1fr',
+              }}
+            >
+              <Dashboard companyId={company.id} />
+              <StaffList companyId={company.id} />
+              <PaymentsList companyId={company.id} />
+              <DeductionsList companyId={company.id} />
+              <PayrollList companyId={company.id} />
+              <Reports companyId={company.id} />
+              <Utilities />
+            </div>
+          </Suspense>
+        </main>
       </div>
-    </ThemeContext.Provider>
-  );
-
-}
-
-function ThemeSwitcher() {
-  const { theme, setTheme } = useContext(ThemeContext);
-  return (
-    <div style={{ position: 'absolute', top: 10, right: 10 }}>
-      <label htmlFor="theme-select" style={{ marginRight: 8 }}>Theme:</label>
-      <select id="theme-select" value={theme} onChange={e => setTheme(e.target.value as any)}>
-        <option value="system">System</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-      </select>
     </div>
   );
-}
+};
+
+// Main App Component
+const App: React.FC = () => {
+  return (
+    <AppProvider>
+      <AuthGuard>
+        <AppContent />
+      </AuthGuard>
+    </AppProvider>
+  );
+};
 
 export default App;

@@ -1,14 +1,17 @@
 # Payroll Management App - Product Blueprint
 
 ## Overview
-A comprehensive multi-company payroll management application designed to handle complex payroll processing, tax calculations, and statutory reporting with role-based access control.
+
+A comprehensive multi-company payroll management application designed to handle complex payroll
+processing, tax calculations, and statutory reporting with role-based access control.
 
 ## User Types & Permissions
 
 ### 1. Primary Admin
+
 - **Role**: Ultimate system administrator
 - **Permissions**: Full application rights across all companies
-- **Restrictions**: 
+- **Restrictions**:
   - Only one Primary Admin allowed
   - Cannot be deleted
   - Has access to all application-level settings
@@ -18,6 +21,7 @@ A comprehensive multi-company payroll management application designed to handle 
   - Manage global tax settings and brackets
 
 ### 2. App Admin
+
 - **Role**: System administrator with broad access
 - **Permissions**: Full application rights across all companies
 - **Restrictions**:
@@ -30,6 +34,7 @@ A comprehensive multi-company payroll management application designed to handle 
   - Access to all company data
 
 ### 3. Company Admin
+
 - **Role**: Company-specific administrator
 - **Permissions**: Full rights only to assigned company(s)
 - **Restrictions**: Limited to specific companies
@@ -40,8 +45,9 @@ A comprehensive multi-company payroll management application designed to handle 
   - Access company-specific reports
 
 ### 4. Payroll Approver
+
 - **Role**: Payroll validation specialist
-- **Permissions**: 
+- **Permissions**:
   - View payroll data
   - Approve payrolls created by others
   - Cannot create or modify payroll calculations
@@ -51,6 +57,7 @@ A comprehensive multi-company payroll management application designed to handle 
   - Validate statutory compliance
 
 ### 5. Payroll Preparer
+
 - **Role**: Payroll calculation specialist
 - **Permissions**:
   - Create and calculate payrolls
@@ -64,12 +71,14 @@ A comprehensive multi-company payroll management application designed to handle 
 ## Application Architecture
 
 ### Authentication & Company Selection Flow
+
 1. User logs in with credentials
 2. System validates user and determines accessible companies
 3. User redirected to **Company Selection** page
 4. After company selection, user redirected to Dashboard
 
 ### Company Selection Page
+
 - **Primary Display**: List of accessible companies with selection interface
 - **Special Access Panel**: "Application Settings" (visible only to Primary Admin and App Admins)
   - **Tab 1**: Company Management
@@ -80,6 +89,7 @@ A comprehensive multi-company payroll management application designed to handle 
 ## Core Application Structure
 
 ### 🏠 Dashboard
+
 - **Purpose**: Default home page and company overview
 - **Features**:
   - Summary metrics for selected company
@@ -89,6 +99,7 @@ A comprehensive multi-company payroll management application designed to handle 
   - Staff count, active payrolls, pending approvals
 
 ### 👥 Staff Page
+
 - **Purpose**: Employee management and records
 - **Features**:
   - **Add Staff Form**:
@@ -115,6 +126,7 @@ A comprehensive multi-company payroll management application designed to handle 
     - **Import History**: Track and audit all import operations
 
 ### 💰 Payments Page
+
 - **Purpose**: Manage employee compensation components
 - **Features**:
   - **Payment Types**:
@@ -140,6 +152,7 @@ A comprehensive multi-company payroll management application designed to handle 
     - **Error Reporting**: Detailed import error logs and corrections
 
 ### 📉 Deductions Page
+
 - **Purpose**: Track and manage employee deductions
 - **Features**:
   - **Deduction Types**:
@@ -161,6 +174,7 @@ A comprehensive multi-company payroll management application designed to handle 
     - **Balance Reconciliation**: Import/export for balance verification
 
 ### 📊 Payroll Page
+
 - **Purpose**: Process actual payroll calculations
 - **Features**:
   - **Payroll Creation**:
@@ -195,6 +209,7 @@ A comprehensive multi-company payroll management application designed to handle 
     - **Comparative Reports**: Export period-to-period comparisons
 
 ### 📋 Reports Page
+
 - **Purpose**: Generate statutory and management reports
 - **Features**:
   - **Statutory Reports**:
@@ -231,6 +246,7 @@ A comprehensive multi-company payroll management application designed to handle 
     - **Report Archive**: Historical report storage and retrieval
 
 ### 🔧 Utilities
+
 - **Purpose**: Information and support resources
 - **Features**:
   - **FAQ**: Frequently asked questions
@@ -241,6 +257,7 @@ A comprehensive multi-company payroll management application designed to handle 
 ## User Interface Design
 
 ### Top Navigation Bar
+
 - **Left Side**: Company logo and name
 - **Right Side** (from left to right):
   - 🌓 **Theme Toggle**: Light/Dark/System (default: System)
@@ -254,6 +271,7 @@ A comprehensive multi-company payroll management application designed to handle 
     - 🚪 "Log Out" link
 
 ### Icon Usage
+
 - Consistent icon library throughout application
 - Icons for:
   - Navigation items
@@ -268,6 +286,7 @@ A comprehensive multi-company payroll management application designed to handle 
 ### Rwanda Tax Structure
 
 #### 1. **PAYE (Pay As You Earn)**
+
 - **Tax Type**: Progressive taxation system
 - **Calculation Basis**: Total gross pay
 - **Tax Brackets**:
@@ -278,42 +297,50 @@ A comprehensive multi-company payroll management application designed to handle 
 - **Calculation Method**: Progressive (cumulative brackets)
 
 #### 2. **Pension Contribution**
+
 - **Employer Rate**: 8% of total gross pay
 - **Employee Rate**: 6% of total gross pay
 - **Calculation Basis**: Total gross pay
 - **Total Contribution**: 14% (8% employer + 6% employee)
 
 #### 3. **Maternity Contribution**
+
 - **Employer Rate**: 0.3% of qualifying gross pay
 - **Employee Rate**: 0.3% of qualifying gross pay
 - **Calculation Basis**: Total gross pay excluding transport allowance
 - **Total Contribution**: 0.6% (0.3% employer + 0.3% employee)
 
 #### 4. **CBHI (Community Based Health Insurance)**
+
 - **Employee Rate**: 0.5% of net salary
 - **Employer Rate**: 0% (employee only)
 - **Calculation Basis**: Net salary before CBHI deduction
 - **Calculation Order**: Applied after all other deductions except CBHI
 
 #### 5. **RAMA (Rwanda Medical Aid)**
+
 - **Employer Rate**: 7.5% of basic pay
 - **Employee Rate**: 7.5% of basic pay
 - **Calculation Basis**: Basic pay only (excludes allowances)
 - **Total Contribution**: 15% (7.5% employer + 7.5% employee)
 
 ### Tax Calculation Sequence
+
 The payroll calculation engine follows this specific order:
 
 1. **Start with Total Gross Pay** (Basic Pay + All Allowances)
 2. **Calculate PAYE** (Progressive brackets on Total Gross Pay)
 3. **Calculate Pension** (14% total: 8% employer + 6% employee on Total Gross Pay)
-4. **Calculate Maternity** (0.6% total: 0.3% employer + 0.3% employee on Total Gross Pay excluding transport)
+4. **Calculate Maternity** (0.6% total: 0.3% employer + 0.3% employee on Total Gross Pay excluding
+   transport)
 5. **Calculate RAMA** (15% total: 7.5% employer + 7.5% employee on Basic Pay only)
-6. **Calculate Net Salary** (Gross Pay - Employee PAYE - Employee Pension - Employee Maternity - Employee RAMA)
+6. **Calculate Net Salary** (Gross Pay - Employee PAYE - Employee Pension - Employee Maternity -
+   Employee RAMA)
 7. **Calculate CBHI** (0.5% employee on Net Salary before CBHI)
 8. **Final Net Pay** (Net Salary - CBHI - Other Deductions)
 
 ### Tax Bracket Management
+
 - **PAYE Progressive Calculation**: Configurable income brackets with cumulative calculation
 - **Rate Management**: Editable tax rates and thresholds
 - **Basis Configuration**: Different calculation bases for each tax type
@@ -323,6 +350,7 @@ The payroll calculation engine follows this specific order:
 ## Technical Specifications
 
 ### Backend Architecture
+
 - **Database**: Google Cloud Firestore (NoSQL)
 - **Real-time Updates**: Firestore real-time listeners
 - **Data Structure**: Document-based with collections and subcollections
@@ -330,30 +358,31 @@ The payroll calculation engine follows this specific order:
 - **Security**: Firestore Security Rules for data protection
 
 ### Firestore Data Model
+
 ```
 /companies/{companyId}
   - name, settings, tax_config, created_at, updated_at
-  
+
 /companies/{companyId}/users/{userId}
   - role, permissions, profile_data, created_at, updated_at
-  
+
 /companies/{companyId}/staff/{staffId}
   - personal_details, employment_details, bank_details, created_at, updated_at
-  
+
 /companies/{companyId}/payments/{paymentId}
   - staff_id, amount, type, is_gross, effective_date, created_at, updated_at
-  
+
 /companies/{companyId}/deductions/{deductionId}
   - staff_id, amount, type, balance, created_at, updated_at
-  
+
 /companies/{companyId}/payrolls/{payrollId}
   - period, status, calculations, approvals, created_at, updated_at
-  
+
 /companies/{companyId}/payrolls/{payrollId}/staff_payroll/{staffId}
   - gross_pay, net_pay, paye_tax, pension_employee, pension_employer,
     maternity_employee, maternity_employer, rama_employee, rama_employer,
     cbhi_employee, other_deductions, final_net_pay, created_at, updated_at
-  
+
 /app_settings/tax_brackets
   - paye_brackets: [
       {min: 0, max: 60000, rate: 0},
@@ -365,12 +394,13 @@ The payroll calculation engine follows this specific order:
   - maternity_rates: {employee: 0.3, employer: 0.3}
   - cbhi_rates: {employee: 0.5, employer: 0}
   - rama_rates: {employee: 7.5, employer: 7.5}
-  
+
 /app_settings/users/{userId}
   - global_permissions, accessible_companies, profile_data
 ```
 
 ### Firestore Integration Features
+
 - **Offline Capability**: Firestore offline persistence
 - **Real-time Sync**: Live updates across multiple users
 - **Atomic Transactions**: Ensure data consistency during payroll processing
@@ -379,6 +409,7 @@ The payroll calculation engine follows this specific order:
 - **Data Validation**: Client and server-side validation rules
 
 ### Gross-up Calculation Algorithm
+
 ```
 Input: Net Amount, Tax Rates, Other Deductions
 Output: Gross Amount
@@ -407,6 +438,7 @@ Special Considerations:
 ```
 
 ### Security Features
+
 - **Firestore Security Rules**: Document-level access control
 - **Authentication**: Firebase Authentication integration
 - **Role-based access control (RBAC)**: Implemented through Firestore security rules
@@ -416,6 +448,7 @@ Special Considerations:
 - **Multi-factor authentication**: Firebase Auth MFA options
 
 ### Data Management
+
 - **Real-time Synchronization**: Firestore real-time listeners for live updates
 - **Import/Export System**:
   - **Supported Import Formats**: CSV, Excel (.xlsx, .xls), JSON
@@ -442,12 +475,14 @@ Special Considerations:
 ## Compliance & Reporting
 
 ### Statutory Compliance
+
 - Rwanda Revenue Authority (RRA) reporting formats
 - Social Security Board (RSSB) submissions
 - Bank payment file standards
 - Audit trail maintenance
 
 ### Report Formats
+
 - **PDF**: Professional formatted reports with company branding
   - **Payslips**: Individual and bulk PDF generation with custom templates
   - **Deduction Reports**: Detailed PDF reports with charts and breakdowns
@@ -459,6 +494,7 @@ Special Considerations:
 - **JSON/XML**: API-ready formats for system integrations
 
 ### Import/Export Technical Specifications
+
 - **File Size Limits**: Up to 50MB for imports, unlimited for exports
 - **Concurrent Processing**: Multiple import/export operations
 - **Progress Tracking**: Real-time progress indicators for large operations
@@ -470,18 +506,21 @@ Special Considerations:
 ## User Experience Design
 
 ### Responsive Design
+
 - Mobile-first approach
 - Tablet optimization
 - Desktop enhancement
 - Cross-browser compatibility
 
 ### Accessibility
+
 - WCAG 2.1 AA compliance
 - Keyboard navigation support
 - Screen reader compatibility
 - High contrast mode support
 
 ### Performance
+
 - Lazy loading for large datasets
 - Optimized database queries
 - Caching strategies
@@ -490,6 +529,7 @@ Special Considerations:
 ## Future Enhancements
 
 ### Planned Features
+
 - Integration with HR systems
 - Advanced analytics and forecasting
 - Mobile application development
@@ -498,6 +538,7 @@ Special Considerations:
 - Advanced workflow automation
 
 ### Scalability Considerations
+
 - **Cloud-native architecture**: Built on Google Cloud Platform with Firestore
 - **Serverless backend**: Firestore's automatic scaling and management
 - **Global distribution**: Firestore multi-region replication

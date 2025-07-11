@@ -12,7 +12,7 @@ jest.mock('firebase/firestore', () => ({
   getDoc: jest.fn(),
 }));
 
-import StaffList from '../components/StaffList';
+import StaffList from '../features/staff/components/StaffList';
 
 describe('StaffList', () => {
   it('renders staff list and search', async () => {

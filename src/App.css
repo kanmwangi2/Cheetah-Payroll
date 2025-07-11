@@ -1,65 +1,36 @@
-/* Theme support */
-body.theme-dark {
-  background: #181a1b;
-  color: #f4f6fb;
+/* Import theme styles */
+@import url('./assets/styles/themes.css');
+
+/* Base application styles */
+* {
+  box-sizing: border-box;
 }
-body.theme-dark .login-container,
-body.theme-dark .dashboard-container,
-body.theme-dark .staff-list-container,
-body.theme-dark .staff-form,
-body.theme-dark .staff-import-export,
-body.theme-dark .staff-profile-card {
-  background: #23272a;
-  color: #f4f6fb;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-}
-body.theme-dark input,
-body.theme-dark select,
-body.theme-dark textarea {
-  background: #23272a;
-  color: #f4f6fb;
-  border: 1px solid #444;
-}
-body.theme-dark input:focus,
-body.theme-dark select:focus {
-  background: #23272a;
-  color: #fff;
-  border: 1.5px solid #90caf9;
-}
-body.theme-dark button,
-body.theme-dark .primary-btn,
-body.theme-dark .staff-profile-btn,
-body.theme-dark .staff-import-btn {
-  background: linear-gradient(90deg, #333 60%, #1976d2 100%);
-  color: #fff;
-}
-body.theme-dark .staff-table,
-body.theme-dark .payroll-table {
-  background: #23272a;
-  color: #f4f6fb;
-}
-body.theme-dark th {
-  background: #23272a;
-  color: #90caf9;
-}
-body.theme-dark .error {
-  color: #ff6b6b;
-}
-body.theme-dark .success {
-  color: #90ee90;
-}
-body.theme-dark hr {
-  border-color: #333;
-}
+
 body {
-  background: #f4f6fb;
-  font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
   margin: 0;
   padding: 0;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+#root {
+  min-height: 100vh;
 }
 
 /* Global focus outline for all interactive elements */
-button:focus, [role="button"]:focus, a:focus, input:focus, select:focus, textarea:focus, [tabindex]:focus {
+button:focus,
+[role='button']:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus,
+[tabindex]:focus {
   outline: 3px solid #1976d2;
   outline-offset: 2px;
   box-shadow: 0 0 0 2px #90caf9;
@@ -72,13 +43,12 @@ button:focus, [role="button"]:focus, a:focus, input:focus, select:focus, textare
   outline-offset: 2px;
 }
 
-
 .login-container {
   max-width: 400px;
   margin: 80px auto;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   padding: 40px 32px 32px 32px;
   display: flex;
   flex-direction: column;
@@ -135,12 +105,79 @@ button:focus, [role="button"]:focus, a:focus, input:focus, select:focus, textare
   text-align: center;
 }
 
+.login-container .success {
+  color: #2e7d32;
+  margin-top: 8px;
+  font-size: 0.98rem;
+  text-align: center;
+}
+
+.login-links {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+
+.login-links a {
+  color: #1976d2;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.login-links a:hover {
+  color: #1565c0;
+  background-color: #f3f7ff;
+  text-decoration: underline;
+}
+
+.password-input-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+.password-input-container input {
+  width: 100%;
+  padding-right: 45px;
+  margin-bottom: 0;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.password-toggle:hover {
+  background-color: rgba(25, 118, 210, 0.1);
+}
+
+.password-toggle:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
 .dashboard-container {
   margin: 32px auto 24px auto;
   max-width: 900px;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   padding: 32px 32px 24px 32px;
 }
 
@@ -180,7 +217,7 @@ button:focus, [role="button"]:focus, a:focus, input:focus, select:focus, textare
   max-width: 900px;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   padding: 32px 32px 24px 32px;
 }
 
@@ -218,7 +255,8 @@ button:focus, [role="button"]:focus, a:focus, input:focus, select:focus, textare
   background: #fafbfc;
 }
 
-.staff-table th, .staff-table td {
+.staff-table th,
+.staff-table td {
   padding: 12px 10px;
   border-bottom: 1px solid #e0e0e0;
   text-align: left;
@@ -270,7 +308,8 @@ button:focus, [role="button"]:focus, a:focus, input:focus, select:focus, textare
   margin-bottom: 12px;
 }
 
-.staff-form input, .staff-form select {
+.staff-form input,
+.staff-form select {
   flex: 1;
   padding: 10px 12px;
   border: 1px solid #cfd8dc;
@@ -280,7 +319,8 @@ button:focus, [role="button"]:focus, a:focus, input:focus, select:focus, textare
   transition: border 0.2s;
 }
 
-.staff-form input:focus, .staff-form select:focus {
+.staff-form input:focus,
+.staff-form select:focus {
   border: 1.5px solid #1976d2;
   outline: none;
 }
@@ -361,8 +401,11 @@ button:focus, [role="button"]:focus, a:focus, input:focus, select:focus, textare
 
 .staff-profile-modal {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.18);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -371,7 +414,7 @@ button:focus, [role="button"]:focus, a:focus, input:focus, select:focus, textare
 .staff-profile-card {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
   padding: 32px 32px 24px 32px;
   min-width: 340px;
   max-width: 480px;

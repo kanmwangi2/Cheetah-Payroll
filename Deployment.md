@@ -1,10 +1,12 @@
 # Firebase Deployment Guide for Cheetah Payroll
 
-Follow these step-by-step instructions to deploy your Cheetah Payroll app (React SPA and optional Node/Express API) to Firebase Hosting and Cloud Functions.
+Follow these step-by-step instructions to deploy your Cheetah Payroll app (React SPA and optional
+Node/Express API) to Firebase Hosting and Cloud Functions.
 
 ---
 
 ## 1. Install Prerequisites
+
 1. Make sure you have Node.js and npm installed.
 2. Install the Firebase CLI globally:
    - Open your terminal.
@@ -13,7 +15,8 @@ Follow these step-by-step instructions to deploy your Cheetah Payroll app (React
      npm install -g firebase-tools
      ```
    - Wait for the installation to finish before continuing.
-3. Create a Firebase project at [https://console.firebase.google.com/](https://console.firebase.google.com/).
+3. Create a Firebase project at
+   [https://console.firebase.google.com/](https://console.firebase.google.com/).
 4. Build your app for production:
    - In your terminal, run:
      ```sh
@@ -21,12 +24,14 @@ Follow these step-by-step instructions to deploy your Cheetah Payroll app (React
      # or
      npx webpack --config webpack.config.js --mode production
      ```
-   - Wait for the build to finish. You should see a message indicating success (such as "Compiled successfully" or "Build complete").
+   - Wait for the build to finish. You should see a message indicating success (such as "Compiled
+     successfully" or "Build complete").
    - If you see an error message, read it carefully and fix any issues before continuing.
 
 ---
 
 ## 2. Initialize Firebase in Your Project
+
 1. Open a terminal in your project root.
 2. Log in to Firebase:
    ```sh
@@ -51,12 +56,14 @@ Follow these step-by-step instructions to deploy your Cheetah Payroll app (React
 ---
 
 ## 3. Prepare Your Build Output
+
 1. Make sure your production build output is in the `dist` folder (Webpack output).
 2. The `dist` folder should contain `index.html`, JavaScript bundles, and all assets.
 
 ---
 
 ## 4. Deploy the Frontend (React SPA)
+
 1. Deploy your frontend to Firebase Hosting:
    ```sh
    firebase deploy --only hosting
@@ -65,41 +72,49 @@ Follow these step-by-step instructions to deploy your Cheetah Payroll app (React
 
 ---
 
-
-
 ## 5. Backend, Authentication, and Database Setup
 
 ### If you do NOT need a custom backend (recommended for most apps):
-Firebase provides built-in Authentication and Database services you can use directly from your frontend code. You do NOT need Express or Cloud Functions unless you have custom backend logic.
+
+Firebase provides built-in Authentication and Database services you can use directly from your
+frontend code. You do NOT need Express or Cloud Functions unless you have custom backend logic.
 
 #### 1. Set up Authentication
 
 Follow these steps to enable and use Firebase Authentication in your app:
 
-1. **Enable Authentication in Firebase Console**
-   a. Go to the [Firebase Console](https://console.firebase.google.com/) for your project.
-   b. In the left menu, click **Authentication** > **Get started**.
-   c. Under the **Sign-in method** tab, enable the providers you want (e.g., Email/Password, Google, etc.).
+1. **Enable Authentication in Firebase Console** a. Go to the
+   [Firebase Console](https://console.firebase.google.com/) for your project. b. In the left menu,
+   click **Authentication** > **Get started**. c. Under the **Sign-in method** tab, enable the
+   providers you want (e.g., Email/Password, Google, etc.).
 
-2. **Add Firebase config to your project**
-   a. In the Firebase Console, go to **Project Settings** > **General** > **Your apps**.
-   b. Copy the Firebase config object (apiKey, authDomain, etc.).
-   c. Add these values to your `.env` file as environment variables (see the Environment Variables section below for details).
+2. **Add Firebase config to your project** a. In the Firebase Console, go to **Project Settings** >
+   **General** > **Your apps**. b. Copy the Firebase config object (apiKey, authDomain, etc.). c.
+   Add these values to your `.env` file as environment variables (see the Environment Variables
+   section below for details).
 
 3. **Connect Authentication in your code**
 
    a. Open the file `src/auth.ts` in your code editor.
 
    b. Make sure the file contains code to:
-      1. Import and initialize Firebase using your config (from your `.env` file).
-      2. Set up Firebase Authentication.
-      3. Export functions for logging in, logging out, and listening for user state changes.
+   1. Import and initialize Firebase using your config (from your `.env` file).
+   2. Set up Firebase Authentication.
+   3. Export functions for logging in, logging out, and listening for user state changes.
 
-   c. For this project, the file `src/auth.ts` is already set up for you. You do NOT need to change anything unless you want to customize the logic. Here’s what it should look like for a Webpack + TypeScript project:
+   c. For this project, the file `src/auth.ts` is already set up for you. You do NOT need to change
+   anything unless you want to customize the logic. Here’s what it should look like for a Webpack +
+   TypeScript project:
 
    ```typescript
    import { initializeApp } from 'firebase/app';
-   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
+   import {
+     getAuth,
+     onAuthStateChanged,
+     signInWithEmailAndPassword,
+     signOut,
+     User as FirebaseUser,
+   } from 'firebase/auth';
 
    const firebaseConfig = {
      apiKey: process.env.FIREBASE_API_KEY,
@@ -128,15 +143,18 @@ Follow these steps to enable and use Firebase Authentication in your app:
    ```
 
    **Important:**
-   - Your environment variables in `.env` must NOT use the `VITE_` prefix. Use `FIREBASE_` (e.g., `FIREBASE_API_KEY`).
-   - You must use a tool like `dotenv-webpack` to load environment variables at build time (see below).
+   - Your environment variables in `.env` must NOT use the `VITE_` prefix. Use `FIREBASE_` (e.g.,
+     `FIREBASE_API_KEY`).
+   - You must use a tool like `dotenv-webpack` to load environment variables at build time (see
+     below).
    - Your `tsconfig.json` should include `src/**/*` in the `include` array.
 
-   d. You can now use these exported functions (`login`, `logout`, `onUserChanged`) in your React components to handle authentication.
+   d. You can now use these exported functions (`login`, `logout`, `onUserChanged`) in your React
+   components to handle authentication.
 
-4. **Use the login helper in your UI**
-   a. In your login form component (e.g., `src/components/Login.tsx`), import the `login` function from `src/auth.ts`.
-   b. Call `login(email, password)` when the user submits the form. Handle success and error as needed.
+4. **Use the login helper in your UI** a. In your login form component (e.g.,
+   `src/components/Login.tsx`), import the `login` function from `src/auth.ts`. b. Call
+   `login(email, password)` when the user submits the form. Handle success and error as needed.
 
 **Example:**
 
@@ -145,20 +163,28 @@ Follow these steps to enable and use Firebase Authentication in your app:
 import { login } from '../auth';
 // ... inside your form submit handler:
 login(email, password)
-  .then(user => { /* handle success, e.g., redirect */ })
-  .catch(error => { /* show error message */ });
+  .then(user => {
+    /* handle success, e.g., redirect */
+  })
+  .catch(error => {
+    /* show error message */
+  });
 ```
 
 **Summary:**
+
 - Enable providers in Firebase Console
 - Add your config to `.env`
 - Use the provided helpers in `src/auth.ts` to log in/out and track user state
 - Call these helpers from your UI components
 
 #### 2. Set up Firestore or Realtime Database
+
 1. In the Firebase Console, click **Firestore Database** or **Realtime Database** in the left menu.
-2. Click **Create database** and follow the prompts (start in test mode for development, but set secure rules before going live).
-3. Use the Firebase SDK in your frontend to read/write data. In this project, Firestore logic is implemented in:
+2. Click **Create database** and follow the prompts (start in test mode for development, but set
+   secure rules before going live).
+3. Use the Firebase SDK in your frontend to read/write data. In this project, Firestore logic is
+   implemented in:
    - `src/company.ts` (CRUD and queries for company data)
    - `src/staff.ts` (CRUD and queries for staff data)
    - `src/payments.ts` (CRUD and queries for payments data)
@@ -166,6 +192,7 @@ login(email, password)
    - `src/payroll.ts` (CRUD and queries for payroll data)
 
    Example from `src/staff.ts`:
+
    ```ts
    // src/staff.ts
    import { getFirestore, collection, addDoc } from 'firebase/firestore';
@@ -176,6 +203,7 @@ login(email, password)
    ```
 
    Example usage in `src/components/StaffForm.tsx`:
+
    ```tsx
    // src/components/StaffForm.tsx
    import { addStaffMember } from '../staff';
@@ -186,6 +214,7 @@ login(email, password)
    ```
 
 #### 3. Environment Variables
+
 1. Create a `.env` file in your project root (do NOT commit secrets to version control).
 2. Add your Firebase config (from Project Settings > General > Your apps > SDK setup and config):
    ```env
@@ -196,10 +225,14 @@ login(email, password)
    FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
    FIREBASE_APP_ID=your-app-id
    ```
-3. In your code, load these variables using `import.meta.env` (Vite) or `process.env` (Webpack/Node). For this project, see how environment variables are loaded in `src/auth.ts` and `src/index.tsx`.
+3. In your code, load these variables using `import.meta.env` (Vite) or `process.env`
+   (Webpack/Node). For this project, see how environment variables are loaded in `src/auth.ts` and
+   `src/index.tsx`.
 
 #### 4. Deploy as usual
+
 You do NOT need to set up or deploy Cloud Functions unless you have custom backend logic. Just use:
+
 ```sh
 firebase deploy --only hosting
 ```
@@ -207,13 +240,18 @@ firebase deploy --only hosting
 ---
 
 ### If you DO need a custom backend (advanced/optional):
-If you want to add custom API endpoints or server logic, you can use Express with Firebase Cloud Functions:
+
+If you want to add custom API endpoints or server logic, you can use Express with Firebase Cloud
+Functions:
 
 1. **Set up the functions directory:**
-   - Run `firebase init` and select **Functions**. Choose TypeScript and use the default `functions` directory.
+   - Run `firebase init` and select **Functions**. Choose TypeScript and use the default `functions`
+     directory.
 2. **Move your Express server code:**
    - Copy your Express app code (for example, from `src/server.ts`) into `functions/server.ts`.
-   - Make sure all dependencies used by your server (like `express`, `cors`, etc.) are listed in `functions/package.json`. Install any missing ones by running `npm install <package>` inside the `functions` directory.
+   - Make sure all dependencies used by your server (like `express`, `cors`, etc.) are listed in
+     `functions/package.json`. Install any missing ones by running `npm install <package>` inside
+     the `functions` directory.
 3. **Create or update `functions/index.ts`:**
    - Export your Express app as a Cloud Function. Example:
      ```ts
@@ -239,6 +277,7 @@ If you want to add custom API endpoints or server logic, you can use Express wit
 ---
 
 ## 6. Set Environment Variables (If Needed)
+
 1. To set environment variables for Cloud Functions, run:
    ```sh
    firebase functions:config:set key=value
@@ -248,12 +287,14 @@ If you want to add custom API endpoints or server logic, you can use Express wit
 ---
 
 ## 7. (Optional) Set Up a Custom Domain
+
 1. In the Firebase Console, go to Hosting.
 2. Add your custom domain and follow the verification steps.
 
 ---
 
 ## 8. Useful Firebase Commands
+
 - `firebase serve` — Preview your app locally
 - `firebase deploy` — Deploy both frontend and backend
 - `firebase deploy --only hosting` — Deploy frontend only
@@ -262,6 +303,7 @@ If you want to add custom API endpoints or server logic, you can use Express wit
 ---
 
 ## 9. References
+
 - [Firebase Hosting Docs](https://firebase.google.com/docs/hosting)
 - [Firebase Functions Docs](https://firebase.google.com/docs/functions)
 - [Firebase CLI Reference](https://firebase.google.com/docs/cli)

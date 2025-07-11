@@ -1,0 +1,98 @@
+/**
+ * Error Boundary Component
+ * Catches JavaScript errors anywhere in the child component tree
+ */
+
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { logger } from '../utils/logger';
+
+interface Props {
+  children: ReactNode;
+  fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+}
+
+interface State {
+  hasError: boolean;
+  error?: Error;
+}
+
+export class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+  };
+
+  public static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    logger.error('Error caught by boundary', error, {
+      componentStack: errorInfo.componentStack,
+      errorBoundary: this.constructor.name,
+    });
+
+    // Call custom error handler if provided
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
+  }
+
+  public render() {
+    if (this.state.hasError) {
+      // Custom fallback UI
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
+      // Default error UI
+      return (
+        <div
+          style={{
+            padding: '20px',
+            textAlign: 'center',
+            border: '2px solid #ff4444',
+            borderRadius: '8px',
+            backgroundColor: '#ffe6e6',
+            margin: '20px',
+          }}
+        >
+          <h2>Something went wrong</h2>
+          <p>We're sorry, but there was an error displaying this content.</p>
+          <details style={{ marginTop: '10px', textAlign: 'left' }}>
+            <summary>Error Details</summary>
+            <pre
+              style={{
+                backgroundColor: '#f5f5f5',
+                padding: '10px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                overflow: 'auto',
+              }}
+            >
+              {this.state.error?.message}
+            </pre>
+          </details>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: '15px',
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;
