@@ -132,6 +132,11 @@ describe('AuthProvider', () => {
     await waitFor(() => {
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
     });
-    expect(screen.getByText('Error: Profile loading failed')).toBeInTheDocument();
+    // Use a matcher function to find the error text even if split across elements
+    expect(
+      screen.getByText((content, element) =>
+        content.includes('Error: Profile loading failed')
+      )
+    ).toBeInTheDocument();
   });
 });

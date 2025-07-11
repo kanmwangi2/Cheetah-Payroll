@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1752241470866" clover="3.2.0">
-  <project timestamp="1752241470867" name="All files">
-    <metrics statements="481" coveredstatements="246" conditionals="153" coveredconditionals="47" methods="121" coveredmethods="38" elements="755" coveredelements="331" complexity="0" loc="481" ncloc="481" packages="7" files="14" classes="14"/>
+<coverage generated="1752242559202" clover="3.2.0">
+  <project timestamp="1752242559202" name="All files">
+    <metrics statements="490" coveredstatements="249" conditionals="160" coveredconditionals="52" methods="121" coveredmethods="38" elements="771" coveredelements="339" complexity="0" loc="490" ncloc="490" packages="7" files="14" classes="14"/>
     <package name="core.providers">
       <metrics statements="96" coveredstatements="49" conditionals="16" coveredconditionals="5" methods="19" coveredmethods="8"/>
       <file name="AppProvider.tsx" path="C:\Applications\Cheetah-Payroll\src\core\providers\AppProvider.tsx">
@@ -394,9 +394,9 @@
       </file>
     </package>
     <package name="shared.hooks">
-      <metrics statements="105" coveredstatements="101" conditionals="32" coveredconditionals="25" methods="17" coveredmethods="16"/>
+      <metrics statements="114" coveredstatements="104" conditionals="39" coveredconditionals="30" methods="17" coveredmethods="16"/>
       <file name="useAuth.ts" path="C:\Applications\Cheetah-Payroll\src\shared\hooks\useAuth.ts">
-        <metrics statements="24" coveredstatements="24" conditionals="4" coveredconditionals="4" methods="5" coveredmethods="4"/>
+        <metrics statements="33" coveredstatements="27" conditionals="11" coveredconditionals="9" methods="5" coveredmethods="4"/>
         <line num="6" count="2" type="stmt"/>
         <line num="8" count="2" type="stmt"/>
         <line num="9" count="2" type="stmt"/>
@@ -405,22 +405,31 @@
         <line num="21" count="23" type="stmt"/>
         <line num="28" count="23" type="stmt"/>
         <line num="29" count="13" type="stmt"/>
-        <line num="30" count="13" type="cond" truecount="1" falsecount="0"/>
         <line num="31" count="13" type="stmt"/>
-        <line num="32" count="6" type="stmt"/>
-        <line num="33" count="6" type="cond" truecount="2" falsecount="0"/>
-        <line num="34" count="4" type="stmt"/>
+        <line num="32" count="13" type="cond" truecount="3" falsecount="1"/>
+        <line num="33" count="13" type="stmt"/>
+        <line num="34" count="6" type="stmt"/>
+        <line num="35" count="6" type="cond" truecount="2" falsecount="0"/>
         <line num="36" count="4" type="stmt"/>
-        <line num="37" count="2" type="stmt"/>
-        <line num="44" count="2" type="stmt"/>
-        <line num="45" count="2" type="stmt"/>
-        <line num="53" count="2" type="stmt"/>
-        <line num="54" count="2" type="stmt"/>
-        <line num="63" count="13" type="stmt"/>
-        <line num="64" count="13" type="cond" truecount="1" falsecount="0"/>
-        <line num="65" count="8" type="stmt"/>
-        <line num="70" count="23" type="stmt"/>
-        <line num="73" count="2" type="stmt"/>
+        <line num="38" count="4" type="stmt"/>
+        <line num="40" count="4" type="stmt"/>
+        <line num="41" count="2" type="stmt"/>
+        <line num="48" count="2" type="stmt"/>
+        <line num="50" count="2" type="stmt"/>
+        <line num="58" count="2" type="stmt"/>
+        <line num="66" count="2" type="stmt"/>
+        <line num="67" count="2" type="stmt"/>
+        <line num="75" count="0" type="stmt"/>
+        <line num="76" count="0" type="stmt"/>
+        <line num="86" count="0" type="stmt"/>
+        <line num="87" count="0" type="stmt"/>
+        <line num="95" count="0" type="stmt"/>
+        <line num="96" count="0" type="stmt"/>
+        <line num="104" count="13" type="stmt"/>
+        <line num="105" count="13" type="cond" truecount="1" falsecount="0"/>
+        <line num="106" count="8" type="stmt"/>
+        <line num="111" count="23" type="stmt"/>
+        <line num="114" count="2" type="stmt"/>
       </file>
       <file name="useTheme.ts" path="C:\Applications\Cheetah-Payroll\src\shared\hooks\useTheme.ts">
         <metrics statements="81" coveredstatements="77" conditionals="28" coveredconditionals="21" methods="12" coveredmethods="12"/>

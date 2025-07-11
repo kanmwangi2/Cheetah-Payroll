@@ -48,10 +48,11 @@ function validateEnv(): void {
     'REACT_APP_FIREBASE_APP_ID',
   ];
 
-  for (const key of required) {
-    if (!env[key as keyof typeof env]) {
-      throw new Error(`Missing required environment variable: ${key}`);
-    }
+  const missing = required.filter(key => !env[key as keyof typeof env]);
+  
+  if (missing.length > 0) {
+    console.warn(`Missing environment variables: ${missing.join(', ')}`);
+    console.warn('Using demo configuration. Please set up proper Firebase config for production.');
   }
 }
 
@@ -63,12 +64,12 @@ export function getConfig(): AppConfig {
     isProduction: env.NODE_ENV === 'production',
     isTest: env.NODE_ENV === 'test',
     firebase: {
-      apiKey: env.REACT_APP_FIREBASE_API_KEY!,
-      authDomain: env.REACT_APP_FIREBASE_AUTH_DOMAIN!,
-      projectId: env.REACT_APP_FIREBASE_PROJECT_ID!,
-      storageBucket: env.REACT_APP_FIREBASE_STORAGE_BUCKET!,
-      messagingSenderId: env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID!,
-      appId: env.REACT_APP_FIREBASE_APP_ID!,
+      apiKey: env.REACT_APP_FIREBASE_API_KEY || 'demo-api-key',
+      authDomain: env.REACT_APP_FIREBASE_AUTH_DOMAIN || 'demo-project.firebaseapp.com',
+      projectId: env.REACT_APP_FIREBASE_PROJECT_ID || 'demo-project',
+      storageBucket: env.REACT_APP_FIREBASE_STORAGE_BUCKET || 'demo-project.appspot.com',
+      messagingSenderId: env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || '123456789',
+      appId: env.REACT_APP_FIREBASE_APP_ID || '1:123456789:web:abcdef123456',
     },
     app: {
       name: 'Cheetah Payroll',

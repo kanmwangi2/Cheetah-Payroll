@@ -48,7 +48,7 @@
 
   /* Border Radius */
   --border-radius-sm: 0.125rem; /* 2px */
-  --border-radius-md: 0.25rem; /* 4px */
+  --border-radius-md: 0.375rem; /* 6px */
   --border-radius-lg: 0.5rem; /* 8px */
   --border-radius-xl: 0.75rem; /* 12px */
   --border-radius-2xl: 1rem; /* 16px */
@@ -75,6 +75,21 @@
   --z-popover: 1060;
   --z-tooltip: 1070;
   --z-toast: 1080;
+
+  /* Default theme colors (light theme defaults) */
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  --color-text-inverse: #ffffff;
+  --color-border-primary: #e5e7eb;
+  --color-border-secondary: #d1d5db;
+  --color-error-bg: #fef2f2;
+  --color-error-text: #b91c1c;
+  --color-error-border: #ef4444;
 }
 
 /* Light Theme */

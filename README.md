@@ -23,7 +23,9 @@ shared code in a single repository root.
    npm install
    ```
 2. **Configure environment:**
-   - Copy `.env.example` to `.env` and fill in your Firebase config (see Firebase console).
+   - Copy `.env.example` to `.env` and fill in your Firebase config
+   - Get Firebase configuration from Firebase Console → Project Settings → General → Your Apps
+   - The app will show setup instructions if Firebase is not configured
 3. **Run in development:**
    ```sh
    npm run frontend
