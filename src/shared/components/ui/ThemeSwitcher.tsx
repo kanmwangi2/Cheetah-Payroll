@@ -214,26 +214,64 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
 
   // Toggle variant (cycles through themes)
   if (variant === 'toggle') {
+    const toggleStyles: React.CSSProperties = {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 'var(--spacing-sm)',
+      padding: sizeClasses[size].includes('sm') ? 'var(--spacing-xs) var(--spacing-sm)' : 
+               sizeClasses[size].includes('lg') ? 'var(--spacing-lg) var(--spacing-xl)' : 
+               'var(--spacing-sm) var(--spacing-md)',
+      borderRadius: 'var(--border-radius-lg)',
+      border: '1px solid var(--color-border-primary)',
+      backgroundColor: 'var(--color-bg-primary)',
+      color: 'var(--color-text-primary)',
+      fontSize: sizeClasses[size].includes('sm') ? 'var(--font-size-sm)' : 
+               sizeClasses[size].includes('lg') ? 'var(--font-size-lg)' : 
+               'var(--font-size-base)',
+      fontWeight: 'var(--font-weight-medium)',
+      cursor: 'pointer',
+      transition: 'all var(--transition-normal)',
+      boxShadow: 'var(--shadow-sm)',
+      zIndex: 1000,
+    };
+
     return (
       <button
         onClick={toggleTheme}
-        className={`
-          inline-flex items-center gap-2 rounded-lg border transition-all duration-200
-          ${sizeClasses[size]}
-          bg-[var(--color-bg-primary)] 
-          border-[var(--color-border-primary)]
-          text-[var(--color-text-primary)]
-          hover:bg-[var(--color-bg-secondary)]
-          hover:scale-105 active:scale-95
-          focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)] focus:ring-offset-2
-          ${className}
-        `}
-        style={{ position: 'fixed', zIndex: 'var(--z-dropdown)' }}
+        style={toggleStyles}
+        className={className}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)';
+          e.currentTarget.style.transform = 'scale(1.05)';
+          e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--color-bg-primary)';
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+        }}
+        onMouseDown={(e) => {
+          e.currentTarget.style.transform = 'scale(0.95)';
+        }}
+        onMouseUp={(e) => {
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.outline = '2px solid var(--color-primary-500)';
+          e.currentTarget.style.outlineOffset = '2px';
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.outline = 'none';
+        }}
         aria-label={`Switch to next theme (current: ${theme})`}
         title={`Current theme: ${ThemeLabels[theme]}${isSystemTheme ? ` (${resolvedTheme})` : ''}`}
       >
-        <span className="flex items-center">{ThemeIcons[theme]}</span>
-        {showLabels && <span className="hidden sm:inline">{ThemeLabels[theme]}</span>}
+        <span style={{ display: 'flex', alignItems: 'center' }}>{ThemeIcons[theme]}</span>
+        {showLabels && (
+          <span style={{ display: window.innerWidth >= 640 ? 'inline' : 'none' }}>
+            {ThemeLabels[theme]}
+          </span>
+        )}
       </button>
     );
   }

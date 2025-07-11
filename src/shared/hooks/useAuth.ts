@@ -38,15 +38,37 @@ export const useAuth = () => {
               try {
                 // Get user profile from Firestore
                 const userProfile = await getUserProfile(firebaseUser.uid);
-                setAuthState({
-                  user: userProfile,
-                  firebaseUser,
-                  loading: false,
-                  error: null,
-                });
+                
+                if (userProfile) {
+                  // User profile exists
+                  setAuthState({
+                    user: userProfile,
+                    firebaseUser,
+                    loading: false,
+                    error: null,
+                  });
+                } else {
+                  // No profile found - create user profile in Firestore
+                  logger.info('No user profile found, creating user profile in Firestore', { uid: firebaseUser.uid });
+                  
+                  // Check if this is the first user (should be app_admin)
+                  const { createUserProfile } = await import('../services/user.service');
+                  const createdUser = await createUserProfile({
+                    id: firebaseUser.uid,
+                    email: firebaseUser.email || '',
+                    name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+                  });
+                  
+                  setAuthState({
+                    user: createdUser,
+                    firebaseUser,
+                    loading: false,
+                    error: null,
+                  });
+                }
               } catch (profileError) {
-                logger.warn('Could not load user profile, using basic user data', profileError as Error);
-                // Create basic user object if profile loading fails
+                logger.warn('Error loading user profile, using basic user data', profileError as Error);
+                // Create basic user object if profile loading fails due to network/permission issues
                 const basicUser = {
                   id: firebaseUser.uid,
                   email: firebaseUser.email || '',
@@ -59,7 +81,7 @@ export const useAuth = () => {
                   user: basicUser,
                   firebaseUser,
                   loading: false,
-                  error: 'Profile loading failed',
+                  error: null, // Don't show error to user - app still works
                 });
               }
             } else {

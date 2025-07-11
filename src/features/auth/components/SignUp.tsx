@@ -319,25 +319,11 @@ const themeSwitcherStyles: React.CSSProperties = {
   top: '24px',
   right: '24px',
   zIndex: 1000,
-  backgroundColor: 'var(--color-bg-secondary)',
-  padding: '12px',
-  borderRadius: '12px',
-  border: '2px solid var(--color-border-primary)',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
-  backdropFilter: 'blur(8px)',
-  minWidth: '120px',
-  transition: 'all var(--transition-normal)',
 };
 
 const cardStyles: React.CSSProperties = {
-  backgroundColor: 'var(--color-bg-secondary)',
-  borderRadius: 'var(--border-radius-xl)',
-  padding: 'var(--spacing-4xl)',
-  boxShadow: 'var(--shadow-xl)',
-  border: '1px solid var(--color-border-primary)',
   width: '100%',
   maxWidth: '420px',
-  transition: 'background-color var(--transition-normal), border-color var(--transition-normal)',
 };
 
 const headerStyles: React.CSSProperties = {

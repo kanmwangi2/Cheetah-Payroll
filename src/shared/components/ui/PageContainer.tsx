@@ -82,11 +82,6 @@ const themeSwitcherStyles: React.CSSProperties = {
   top: 'var(--spacing-lg)',
   right: 'var(--spacing-lg)',
   zIndex: 50,
-  backgroundColor: 'var(--color-bg-secondary)',
-  padding: 'var(--spacing-xs)',
-  borderRadius: 'var(--border-radius-md)',
-  border: '1px solid var(--color-border-primary)',
-  boxShadow: 'var(--shadow-sm)',
 };
 
 const headerContainerStyles: React.CSSProperties = {
