@@ -1,6 +1,5 @@
 import React, { useState, Suspense, lazy } from 'react';
 import './App.css';
-import { AppProvider } from './core/providers/AppProvider';
 import { AuthGuard } from './core/guards/AuthGuard';
 import { useAuthContext } from './core/providers/AuthProvider';
 import { useThemeContext } from './core/providers/ThemeProvider';
@@ -37,7 +36,7 @@ const AppContent: React.FC = () => {
       }}
     >
       {/* Theme Switcher */}
-      <ThemeSwitcher variant="dropdown" position="top-right" showLabels={true} />
+      <ThemeSwitcher variant="toggle" position="top-right" size="sm" showLabels={false} />
 
       {/* Main Content */}
       <div
@@ -45,7 +44,7 @@ const AppContent: React.FC = () => {
           maxWidth: '1200px',
           margin: '0 auto',
           padding: 'var(--spacing-lg)',
-          paddingTop: 'var(--spacing-6xl)', // Space for theme switcher
+          paddingTop: 'var(--spacing-6xl)', // Space for theme toggle
         }}
       >
         <header
@@ -168,11 +167,9 @@ const AppContent: React.FC = () => {
 // Main App Component
 const App: React.FC = () => {
   return (
-    <AppProvider>
-      <AuthGuard>
-        <AppContent />
-      </AuthGuard>
-    </AppProvider>
+    <AuthGuard>
+      <AppContent />
+    </AuthGuard>
   );
 };
 

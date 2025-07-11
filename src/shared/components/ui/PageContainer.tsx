@@ -32,7 +32,7 @@ const PageContainer: React.FC<PageContainerProps> = ({
       {/* Theme Switcher */}
       {showThemeToggle && (
         <div style={themeSwitcherStyles}>
-          <ThemeSwitcher variant="dropdown" size="sm" showLabels={false} />
+          <ThemeSwitcher variant="toggle" size="sm" showLabels={false} />
         </div>
       )}
 

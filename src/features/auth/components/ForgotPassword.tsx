@@ -9,6 +9,7 @@ import { resetPassword } from '../../../core/providers/auth.provider';
 import { useThemeContext } from '../../../core/providers/ThemeProvider';
 import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
 import LoadingSpinner from '../../../shared/components/ui/LoadingSpinner';
+import ThemeBoundary from '../../../shared/components/ui/ThemeBoundary';
 import { logger } from '../../../shared/utils/logger';
 import { getFirebaseErrorMessage, isCredentialError, isRetryableError } from '../../../shared/utils/firebase-errors';
 
@@ -59,10 +60,11 @@ const ForgotPassword: React.FC = () => {
   }
 
   return (
-    <div style={containerStyles}>
+    <ThemeBoundary>
+      <div style={containerStyles}>
       {/* Theme Switcher */}
       <div style={themeSwitcherStyles}>
-        <ThemeSwitcher variant="dropdown" size="md" showLabels={true} />
+        <ThemeSwitcher variant="toggle" size="sm" showLabels={true} />
       </div>
 
       {/* Forgot Password Card */}
@@ -162,7 +164,8 @@ const ForgotPassword: React.FC = () => {
           © 2025 Cheetah Payroll. Built for Rwanda's workforce.
         </p>
       </div>
-    </div>
+      </div>
+    </ThemeBoundary>
   );
 };
 
@@ -197,14 +200,17 @@ const containerStyles: React.CSSProperties = {
 
 const themeSwitcherStyles: React.CSSProperties = {
   position: 'fixed',
-  top: 'var(--spacing-xl)',
-  right: 'var(--spacing-xl)',
-  zIndex: 50,
+  top: '24px',
+  right: '24px',
+  zIndex: 1000,
   backgroundColor: 'var(--color-bg-secondary)',
-  padding: 'var(--spacing-sm)',
-  borderRadius: 'var(--border-radius-md)',
-  border: '1px solid var(--color-border-primary)',
-  boxShadow: 'var(--shadow-md)',
+  padding: '12px',
+  borderRadius: '12px',
+  border: '2px solid var(--color-border-primary)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
+  backdropFilter: 'blur(8px)',
+  minWidth: '120px',
+  transition: 'all var(--transition-normal)',
 };
 
 const cardStyles: React.CSSProperties = {

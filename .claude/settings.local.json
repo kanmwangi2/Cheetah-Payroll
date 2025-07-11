@@ -17,7 +17,8 @@
       "Bash(npm run typecheck:*)",
       "Bash(npm run lint)",
       "Bash(npm run build:frontend:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(sed:*)"
     ],
     "deny": []
   }

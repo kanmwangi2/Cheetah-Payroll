@@ -7,6 +7,7 @@ import React, { ReactNode } from 'react';
 import { ErrorBoundary } from '../../shared/components/ErrorBoundary';
 import { ThemeProvider } from './ThemeProvider';
 import { AuthProvider } from './AuthProvider';
+import ThemeErrorBoundary from '../../shared/components/ui/ThemeErrorBoundary';
 import { logger } from '../../shared/utils/logger';
 
 interface AppProviderProps {
@@ -22,9 +23,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   return (
     <ErrorBoundary onError={handleError}>
-      <ThemeProvider>
-        <AuthProvider>{children}</AuthProvider>
-      </ThemeProvider>
+      <ThemeErrorBoundary fallbackTheme="system">
+        <ThemeProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
+      </ThemeErrorBoundary>
     </ErrorBoundary>
   );
 };

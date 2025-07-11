@@ -78,7 +78,23 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 export const useThemeContext = (): ThemeContextType => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useThemeContext must be used within a ThemeProvider');
+    // Log the error for debugging
+    logger.error('useThemeContext called outside of ThemeProvider', new Error('Missing ThemeProvider'));
+    
+    // Instead of throwing, provide a fallback theme context
+    logger.warn('Using fallback theme context. Please ensure ThemeProvider wraps your component.');
+    
+    // Return a fallback context with default values
+    return {
+      theme: 'light' as Theme,
+      resolvedTheme: 'light' as ResolvedTheme,
+      systemTheme: 'light' as ResolvedTheme,
+      isSystemTheme: false,
+      setTheme: () => logger.warn('setTheme called outside ThemeProvider'),
+      toggleTheme: () => logger.warn('toggleTheme called outside ThemeProvider'),
+      isDark: false,
+      isLight: true,
+    };
   }
   return context;
 };

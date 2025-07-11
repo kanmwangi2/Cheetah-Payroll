@@ -2,6 +2,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import RootRoutes from './RootRoutes';
+import { AppProvider } from './core/providers/AppProvider';
 
 console.log('React app starting...');
 
@@ -9,7 +10,11 @@ const container = document.getElementById('root');
 if (container) {
   console.log('Root container found, rendering app...');
   try {
-    createRoot(container).render(<RootRoutes />);
+    createRoot(container).render(
+      <AppProvider>
+        <RootRoutes />
+      </AppProvider>
+    );
     console.log('App rendered successfully');
   } catch (error) {
     console.error('Error rendering app:', error);
