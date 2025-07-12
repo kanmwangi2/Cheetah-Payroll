@@ -117,14 +117,13 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
         onImported={() => setRefresh(r => r + 1)}
         deductions={deductions}
       />
-      <div className="deductions-table-controls" style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
+      <div className="deductions-table-controls">
         <input
           type="search"
           placeholder="Search by type, employee, or description..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="deductions-search"
-          style={{ flex: '1', minWidth: '200px' }}
         />
         <select
           value={filterType}
@@ -160,78 +159,60 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
       ) : filtered.length === 0 ? (
         <div className="deductions-empty">No deductions found.</div>
       ) : (
-        <div className="deductions-table-wrapper" style={{ overflowX: 'auto' }}>
-          <table className="deductions-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="deductions-table-wrapper">
+          <table className="deductions-table">
             <thead>
-              <tr style={{ background: '#f8f9fa' }}>
-                <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #dee2e6' }}>Type</th>
-                <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #dee2e6' }}>Employee</th>
-                <th style={{ padding: '12px', textAlign: 'right', border: '1px solid #dee2e6' }}>Original Amount</th>
-                <th style={{ padding: '12px', textAlign: 'right', border: '1px solid #dee2e6' }}>Remaining</th>
-                <th style={{ padding: '12px', textAlign: 'center', border: '1px solid #dee2e6' }}>Progress</th>
-                <th style={{ padding: '12px', textAlign: 'center', border: '1px solid #dee2e6' }}>Status</th>
-                <th style={{ padding: '12px', textAlign: 'center', border: '1px solid #dee2e6' }}>Loan Details</th>
-                <th style={{ padding: '12px', textAlign: 'center', border: '1px solid #dee2e6' }}>Actions</th>
+              <tr>
+                <th>Type</th>
+                <th>Employee</th>
+                <th style={{ textAlign: 'right' }}>Original Amount</th>
+                <th style={{ textAlign: 'right' }}>Remaining</th>
+                <th style={{ textAlign: 'center' }}>Progress</th>
+                <th style={{ textAlign: 'center' }}>Status</th>
+                <th style={{ textAlign: 'center' }}>Loan Details</th>
+                <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(d => (
-                <tr key={d.id} style={{ borderBottom: '1px solid #dee2e6' }}>
-                  <td style={{ padding: '12px', border: '1px solid #dee2e6' }}>
-                    <div style={{ fontWeight: '500' }}>
+                <tr key={d.id}>
+                  <td>
+                    <div style={{ fontWeight: 'var(--font-weight-medium)' }}>
                       {DEDUCTION_TYPE_LABELS[d.type] || d.type}
                     </div>
                     {d.description && (
-                      <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
+                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)', marginTop: 'var(--spacing-xs)' }}>
                         {d.description}
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid #dee2e6' }}>
+                  <td>
                     {getStaffName(d.staffId)}
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'right', border: '1px solid #dee2e6', fontWeight: '500' }}>
+                  <td style={{ textAlign: 'right', fontWeight: 'var(--font-weight-medium)' }}>
                     RWF {d.originalAmount.toLocaleString()}
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'right', border: '1px solid #dee2e6', fontWeight: '500', color: d.remainingBalance > 0 ? '#d32f2f' : '#4caf50' }}>
+                  <td style={{ textAlign: 'right', fontWeight: 'var(--font-weight-medium)', color: d.remainingBalance > 0 ? 'var(--color-error-text)' : 'var(--color-success-text)' }}>
                     RWF {d.remainingBalance.toLocaleString()}
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'center', border: '1px solid #dee2e6' }}>
+                  <td style={{ textAlign: 'center' }}>
                     <div style={{ width: '100px', margin: '0 auto' }}>
-                      <div style={{
-                        width: '100%',
-                        height: '8px',
-                        background: '#e0e0e0',
-                        borderRadius: '4px',
-                        overflow: 'hidden'
-                      }}>
-                        <div style={{
-                          width: `${getProgressPercentage(d)}%`,
-                          height: '100%',
-                          background: d.status === 'completed' ? '#4caf50' : '#2196f3',
-                          transition: 'width 0.3s ease'
-                        }} />
+                      <div className="progress-bar">
+                        <div className={`progress-fill ${d.status === 'completed' ? 'completed' : ''}`} style={{ width: `${getProgressPercentage(d)}%` }} />
                       </div>
-                      <div style={{ fontSize: '0.8rem', marginTop: '4px' }}>
+                      <div style={{ fontSize: 'var(--font-size-xs)', marginTop: 'var(--spacing-xs)' }}>
                         {getProgressPercentage(d)}%
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'center', border: '1px solid #dee2e6' }}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      fontWeight: '500',
-                      background: d.status === 'active' ? '#e8f5e8' : d.status === 'completed' ? '#f3e5f5' : '#ffebee',
-                      color: d.status === 'active' ? '#2e7d32' : d.status === 'completed' ? '#7b1fa2' : '#c62828'
-                    }}>
+                  <td style={{ textAlign: 'center' }}>
+                    <span className={`status-badge status-${d.status}`}>
                       {d.status.charAt(0).toUpperCase() + d.status.slice(1)}
                     </span>
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'center', border: '1px solid #dee2e6' }}>
+                  <td style={{ textAlign: 'center' }}>
                     {d.type === 'loan' && (
-                      <div style={{ fontSize: '0.8rem' }}>
+                      <div style={{ fontSize: 'var(--font-size-xs)' }}>
                         {d.monthlyInstallment && (
                           <div>Monthly: RWF {d.monthlyInstallment.toLocaleString()}</div>
                         )}
@@ -241,35 +222,21 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'center', border: '1px solid #dee2e6' }}>
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <td style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: 'var(--spacing-sm)', justifyContent: 'center', flexWrap: 'wrap' }}>
                       {d.type === 'loan' && d.status === 'active' && d.remainingBalance > 0 && (
                         <button
                           onClick={() => setPaymentModalOpen(d.id)}
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            border: '1px solid #1976d2',
-                            background: '#1976d2',
-                            color: 'white',
-                            fontSize: '0.8rem',
-                            cursor: 'pointer'
-                          }}
+                          className="primary-btn"
+                          style={{ fontSize: 'var(--font-size-xs)', padding: 'var(--spacing-xs) var(--spacing-sm)' }}
                         >
                           Record Payment
                         </button>
                       )}
                       <button
                         onClick={() => handleDelete(d.id)}
-                        style={{
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          border: '1px solid #dc3545',
-                          background: 'white',
-                          color: '#dc3545',
-                          fontSize: '0.8rem',
-                          cursor: 'pointer'
-                        }}
+                        className="secondary-btn"
+                        style={{ fontSize: 'var(--font-size-xs)', padding: 'var(--spacing-xs) var(--spacing-sm)', color: 'var(--color-error-text)', borderColor: 'var(--color-error-border)' }}
                       >
                         Cancel
                       </button>
@@ -283,27 +250,10 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
       )}
       {/* Payment Modal */}
       {paymentModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: 'white',
-            padding: '24px',
-            borderRadius: '8px',
-            maxWidth: '400px',
-            width: '90%'
-          }}>
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '400px', width: '90%' }}>
             <h3>Record Loan Payment</h3>
-            <div style={{ marginBottom: '16px' }}>
+            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
               <label>
                 Payment Amount
                 <input
@@ -311,42 +261,23 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                   value={paymentAmount}
                   onChange={e => setPaymentAmount(e.target.value)}
                   placeholder="Enter payment amount"
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    marginTop: '4px'
-                  }}
+                  style={{ marginTop: 'var(--spacing-xs)' }}
                 />
               </label>
             </div>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: 'var(--spacing-md)', justifyContent: 'flex-end' }}>
               <button
                 onClick={() => {
                   setPaymentModalOpen(null);
                   setPaymentAmount('');
                 }}
-                style={{
-                  padding: '8px 16px',
-                  border: '1px solid #ccc',
-                  background: 'white',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
+                className="secondary-btn"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleLoanPayment(paymentModalOpen)}
-                style={{
-                  padding: '8px 16px',
-                  border: 'none',
-                  background: '#1976d2',
-                  color: 'white',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
+                className="primary-btn"
               >
                 Record Payment
               </button>

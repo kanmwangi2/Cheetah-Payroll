@@ -95,10 +95,10 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
     }
   };
 
-  if (loading) {return <div aria-live="polite">Loading payrolls...</div>;}
+  if (loading) {return <div className="payroll-loading" aria-live="polite">Loading payrolls...</div>;}
   if (error)
     {return (
-      <div style={{ color: 'red' }} role="alert" aria-live="assertive">
+      <div className="payroll-error" role="alert" aria-live="assertive">
         {error}
       </div>
     );}

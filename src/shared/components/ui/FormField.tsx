@@ -178,8 +178,8 @@ const requiredStyles: React.CSSProperties = {
 const getInputStyles = (hasError: boolean): React.CSSProperties => ({
   padding: 'var(--spacing-md) var(--spacing-lg)',
   borderRadius: 'var(--border-radius-md)',
-  border: `1px solid ${hasError ? 'var(--color-error-border)' : 'var(--color-border-secondary)'}`,
-  backgroundColor: 'var(--color-bg-primary)',
+  border: `1px solid ${hasError ? 'var(--color-error-border)' : 'var(--color-input-border)'}`,
+  backgroundColor: 'var(--color-input-bg)',
   color: 'var(--color-text-primary)',
   fontSize: 'var(--font-size-base)',
   transition: 'all var(--transition-normal)',

@@ -189,7 +189,7 @@ const PayrollImportExport: React.FC<{
           <b>Row Errors:</b>
           <ul>
             {rowErrors.map((e, i) => (
-              <li key={i} style={{ color: 'crimson' }}>
+              <li key={i} style={{ color: 'var(--color-error-text)' }}>
                 Row {e.row}: {e.error}
               </li>
             ))}
@@ -227,14 +227,14 @@ const PayrollImportExport: React.FC<{
                           <summary>View</summary>
                           <ul style={{ margin: 0, paddingLeft: 16 }}>
                             {h.errors.map((e, j) => (
-                              <li key={j} style={{ color: 'crimson' }}>
+                              <li key={j} style={{ color: 'var(--color-error-text)' }}>
                                 Row {e.row}: {e.error}
                               </li>
                             ))}
                           </ul>
                         </details>
                       ) : (
-                        <span style={{ color: 'green' }}>OK</span>
+                        <span style={{ color: 'var(--color-success-text)' }}>OK</span>
                       )}
                     </td>
                   </tr>

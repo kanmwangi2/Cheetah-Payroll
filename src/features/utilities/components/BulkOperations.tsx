@@ -76,8 +76,8 @@ export default function BulkOperations({ type, companyId }: { type: string; comp
           Bulk Delete
         </button>
       </div>
-      {result && <div style={{ color: 'green' }}>{result}</div>}
-      {error && <div style={{ color: 'crimson' }}>{error}</div>}
+      {result && <div style={{ color: 'var(--color-success-text)' }}>{result}</div>}
+      {error && <div style={{ color: 'var(--color-error-text)' }}>{error}</div>}
     </div>
   );
 }

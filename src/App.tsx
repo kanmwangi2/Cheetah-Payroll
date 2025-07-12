@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import './assets/styles/components.css';
 import { AuthGuard } from './core/guards/AuthGuard';
 import { useAuthContext } from './core/providers/AuthProvider';
 import CompanySelector from './features/auth/components/CompanySelector';
@@ -31,6 +32,12 @@ const Reports = lazy(() =>
 const Utilities = lazy(() => 
   import(/* webpackChunkName: "utilities" */ './features/utilities/components/Utilities')
 );
+const FAQ = lazy(() => 
+  import(/* webpackChunkName: "help" */ './features/help/components/FAQ')
+);
+const Documentation = lazy(() => 
+  import(/* webpackChunkName: "help" */ './features/help/components/Documentation')
+);
 
 // Main App Content Component
 const AppContent: React.FC = () => {
@@ -59,6 +66,8 @@ const AppContent: React.FC = () => {
           <Route path="/payroll" element={<PayrollList companyId={company.id} />} />
           <Route path="/reports" element={<Reports companyId={company.id} />} />
           <Route path="/utilities" element={<Utilities />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/documentation" element={<Documentation />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Suspense>

@@ -85,8 +85,8 @@ export default function AdvancedUtilities() {
           </a>
         </div>
       )}
-      {restoreResult && <div style={{ color: 'green' }}>{restoreResult}</div>}
-      {error && <div style={{ color: 'crimson' }}>{error}</div>}
+      {restoreResult && <div style={{ color: 'var(--color-success-text)' }}>{restoreResult}</div>}
+      {error && <div style={{ color: 'var(--color-error-text)' }}>{error}</div>}
     </div>
   );
 }

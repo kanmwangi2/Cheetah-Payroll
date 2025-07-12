@@ -38,6 +38,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
     { id: 'payroll', label: 'Payroll', icon: '📊', path: '/payroll' },
     { id: 'reports', label: 'Reports', icon: '📋', path: '/reports' },
     { id: 'utilities', label: 'Utilities', icon: '🔧', path: '/utilities' },
+    { id: 'faq', label: 'FAQ', icon: '❓', path: '/faq' },
+    { id: 'documentation', label: 'Documentation', icon: '📚', path: '/documentation' },
   ];
 
   const handleLogout = async () => {
@@ -52,15 +54,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-primary)' }}>
       {/* Top Navigation Bar */}
       <div style={{
-        background: '#ffffff',
-        borderBottom: '1px solid #e5e7eb',
+        background: 'var(--color-nav-bg)',
+        borderBottom: '1px solid var(--color-nav-border)',
         position: 'sticky',
         top: 0,
         zIndex: 1020,
-        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+        boxShadow: 'var(--shadow-sm)'
       }}>
         <div style={{
           maxWidth: '1400px',
@@ -101,10 +103,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
             <div style={{ 
               height: '24px', 
               width: '1px', 
-              background: '#e5e7eb' 
+              background: 'var(--color-nav-border)' 
             }} />
             
-            <div style={{ color: '#6b7280', fontSize: '14px' }}>
+            <div style={{ color: 'var(--color-nav-text)', fontSize: '14px' }}>
               <strong>{company.name}</strong>
             </div>
           </div>
@@ -121,8 +123,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                   alignItems: 'center',
                   gap: '8px',
                   padding: '8px 12px',
-                  background: '#f3f4f6',
-                  border: '1px solid #e5e7eb',
+                  background: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-nav-border)',
                   borderRadius: '8px',
                   cursor: 'pointer',
                   fontSize: '14px'
@@ -131,24 +133,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                 <div style={{
                   width: '32px',
                   height: '32px',
-                  background: '#2563eb',
+                  background: 'var(--color-primary-600)',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#ffffff',
+                  color: 'var(--color-text-inverse)',
                   fontSize: '12px',
                   fontWeight: '500'
                 }}>
                   {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontWeight: '500', color: '#111827' }}>{user?.name}</div>
-                  <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                  <div style={{ fontWeight: '500', color: 'var(--color-text-primary)' }}>{user?.name}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
                     {roleLabels[user?.role || ''] || user?.role}
                   </div>
                 </div>
-                <span style={{ color: '#6b7280', fontSize: '12px' }}>▼</span>
+                <span style={{ color: 'var(--color-text-secondary)', fontSize: '12px' }}>▼</span>
               </button>
 
               {showUserMenu && (
@@ -157,16 +159,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                   top: '100%',
                   right: 0,
                   marginTop: '4px',
-                  background: '#ffffff',
-                  border: '1px solid #e5e7eb',
+                  background: 'var(--color-card-bg)',
+                  border: '1px solid var(--color-card-border)',
                   borderRadius: '8px',
-                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                  boxShadow: 'var(--shadow-lg)',
                   minWidth: '200px',
                   zIndex: 1000
                 }}>
-                  <div style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb' }}>
-                    <div style={{ fontWeight: '500', color: '#111827' }}>{user?.name}</div>
-                    <div style={{ fontSize: '12px', color: '#6b7280' }}>{user?.email}</div>
+                  <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border-primary)' }}>
+                    <div style={{ fontWeight: '500', color: 'var(--color-text-primary)' }}>{user?.name}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{user?.email}</div>
                   </div>
                   
                   <div style={{ padding: '8px 0' }}>
@@ -183,9 +185,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                         textAlign: 'left',
                         cursor: 'pointer',
                         fontSize: '0.9rem',
-                        color: '#333'
+                        color: 'var(--color-text-primary)'
                       }}
-                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = '#f8f9fa'}
+                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = 'var(--color-table-row-hover)'}
                       onMouseLeave={(e) => (e.target as HTMLButtonElement).style.background = 'none'}
                     >
                       👤 User Profile
@@ -205,9 +207,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                           textAlign: 'left',
                           cursor: 'pointer',
                           fontSize: '0.9rem',
-                          color: '#333'
+                          color: 'var(--color-text-primary)'
                         }}
-                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = '#f8f9fa'}
+                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = 'var(--color-table-row-hover)'}
                         onMouseLeave={(e) => (e.target as HTMLButtonElement).style.background = 'none'}
                       >
                         🏢 Company Settings
@@ -224,9 +226,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                         textAlign: 'left',
                         cursor: 'pointer',
                         fontSize: '0.9rem',
-                        color: '#333'
+                        color: 'var(--color-text-primary)'
                       }}
-                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = '#f8f9fa'}
+                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = 'var(--color-table-row-hover)'}
                       onMouseLeave={(e) => (e.target as HTMLButtonElement).style.background = 'none'}
                     >
                       🔄 Switch Company
@@ -243,16 +245,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                           textAlign: 'left',
                           cursor: 'pointer',
                           fontSize: '0.9rem',
-                          color: '#333'
+                          color: 'var(--color-text-primary)'
                         }}
-                        onMouseEnter={(e) => ((e.target as HTMLElement).style.background = '#f8f9fa')}
+                        onMouseEnter={(e) => ((e.target as HTMLElement).style.background = 'var(--color-table-row-hover)')}
                         onMouseLeave={(e) => ((e.target as HTMLElement).style.background = 'none')}
                       >
                         ⚙️ Admin Panel
                       </button>
                     )}
                     
-                    <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid #e9ecef' }} />
+                    <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid var(--color-border-primary)' }} />
                     
                     <button
                       onClick={handleLogout}
@@ -264,9 +266,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                         textAlign: 'left',
                         cursor: 'pointer',
                         fontSize: '0.9rem',
-                        color: '#dc3545'
+                        color: 'var(--color-error-text)'
                       }}
-                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = '#f8f9fa'}
+                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = 'var(--color-table-row-hover)'}
                       onMouseLeave={(e) => (e.target as HTMLButtonElement).style.background = 'none'}
                     >
                       🚪 Logout
@@ -283,8 +285,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
         {/* Side Navigation */}
         <div style={{
           width: '240px',
-          background: '#ffffff',
-          borderRight: '1px solid #e5e7eb',
+          background: 'var(--color-nav-bg)',
+          borderRight: '1px solid var(--color-nav-border)',
           padding: '24px 0'
         }}>
           <nav>
@@ -295,14 +297,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                 style={{
                   width: '100%',
                   padding: '12px 24px',
-                  background: isActive(item.path) ? '#eff6ff' : 'transparent',
+                  background: isActive(item.path) ? 'var(--color-primary-50)' : 'transparent',
                   border: 'none',
-                  borderRight: isActive(item.path) ? '3px solid #2563eb' : '3px solid transparent',
+                  borderRight: isActive(item.path) ? '3px solid var(--color-primary-500)' : '3px solid transparent',
                   textAlign: 'left',
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: isActive(item.path) ? 600 : 400,
-                  color: isActive(item.path) ? '#2563eb' : '#6b7280',
+                  color: isActive(item.path) ? 'var(--color-nav-text-active)' : 'var(--color-nav-text)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
@@ -310,7 +312,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive(item.path)) {
-                    (e.target as HTMLButtonElement).style.background = '#f9fafb';
+                    (e.target as HTMLButtonElement).style.background = 'var(--color-table-row-hover)';
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -355,14 +357,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
+          background: 'var(--color-bg-overlay)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
         }}>
           <div style={{
-            background: 'white',
+            background: 'var(--color-card-bg)',
             borderRadius: '8px',
             maxWidth: '800px',
             width: '90%',
@@ -380,7 +382,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                 border: 'none',
                 fontSize: '24px',
                 cursor: 'pointer',
-                zIndex: 1001
+                zIndex: 1001,
+                color: 'var(--color-text-secondary)'
               }}
             >
               ×
@@ -398,14 +401,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
+          background: 'var(--color-bg-overlay)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
         }}>
           <div style={{
-            background: 'white',
+            background: 'var(--color-card-bg)',
             borderRadius: '8px',
             maxWidth: '1000px',
             width: '90%',
@@ -423,7 +426,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                 border: 'none',
                 fontSize: '24px',
                 cursor: 'pointer',
-                zIndex: 1001
+                zIndex: 1001,
+                color: 'var(--color-text-secondary)'
               }}
             >
               ×

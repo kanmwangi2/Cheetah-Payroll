@@ -1,0 +1,728 @@
+/**
+ * Component Styles - Theme-aware component styling
+ * Uses CSS custom properties from themes.css for consistent theming
+ */
+
+/* Form Components */
+.staff-form,
+.deductions-form,
+.payments-form,
+.payroll-form,
+.settings-form {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.staff-form h3,
+.deductions-form h3,
+.payments-form h3,
+.payroll-form h3,
+.settings-form h3 {
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.staff-form-row,
+.form-row {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.staff-form-row > *,
+.form-row > * {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Input Styling */
+.staff-form input,
+.staff-form select,
+.deductions-form input,
+.deductions-form select,
+.payments-form input,
+.payments-form select,
+.payroll-form input,
+.payroll-form select,
+.settings-form input,
+.settings-form select,
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-input-bg);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  transition: all var(--transition-fast);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-input-focus);
+  box-shadow: 0 0 0 2px var(--color-input-focus)25;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: var(--color-input-disabled);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+input.error,
+select.error,
+textarea.error {
+  border-color: var(--color-error-border);
+  background-color: var(--color-error-bg);
+}
+
+/* Button Styling */
+.staff-form-btn,
+.primary-btn,
+button[type="submit"] {
+  background-color: var(--color-button-primary);
+  color: var(--color-text-inverse);
+  border: none;
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.staff-form-btn:hover,
+.primary-btn:hover,
+button[type="submit"]:hover {
+  background-color: var(--color-button-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.staff-form-btn:disabled,
+.primary-btn:disabled,
+button[type="submit"]:disabled {
+  background-color: var(--color-text-disabled);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Secondary buttons */
+.secondary-btn {
+  background-color: transparent;
+  color: var(--color-button-secondary);
+  border: 1px solid var(--color-button-secondary);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.secondary-btn:hover {
+  background-color: var(--color-button-secondary);
+  color: var(--color-text-inverse);
+}
+
+/* Error Messages */
+.staff-form-error,
+.form-error,
+.field-error {
+  color: var(--color-error-text);
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-sm);
+}
+
+/* Table Styling */
+.deductions-table,
+.payments-table,
+.payroll-table,
+.staff-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--color-card-bg);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.deductions-table th,
+.payments-table th,
+.payroll-table th,
+.staff-table th {
+  background-color: var(--color-table-header);
+  color: var(--color-text-primary);
+  padding: var(--spacing-md);
+  text-align: left;
+  font-weight: var(--font-weight-semibold);
+  border-bottom: 1px solid var(--color-table-border);
+}
+
+.deductions-table td,
+.payments-table td,
+.payroll-table td,
+.staff-table td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-table-border);
+  color: var(--color-text-primary);
+}
+
+.deductions-table tbody tr:hover,
+.payments-table tbody tr:hover,
+.payroll-table tbody tr:hover,
+.staff-table tbody tr:hover {
+  background-color: var(--color-table-row-hover);
+}
+
+/* Table wrapper for responsive design */
+.deductions-table-wrapper,
+.payments-table-wrapper,
+.payroll-table-wrapper,
+.staff-table-wrapper {
+  overflow-x: auto;
+  background-color: var(--color-card-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Search and filter controls */
+.deductions-table-controls,
+.payments-table-controls,
+.payroll-table-controls,
+.staff-table-controls {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.deductions-search,
+.payments-search,
+.payroll-search,
+.staff-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.deductions-type-filter,
+.deductions-status-filter,
+.payments-type-filter,
+.payments-status-filter,
+.payroll-filter,
+.staff-filter {
+  min-width: 150px;
+}
+
+/* Loading and empty states */
+.deductions-loading,
+.payments-loading,
+.payroll-loading,
+.staff-loading,
+.deductions-empty,
+.payments-empty,
+.payroll-empty,
+.staff-empty {
+  text-align: center;
+  padding: var(--spacing-3xl);
+  color: var(--color-text-secondary);
+  background-color: var(--color-card-bg);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-card-border);
+}
+
+.deductions-error,
+.payments-error,
+.payroll-error,
+.staff-error {
+  color: var(--color-error-text);
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Page layout */
+.deductions-list,
+.payments-list,
+.payroll-list,
+.staff-list {
+  padding: var(--spacing-xl);
+  background-color: var(--color-bg-primary);
+  min-height: 100vh;
+}
+
+.deductions-list h2,
+.payments-list h2,
+.payroll-list h2,
+.staff-list h2 {
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xl);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-xl);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-2xl);
+}
+
+.modal-content h3 {
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Labels */
+label {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-xs);
+  display: block;
+}
+
+/* Status badges */
+.status-badge {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+}
+
+.status-active {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
+}
+
+.status-completed {
+  background-color: var(--color-info-bg);
+  color: var(--color-info-text);
+  border: 1px solid var(--color-info-border);
+}
+
+.status-cancelled,
+.status-rejected {
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
+  border: 1px solid var(--color-error-border);
+}
+
+.status-pending,
+.status-draft {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-border);
+}
+
+/* Progress bars */
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-gray-200);
+  border-radius: var(--border-radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--color-primary-500);
+  transition: width var(--transition-normal);
+}
+
+.progress-fill.completed {
+  background-color: var(--color-success-500);
+}
+
+.progress-fill.error {
+  background-color: var(--color-error-500);
+}
+
+/* Accordion Styles */
+.accordion {
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-lg);
+  background-color: var(--color-card-bg);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+}
+
+.accordion-header {
+  background-color: var(--color-table-header);
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  transition: background-color var(--transition-fast);
+}
+
+.accordion-header:hover {
+  background-color: var(--color-table-row-hover);
+}
+
+.accordion-header:focus {
+  outline: 2px solid var(--color-input-focus);
+  outline-offset: -2px;
+}
+
+.accordion-icon {
+  transition: transform var(--transition-fast);
+}
+
+.accordion-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.accordion-content h4 {
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+.accordion-content p {
+  margin-bottom: var(--spacing-md);
+}
+
+.accordion-content ul,
+.accordion-content ol {
+  margin-left: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.accordion-content li {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Export button */
+.export-pdf-btn {
+  background-color: var(--color-error-500);
+  color: var(--color-text-inverse);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg);
+}
+
+.export-pdf-btn:hover {
+  background-color: var(--color-error-600);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Dashboard Styles */
+.dashboard-container {
+  padding: 0;
+  background: transparent;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3xl);
+}
+
+.dashboard-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.dashboard-timestamp {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.dashboard-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  background-color: var(--color-card-bg);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-card-border);
+}
+
+.dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-3xl);
+}
+
+.dashboard-metric-card {
+  background-color: var(--color-card-bg);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-card-border);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.dashboard-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.dashboard-metric-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.dashboard-metric-icon {
+  font-size: var(--font-size-2xl);
+}
+
+.dashboard-metric-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.dashboard-metric-value {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-600);
+  margin: 0;
+}
+
+.dashboard-metric-change {
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.dashboard-metric-change.positive {
+  color: var(--color-success-text);
+}
+
+.dashboard-metric-change.negative {
+  color: var(--color-error-text);
+}
+
+.dashboard-quick-actions {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.dashboard-section-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-lg);
+}
+
+.dashboard-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.dashboard-action-card {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-decoration: none;
+  color: inherit;
+}
+
+.dashboard-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-300);
+}
+
+.dashboard-action-icon {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.dashboard-action-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-xs);
+}
+
+.dashboard-action-description {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.dashboard-recent-activity {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+}
+
+.dashboard-activity-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.dashboard-activity-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-activity-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-600);
+}
+
+.dashboard-activity-content {
+  flex: 1;
+}
+
+.dashboard-activity-description {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.dashboard-activity-time {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.dashboard-activity-status {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Remove old hardcoded dashboard styles from App.css */
+.dashboard-container.old {
+  margin: 32px auto 24px auto;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 32px 32px 24px 32px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .staff-form-row,
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .deductions-table-controls,
+  .payments-table-controls,
+  .payroll-table-controls,
+  .staff-table-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .deductions-search,
+  .payments-search,
+  .payroll-search,
+  .staff-search {
+    min-width: unset;
+  }
+  
+  .dashboard-metrics {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-actions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+  }
+}
