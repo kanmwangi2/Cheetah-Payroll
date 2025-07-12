@@ -24,7 +24,10 @@
       "Bash(npx firebase login:*)",
       "Bash(npx firebase projects:list:*)",
       "Bash(npx firebase use:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": []
   }

@@ -52,65 +52,65 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
+    <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
       {/* Top Navigation Bar */}
       <div style={{
-        background: 'var(--color-nav-bg)',
-        borderBottom: '1px solid var(--color-nav-border)',
+        background: '#ffffff',
+        borderBottom: '1px solid #e5e7eb',
         position: 'sticky',
         top: 0,
-        zIndex: 'var(--z-sticky)',
-        boxShadow: 'var(--shadow-sm)'
+        zIndex: 1020,
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
       }}>
         <div style={{
           maxWidth: '1400px',
           margin: '0 auto',
-          padding: '0 var(--spacing-2xl)',
+          padding: '0 24px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           height: '64px'
         }}>
           {/* Left Side - Logo and Company */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2xl)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{
                 width: '32px',
                 height: '32px',
-                background: 'linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400))',
-                borderRadius: 'var(--border-radius-lg)',
+                background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                borderRadius: '8px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--color-text-inverse)',
-                fontWeight: 'var(--font-weight-bold)',
-                fontSize: 'var(--font-size-sm)'
+                color: '#ffffff',
+                fontWeight: '700',
+                fontSize: '14px'
               }}>
                 CP
               </div>
               <h1 style={{ 
                 margin: 0, 
-                fontSize: 'var(--font-size-xl)', 
-                fontWeight: 'var(--font-weight-semibold)', 
-                color: 'var(--color-primary-600)' 
+                fontSize: '20px', 
+                fontWeight: '600', 
+                color: '#2563eb' 
               }}>
                 Cheetah Payroll
               </h1>
             </div>
             
             <div style={{ 
-              height: 'var(--spacing-2xl)', 
+              height: '24px', 
               width: '1px', 
-              background: 'var(--color-border-primary)' 
+              background: '#e5e7eb' 
             }} />
             
-            <div style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+            <div style={{ color: '#6b7280', fontSize: '14px' }}>
               <strong>{company.name}</strong>
             </div>
           </div>
 
           {/* Right Side - Theme Toggle and User Menu */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <ThemeSwitcher variant="toggle" size="sm" showLabels={false} />
             
             <div style={{ position: 'relative' }}>
@@ -119,36 +119,36 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 'var(--spacing-sm)',
-                  padding: 'var(--spacing-sm) var(--spacing-md)',
-                  background: 'var(--color-bg-tertiary)',
-                  border: '1px solid var(--color-border-primary)',
-                  borderRadius: 'var(--border-radius-lg)',
+                  gap: '8px',
+                  padding: '8px 12px',
+                  background: '#f3f4f6',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
                   cursor: 'pointer',
-                  fontSize: 'var(--font-size-sm)'
+                  fontSize: '14px'
                 }}
               >
                 <div style={{
                   width: '32px',
                   height: '32px',
-                  background: 'var(--color-primary-600)',
-                  borderRadius: 'var(--border-radius-full)',
+                  background: '#2563eb',
+                  borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--color-text-inverse)',
-                  fontSize: 'var(--font-size-xs)',
-                  fontWeight: 'var(--font-weight-medium)'
+                  color: '#ffffff',
+                  fontSize: '12px',
+                  fontWeight: '500'
                 }}>
                   {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontWeight: 'var(--font-weight-medium)', color: 'var(--color-text-primary)' }}>{user?.name}</div>
-                  <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
+                  <div style={{ fontWeight: '500', color: '#111827' }}>{user?.name}</div>
+                  <div style={{ fontSize: '12px', color: '#6b7280' }}>
                     {roleLabels[user?.role || ''] || user?.role}
                   </div>
                 </div>
-                <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-xs)' }}>▼</span>
+                <span style={{ color: '#6b7280', fontSize: '12px' }}>▼</span>
               </button>
 
               {showUserMenu && (
@@ -156,20 +156,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                   position: 'absolute',
                   top: '100%',
                   right: 0,
-                  marginTop: 'var(--spacing-xs)',
-                  background: 'var(--color-bg-primary)',
-                  border: '1px solid var(--color-border-primary)',
-                  borderRadius: 'var(--border-radius-lg)',
-                  boxShadow: 'var(--shadow-lg)',
+                  marginTop: '4px',
+                  background: '#ffffff',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                   minWidth: '200px',
-                  zIndex: 'var(--z-dropdown)'
+                  zIndex: 1000
                 }}>
-                  <div style={{ padding: 'var(--spacing-md) var(--spacing-lg)', borderBottom: '1px solid var(--color-border-primary)' }}>
-                    <div style={{ fontWeight: 'var(--font-weight-medium)', color: 'var(--color-text-primary)' }}>{user?.name}</div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>{user?.email}</div>
+                  <div style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb' }}>
+                    <div style={{ fontWeight: '500', color: '#111827' }}>{user?.name}</div>
+                    <div style={{ fontSize: '12px', color: '#6b7280' }}>{user?.email}</div>
                   </div>
                   
-                  <div style={{ padding: 'var(--spacing-sm) 0' }}>
+                  <div style={{ padding: '8px 0' }}>
                     <button
                       onClick={() => {
                         setShowUserProfile(true);
@@ -283,8 +283,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
         {/* Side Navigation */}
         <div style={{
           width: '240px',
-          background: '#fff',
-          borderRight: '1px solid #e9ecef',
+          background: '#ffffff',
+          borderRight: '1px solid #e5e7eb',
           padding: '24px 0'
         }}>
           <nav>
@@ -295,14 +295,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                 style={{
                   width: '100%',
                   padding: '12px 24px',
-                  background: isActive(item.path) ? '#e3f2fd' : 'transparent',
+                  background: isActive(item.path) ? '#eff6ff' : 'transparent',
                   border: 'none',
-                  borderRight: isActive(item.path) ? '3px solid #1976d2' : '3px solid transparent',
+                  borderRight: isActive(item.path) ? '3px solid #2563eb' : '3px solid transparent',
                   textAlign: 'left',
                   cursor: 'pointer',
-                  fontSize: '0.9rem',
+                  fontSize: '14px',
                   fontWeight: isActive(item.path) ? 600 : 400,
-                  color: isActive(item.path) ? '#1976d2' : '#666',
+                  color: isActive(item.path) ? '#2563eb' : '#6b7280',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
@@ -310,7 +310,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive(item.path)) {
-                    (e.target as HTMLButtonElement).style.background = '#f8f9fa';
+                    (e.target as HTMLButtonElement).style.background = '#f9fafb';
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -319,7 +319,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                   }
                 }}
               >
-                <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+                <span style={{ fontSize: '18px' }}>{item.icon}</span>
                 {item.label}
               </button>
             ))}

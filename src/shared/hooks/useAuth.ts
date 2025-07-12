@@ -28,6 +28,7 @@ export const useAuth = () => {
   useEffect(() => {
     let unsubscribe: (() => void) = () => {};
     
+    
     try {
       if (auth && auth.onAuthStateChanged) {
         unsubscribe = auth.onAuthStateChanged(async firebaseUser => {
