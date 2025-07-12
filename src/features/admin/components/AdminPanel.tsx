@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useThemeContext } from '../../../core/providers/ThemeProvider';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../core/config/firebase.config';
+// import { useThemeContext } from '../../../core/providers/ThemeProvider';
 import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
 import ThemeBoundary from '../../../shared/components/ui/ThemeBoundary';
 import CompanyManagement from './CompanyManagement';
@@ -10,8 +12,30 @@ import GlobalSettings from './GlobalSettings';
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('companies');
+  const [globalLogoUrl, setGlobalLogoUrl] = useState<string>('');
   const navigate = useNavigate();
-  const { isDark, resolvedTheme } = useThemeContext();
+  // ...existing code...
+
+  // Load global logo settings
+  useEffect(() => {
+    const loadGlobalLogo = async () => {
+      try {
+        const docRef = doc(db, 'app_settings', 'global_settings');
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data?.application?.logoUrl) {
+            setGlobalLogoUrl(data.application.logoUrl);
+          }
+        }
+      } catch (error) {
+        // console.error('Error loading global logo:', error);
+      }
+    };
+
+    loadGlobalLogo();
+  }, []);
 
   const tabs = [
     { id: 'companies', label: 'Company Management', icon: '🏢' },
@@ -47,7 +71,33 @@ const AdminPanel: React.FC = () => {
         <div style={headerStyles}>
           <div style={headerContentStyles}>
             <div style={titleSectionStyles}>
-              <div style={logoStyles}>🐆</div>
+              {globalLogoUrl ? (
+                <img 
+                  src={globalLogoUrl} 
+                  alt="Application Logo" 
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    objectFit: 'contain',
+                    borderRadius: '8px'
+                  }}
+                />
+              ) : (
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '8px',
+                  background: 'var(--color-primary-600)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--color-text-inverse)',
+                  fontSize: '20px',
+                  fontWeight: 'bold'
+                }}>
+                  ⚙️
+                </div>
+              )}
               <h1 style={titleStyles}>
                 Application Administration
               </h1>
@@ -95,7 +145,7 @@ const containerStyles: React.CSSProperties = {
 const themeSwitcherStyles: React.CSSProperties = {
   position: 'fixed',
   top: '24px',
-  right: '24px',
+  left: '24px', // Move to left side to avoid overlap
   zIndex: 1000,
 };
 
@@ -122,9 +172,9 @@ const titleSectionStyles: React.CSSProperties = {
   gap: 'var(--spacing-lg)',
 };
 
-const logoStyles: React.CSSProperties = {
-  fontSize: '2rem',
-};
+// const logoStyles: React.CSSProperties = {
+//   fontSize: '2rem',
+// };
 
 const titleStyles: React.CSSProperties = {
   color: 'var(--color-primary-600)',
