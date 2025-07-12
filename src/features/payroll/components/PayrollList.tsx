@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PDFExport from '../../reports/components/PDFExport';
-import AuditTrail from '../../../shared/components/AuditTrail';
 import ApprovalWorkflow from '../../../shared/components/ApprovalWorkflow';
 import { getPayrolls, createPayroll, calculatePayroll } from '../services/payroll.service';
-import PayrollImportExport from './PayrollImportExport';
 
 const defaultBrackets = [
   { min: 0, max: 60000, rate: 0 },
@@ -30,6 +28,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [result, setResult] = useState<any>(null);
   const [fieldErrors, setFieldErrors] = useState<{ [k: string]: string }>({});
   const [search, setSearch] = useState('');
+  const [showCalculationForm, setShowCalculationForm] = useState(false);
 
   useEffect(() => {
     getPayrolls(companyId)
@@ -90,6 +89,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
       setRefresh(r => r + 1);
       setForm({ gross: '', basic: '', transport: '', otherDeductions: '' });
       setResult(null);
+      setShowCalculationForm(false);
     } catch (err: any) {
       setError(err.message || 'Failed to create payroll');
     }
@@ -108,163 +108,550 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
   });
 
   return (
-    <div className="payroll-list">
-      <h2>Payrolls</h2>
-      <PDFExport data={payrolls} type="payroll" />
-      <AuditTrail entityId={companyId} entityType="company" />
-      <ApprovalWorkflow payrollId={payrolls[0]?.id || ''} companyId={companyId} />
-      <div className="payroll-form-wrapper">
-        <h3>Create Payroll</h3>
-        <div className="payroll-form">
-          <div className="form-row">
-            <label htmlFor="payroll-gross">Gross Pay</label>
-            <input
-              id="payroll-gross"
-              className={fieldErrors.gross ? 'error' : ''}
-              placeholder="Gross Pay"
-              value={form.gross}
-              onChange={e => handleChange('gross', e.target.value)}
-              required
-              aria-invalid={!!fieldErrors.gross}
-              aria-describedby="gross-error"
-              inputMode="decimal"
-            />
-            {fieldErrors.gross && (
-              <div className="field-error" id="gross-error">
-                {fieldErrors.gross}
-              </div>
-            )}
-          </div>
-          <div className="form-row">
-            <label htmlFor="payroll-basic">Basic Pay</label>
-            <input
-              id="payroll-basic"
-              className={fieldErrors.basic ? 'error' : ''}
-              placeholder="Basic Pay"
-              value={form.basic}
-              onChange={e => handleChange('basic', e.target.value)}
-              required
-              aria-invalid={!!fieldErrors.basic}
-              aria-describedby="basic-error"
-              inputMode="decimal"
-            />
-            {fieldErrors.basic && (
-              <div className="field-error" id="basic-error">
-                {fieldErrors.basic}
-              </div>
-            )}
-          </div>
-          <div className="form-row">
-            <label htmlFor="payroll-transport">Transport Allowance</label>
-            <input
-              id="payroll-transport"
-              className={fieldErrors.transport ? 'error' : ''}
-              placeholder="Transport Allowance"
-              value={form.transport}
-              onChange={e => handleChange('transport', e.target.value)}
-              aria-invalid={!!fieldErrors.transport}
-              aria-describedby="transport-error"
-              inputMode="decimal"
-            />
-            {fieldErrors.transport && (
-              <div className="field-error" id="transport-error">
-                {fieldErrors.transport}
-              </div>
-            )}
-          </div>
-          <div className="form-row">
-            <label>
-              Other Deductions
-              <input
-                className={fieldErrors.otherDeductions ? 'error' : ''}
-                placeholder="Other Deductions"
-                value={form.otherDeductions}
-                onChange={e => handleChange('otherDeductions', e.target.value)}
-                aria-invalid={!!fieldErrors.otherDeductions}
-                aria-describedby="otherDeductions-error"
-                inputMode="decimal"
-              />
+    <div>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        marginBottom: '24px'
+      }}>
+        <h1 style={{ 
+          margin: 0, 
+          color: '#333',
+          fontSize: '2rem',
+          fontWeight: 600
+        }}>
+          Payroll Management
+        </h1>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={() => {
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.accept = '.csv';
+              input.onchange = (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (file) {
+                  console.log('Import CSV:', file);
+                }
+              };
+              input.click();
+            }}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 6,
+              border: '1px solid #28a745',
+              background: '#fff',
+              color: '#28a745',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '14px'
+            }}
+          >
+            📤 Import CSV
+          </button>
+          <button
+            onClick={() => {
+              const csvContent = 'gross,finalNet,paye\n' + 
+                payrolls.map(p => `${p.gross},${p.finalNet},${p.paye}`).join('\n');
+              const blob = new Blob([csvContent], { type: 'text/csv' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'payroll_export.csv';
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 6,
+              border: '1px solid #17a2b8',
+              background: '#fff',
+              color: '#17a2b8',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '14px'
+            }}
+          >
+            📥 Export CSV
+          </button>
+          <button
+            onClick={() => {
+              const template = 'gross,basic,transport,otherDeductions\n500000,400000,50000,0';
+              const blob = new Blob([template], { type: 'text/csv' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'payroll_import_template.csv';
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 6,
+              border: '1px solid #6c757d',
+              background: '#fff',
+              color: '#6c757d',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '14px'
+            }}
+          >
+            📋 Template
+          </button>
+          <button
+            onClick={() => setShowCalculationForm(true)}
+            style={{
+              padding: '10px 20px',
+              borderRadius: 6,
+              border: 'none',
+              background: '#1976d2',
+              color: '#fff',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '14px'
+            }}
+          >
+            + Calculate Payroll
+          </button>
+        </div>
+      </div>
+
+      {/* PDF Export and Approval Workflow */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '16px', 
+        marginBottom: '24px',
+        alignItems: 'center'
+      }}>
+        <PDFExport data={payrolls} type="payroll" />
+        <ApprovalWorkflow payrollId={payrolls[0]?.id || ''} companyId={companyId} />
+      </div>
+
+      {/* Search and Filters */}
+      <div style={{
+        background: '#fff',
+        padding: '20px',
+        borderRadius: '8px',
+        border: '1px solid #e9ecef',
+        marginBottom: '24px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'end' }}>
+          <div style={{ flex: '1' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '6px', 
+              fontWeight: 500,
+              color: '#333'
+            }}>
+              Search Payrolls
             </label>
-            {fieldErrors.otherDeductions && (
-              <div className="field-error" id="otherDeductions-error">
-                {fieldErrors.otherDeductions}
-              </div>
-            )}
+            <input
+              type="search"
+              placeholder="Search by gross or net..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                fontSize: '14px'
+              }}
+            />
           </div>
-          <div className="form-row">
-            <button type="button" className="primary-btn" onClick={handleCalculate}>
-              Calculate
+        </div>
+        
+        <div style={{ 
+          marginTop: '16px', 
+          fontSize: '14px', 
+          color: '#666',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span>Showing {filtered.length} of {payrolls.length} payrolls</span>
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              style={{
+                padding: '4px 8px',
+                borderRadius: 4,
+                border: '1px solid #ddd',
+                background: '#fff',
+                color: '#666',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              Clear Search
             </button>
-          </div>
-          {error && (
-            <div className="form-error" role="alert" aria-live="assertive">
-              {error}
-            </div>
           )}
         </div>
-        {result && (
-          <div className="payroll-calc-result">
-            <h4>Calculation Result</h4>
-            <pre>{JSON.stringify(result, null, 2)}</pre>
-            <button className="primary-btn" onClick={handleCreate}>
-              Save Payroll
-            </button>
+      </div>
+
+      {/* Payroll Table */}
+      <div style={{
+        background: '#fff',
+        borderRadius: '8px',
+        border: '1px solid #e9ecef',
+        overflow: 'hidden',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}>
+        {filtered.length === 0 ? (
+          <div style={{ 
+            padding: '60px 40px', 
+            textAlign: 'center',
+            color: '#666'
+          }}>
+            {payrolls.length === 0 ? (
+              <>
+                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📊</div>
+                <h3 style={{ margin: '0 0 8px 0', color: '#333' }}>No payrolls yet</h3>
+                <p style={{ margin: '0' }}>Get started by calculating your first payroll.</p>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
+                <h3 style={{ margin: '0 0 8px 0', color: '#333' }}>No payrolls found</h3>
+                <p style={{ margin: '0' }}>Try adjusting your search criteria.</p>
+              </>
+            )}
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #e9ecef' }}>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'right', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    Gross
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'right', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    Net
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'right', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    PAYE
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'center', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    Pension (Emp/Er)
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'center', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    Maternity (Emp/Er)
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'center', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    RAMA (Emp/Er)
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'right', 
+                    fontWeight: 600,
+                    color: '#333',
+                    fontSize: '14px'
+                  }}>
+                    CBHI
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(p => (
+                  <tr key={p.id} style={{ borderBottom: '1px solid #e9ecef' }}>
+                    <td style={{ padding: '16px', textAlign: 'right', fontWeight: 500, color: '#333' }}>
+                      RWF {p.gross?.toLocaleString()}
+                    </td>
+                    <td style={{ padding: '16px', textAlign: 'right', fontWeight: 500, color: '#28a745' }}>
+                      RWF {p.finalNet?.toLocaleString()}
+                    </td>
+                    <td style={{ padding: '16px', textAlign: 'right', color: '#333' }}>
+                      RWF {p.paye?.toLocaleString()}
+                    </td>
+                    <td style={{ padding: '16px', textAlign: 'center', color: '#333' }}>
+                      {p.pensionEmployee} / {p.pensionEmployer}
+                    </td>
+                    <td style={{ padding: '16px', textAlign: 'center', color: '#333' }}>
+                      {p.maternityEmployee} / {p.maternityEmployer}
+                    </td>
+                    <td style={{ padding: '16px', textAlign: 'center', color: '#333' }}>
+                      {p.ramaEmployee} / {p.ramaEmployer}
+                    </td>
+                    <td style={{ padding: '16px', textAlign: 'right', color: '#333' }}>
+                      RWF {p.cbhiEmployee?.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
-      <PayrollImportExport
-        companyId={companyId}
-        onImported={() => setRefresh(r => r + 1)}
-        payrolls={payrolls}
-      />
-      <h3>Payroll List</h3>
-      <div className="payroll-table-controls">
-        <input
-          type="search"
-          placeholder="Search by gross or net..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="payroll-search"
-        />
-      </div>
-      {filtered.length === 0 ? (
-        <div className="payroll-empty" aria-live="polite">
-          No payrolls found.
-        </div>
-      ) : (
-        <div className="payroll-table-wrapper">
-          <table className="payroll-table">
-            <thead>
-              <tr>
-                <th>Gross</th>
-                <th>Net</th>
-                <th>PAYE</th>
-                <th>Pension (Emp/Er)</th>
-                <th>Maternity (Emp/Er)</th>
-                <th>RAMA (Emp/Er)</th>
-                <th>CBHI</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(p => (
-                <tr key={p.id}>
-                  <td>{p.gross}</td>
-                  <td>{p.finalNet}</td>
-                  <td>{p.paye}</td>
-                  <td>
-                    {p.pensionEmployee} / {p.pensionEmployer}
-                  </td>
-                  <td>
-                    {p.maternityEmployee} / {p.maternityEmployer}
-                  </td>
-                  <td>
-                    {p.ramaEmployee} / {p.ramaEmployer}
-                  </td>
-                  <td>{p.cbhiEmployee}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+      {/* Calculation Form Modal */}
+      {showCalculationForm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '8px',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            position: 'relative',
+            padding: '24px'
+          }}>
+            <button
+              onClick={() => {
+                setShowCalculationForm(false);
+                setResult(null);
+                setForm({ gross: '', basic: '', transport: '', otherDeductions: '' });
+                setFieldErrors({});
+              }}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                zIndex: 1001,
+                color: '#666'
+              }}
+            >
+              ×
+            </button>
+            
+            <h3 style={{ margin: '0 0 24px 0', color: '#333' }}>Calculate Payroll</h3>
+            
+            <div style={{ display: 'grid', gap: '16px' }}>
+              <div>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '6px', 
+                  fontWeight: 500,
+                  color: '#333'
+                }}>
+                  Gross Pay *
+                </label>
+                <input
+                  className={fieldErrors.gross ? 'error' : ''}
+                  placeholder="Enter gross pay amount"
+                  value={form.gross}
+                  onChange={e => handleChange('gross', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: fieldErrors.gross ? '1px solid #dc3545' : '1px solid #ddd',
+                    borderRadius: 4,
+                    fontSize: '14px'
+                  }}
+                />
+                {fieldErrors.gross && (
+                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '4px' }}>
+                    {fieldErrors.gross}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '6px', 
+                  fontWeight: 500,
+                  color: '#333'
+                }}>
+                  Basic Pay *
+                </label>
+                <input
+                  className={fieldErrors.basic ? 'error' : ''}
+                  placeholder="Enter basic pay amount"
+                  value={form.basic}
+                  onChange={e => handleChange('basic', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: fieldErrors.basic ? '1px solid #dc3545' : '1px solid #ddd',
+                    borderRadius: 4,
+                    fontSize: '14px'
+                  }}
+                />
+                {fieldErrors.basic && (
+                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '4px' }}>
+                    {fieldErrors.basic}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '6px', 
+                  fontWeight: 500,
+                  color: '#333'
+                }}>
+                  Transport Allowance
+                </label>
+                <input
+                  className={fieldErrors.transport ? 'error' : ''}
+                  placeholder="Enter transport allowance (optional)"
+                  value={form.transport}
+                  onChange={e => handleChange('transport', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: fieldErrors.transport ? '1px solid #dc3545' : '1px solid #ddd',
+                    borderRadius: 4,
+                    fontSize: '14px'
+                  }}
+                />
+                {fieldErrors.transport && (
+                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '4px' }}>
+                    {fieldErrors.transport}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '6px', 
+                  fontWeight: 500,
+                  color: '#333'
+                }}>
+                  Other Deductions
+                </label>
+                <input
+                  className={fieldErrors.otherDeductions ? 'error' : ''}
+                  placeholder="Enter other deductions (optional)"
+                  value={form.otherDeductions}
+                  onChange={e => handleChange('otherDeductions', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: fieldErrors.otherDeductions ? '1px solid #dc3545' : '1px solid #ddd',
+                    borderRadius: 4,
+                    fontSize: '14px'
+                  }}
+                />
+                {fieldErrors.otherDeductions && (
+                  <div style={{ color: '#dc3545', fontSize: '13px', marginTop: '4px' }}>
+                    {fieldErrors.otherDeductions}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={handleCalculate}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: 4,
+                    border: 'none',
+                    background: '#007bff',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  Calculate
+                </button>
+              </div>
+
+              {error && (
+                <div style={{ 
+                  background: '#f8d7da', 
+                  color: '#721c24', 
+                  padding: '12px', 
+                  borderRadius: 4,
+                  fontSize: '14px'
+                }}>
+                  {error}
+                </div>
+              )}
+
+              {result && (
+                <div style={{ 
+                  background: '#f8f9fa', 
+                  padding: '16px', 
+                  borderRadius: 4,
+                  border: '1px solid #e9ecef'
+                }}>
+                  <h4 style={{ margin: '0 0 12px 0', color: '#333' }}>Calculation Result</h4>
+                  <div style={{ 
+                    background: '#fff', 
+                    padding: '12px', 
+                    borderRadius: 4, 
+                    fontFamily: 'monospace',
+                    fontSize: '13px',
+                    marginBottom: '16px',
+                    border: '1px solid #e9ecef'
+                  }}>
+                    {JSON.stringify(result, null, 2)}
+                  </div>
+                  <button 
+                    onClick={handleCreate}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: 4,
+                      border: 'none',
+                      background: '#28a745',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    Save Payroll
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

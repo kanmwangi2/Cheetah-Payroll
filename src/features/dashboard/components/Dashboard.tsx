@@ -15,13 +15,6 @@ interface DashboardMetrics {
   thisMonthPayroll: number;
 }
 
-interface RecentActivity {
-  id: string;
-  type: 'staff' | 'payroll' | 'payment' | 'deduction';
-  description: string;
-  timestamp: Date;
-  status?: string;
-}
 
 const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
   const [metrics, setMetrics] = useState<DashboardMetrics>({
@@ -32,7 +25,6 @@ const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
     totalDeductions: 0,
     thisMonthPayroll: 0
   });
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -73,30 +65,6 @@ const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
           thisMonthPayroll
         });
 
-        // Sample recent activity
-        setRecentActivity([
-          {
-            id: '1',
-            type: 'staff',
-            description: 'New employee added',
-            timestamp: new Date(Date.now() - 3600000),
-            status: 'completed'
-          },
-          {
-            id: '2',
-            type: 'payroll',
-            description: 'Monthly payroll processed',
-            timestamp: new Date(Date.now() - 7200000),
-            status: 'completed'
-          },
-          {
-            id: '3',
-            type: 'payment',
-            description: 'Salary payments processed',
-            timestamp: new Date(Date.now() - 7200000),
-            status: 'completed'
-          }
-        ]);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -208,87 +176,29 @@ const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
         </div>
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '2fr 1fr', 
-        gap: 'var(--spacing-xl)',
-        marginBottom: 'var(--spacing-3xl)'
-      }}>
-        {/* Quick Actions */}
-        <div className="dashboard-quick-actions">
-          <h3 className="dashboard-section-title">
-            Quick Actions
-          </h3>
-          <div className="dashboard-actions-grid">
-            {quickActions.map((action, index) => (
-              <button
-                key={index}
-                onClick={action.action}
-                className="dashboard-action-card"
-              >
-                <div className="dashboard-action-icon">
-                  {action.icon}
-                </div>
-                <div className="dashboard-action-title">
-                  {action.title}
-                </div>
-                <p className="dashboard-action-description">
-                  {action.description}
-                </p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="dashboard-recent-activity">
-          <h3 className="dashboard-section-title">
-            Recent Activity
-          </h3>
-          <div>
-            {recentActivity.length === 0 ? (
-              <div style={{ 
-                textAlign: 'center', 
-                color: 'var(--color-text-secondary)', 
-                padding: 'var(--spacing-xl)',
-                fontSize: 'var(--font-size-sm)'
-              }}>
-                No recent activity
+      {/* Quick Actions */}
+      <div className="dashboard-quick-actions">
+        <h3 className="dashboard-section-title">
+          Quick Actions
+        </h3>
+        <div className="dashboard-actions-grid">
+          {quickActions.map((action, index) => (
+            <button
+              key={index}
+              onClick={action.action}
+              className="dashboard-action-card"
+            >
+              <div className="dashboard-action-icon">
+                {action.icon}
               </div>
-            ) : (
-              recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="dashboard-activity-item"
-                >
-                  <div className="dashboard-activity-icon">
-                    {activity.type === 'staff' ? '👤' :
-                     activity.type === 'payroll' ? '📊' :
-                     activity.type === 'payment' ? '💰' : '📉'}
-                  </div>
-                  <div className="dashboard-activity-content">
-                    <p className="dashboard-activity-description">
-                      {activity.description}
-                    </p>
-                    <div style={{ 
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <p className="dashboard-activity-time">
-                        {activity.timestamp.toLocaleString()}
-                      </p>
-                      {activity.status && (
-                        <span className={`dashboard-activity-status status-${activity.status}`}>
-                          {activity.status.replace('_', ' ')}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+              <div className="dashboard-action-title">
+                {action.title}
+              </div>
+              <p className="dashboard-action-description">
+                {action.description}
+              </p>
+            </button>
+          ))}
         </div>
       </div>
     </div>

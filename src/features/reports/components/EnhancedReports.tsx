@@ -215,21 +215,21 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
             <div className="reports-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
               {STATUTORY_REPORTS.map(report => (
                 <div key={report.key} className="report-card" style={{ 
-                  border: '1px solid #e0e0e0', 
+                  border: '1px solid var(--color-card-border)', 
                   borderRadius: '8px', 
                   padding: '16px',
-                  background: 'white'
+                  background: 'var(--color-card-bg)'
                 }}>
-                  <h4 style={{ margin: '0 0 8px 0', color: '#1976d2' }}>{report.label}</h4>
-                  <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: '#666' }}>{report.description}</p>
+                  <h4 style={{ margin: '0 0 8px 0', color: 'var(--color-primary-600)' }}>{report.label}</h4>
+                  <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{report.description}</p>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button
                       onClick={() => handleStatutoryReport(report.key as StatutoryReportType, 'pdf')}
                       disabled={loading || !selectedPeriod}
                       style={{
                         padding: '6px 12px',
-                        background: '#1976d2',
-                        color: 'white',
+                        background: 'var(--color-button-primary)',
+                        color: 'var(--color-text-inverse)',
                         border: 'none',
                         borderRadius: '4px',
                         fontSize: '0.8rem',
@@ -243,9 +243,9 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
                       disabled={loading || !selectedPeriod}
                       style={{
                         padding: '6px 12px',
-                        background: 'white',
-                        color: '#1976d2',
-                        border: '1px solid #1976d2',
+                        background: 'var(--color-card-bg)',
+                        color: 'var(--color-button-secondary)',
+                        border: '1px solid var(--color-button-secondary)',
                         borderRadius: '4px',
                         fontSize: '0.8rem',
                         cursor: loading || !selectedPeriod ? 'not-allowed' : 'pointer'
@@ -287,8 +287,8 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
                 disabled={loading || !selectedPayroll}
                 style={{
                   padding: '12px 24px',
-                  background: '#1976d2',
-                  color: 'white',
+                  background: 'var(--color-button-primary)',
+                  color: 'var(--color-text-inverse)',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: loading || !selectedPayroll ? 'not-allowed' : 'pointer'
@@ -301,8 +301,8 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
                 disabled={loading || !selectedPayroll}
                 style={{
                   padding: '12px 24px',
-                  background: '#4caf50',
-                  color: 'white',
+                  background: 'var(--color-success-500)',
+                  color: 'var(--color-text-inverse)',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: loading || !selectedPayroll ? 'not-allowed' : 'pointer'
@@ -341,8 +341,8 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
                 disabled={loading || !selectedPayroll}
                 style={{
                   padding: '12px 24px',
-                  background: '#1976d2',
-                  color: 'white',
+                  background: 'var(--color-button-primary)',
+                  color: 'var(--color-text-inverse)',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: loading || !selectedPayroll ? 'not-allowed' : 'pointer'
@@ -355,8 +355,8 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
                 disabled={loading || !selectedPayroll}
                 style={{
                   padding: '12px 24px',
-                  background: '#ff9800',
-                  color: 'white',
+                  background: 'var(--color-warning-500)',
+                  color: 'var(--color-text-inverse)',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: loading || !selectedPayroll ? 'not-allowed' : 'pointer'
@@ -374,7 +374,7 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
             <h3>Management Reports</h3>
             <p>Analytical reports for management decision making.</p>
             <AdvancedCharts data={{}} />
-            <p style={{ color: '#666', fontStyle: 'italic' }}>Advanced analytics and management reports coming soon...</p>
+            <p style={{ color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>Advanced analytics and management reports coming soon...</p>
           </div>
         );
 
@@ -389,7 +389,7 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
       
       {/* Tab Navigation */}
       <div className="tab-navigation" style={{ 
-        borderBottom: '1px solid #e0e0e0',
+        borderBottom: '1px solid var(--color-border-primary)',
         marginBottom: '24px'
       }}>
         {[
@@ -405,8 +405,8 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
               padding: '12px 24px',
               border: 'none',
               background: 'none',
-              borderBottom: activeTab === tab.key ? '2px solid #1976d2' : '2px solid transparent',
-              color: activeTab === tab.key ? '#1976d2' : '#666',
+              borderBottom: activeTab === tab.key ? '2px solid var(--color-primary-600)' : '2px solid transparent',
+              color: activeTab === tab.key ? 'var(--color-primary-600)' : 'var(--color-text-secondary)',
               fontWeight: activeTab === tab.key ? '600' : 'normal',
               cursor: 'pointer',
               fontSize: '0.9rem'
@@ -425,8 +425,8 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
         <div style={{ 
           padding: '20px', 
           textAlign: 'center', 
-          color: '#1976d2',
-          background: '#f5f5f5',
+          color: 'var(--color-primary-600)',
+          background: 'var(--color-bg-secondary)',
           borderRadius: '4px',
           margin: '16px 0'
         }}>
@@ -437,9 +437,9 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
       {error && (
         <div className="reports-error" role="alert" style={{
           padding: '12px',
-          background: '#ffebee',
-          color: '#c62828',
-          border: '1px solid #ffcdd2',
+          background: 'var(--color-error-bg)',
+          color: 'var(--color-error-text)',
+          border: '1px solid var(--color-error-border)',
           borderRadius: '4px',
           margin: '16px 0'
         }}>

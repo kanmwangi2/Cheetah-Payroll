@@ -3,7 +3,6 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy 
 import { db } from '../../../core/config/firebase.config';
 import StaffForm from './StaffForm';
 import StaffProfile from './StaffProfile';
-import StaffImportExport from './StaffImportExport';
 
 interface StaffMember {
   id: string;
@@ -48,7 +47,6 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [showImportExport, setShowImportExport] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [departments, setDepartments] = useState<string[]>([]);
 
@@ -157,18 +155,82 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
         </h1>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
-            onClick={() => setShowImportExport(true)}
+            onClick={() => {
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.accept = '.csv';
+              input.onchange = (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (file) {
+                  // Handle CSV import logic here
+                  console.log('Import CSV:', file);
+                }
+              };
+              input.click();
+            }}
             style={{
-              padding: '10px 20px',
+              padding: '10px 16px',
               borderRadius: 6,
-              border: '1px solid #1976d2',
+              border: '1px solid #28a745',
               background: '#fff',
-              color: '#1976d2',
+              color: '#28a745',
               cursor: 'pointer',
-              fontWeight: 500
+              fontWeight: 500,
+              fontSize: '14px'
             }}
           >
-            📥 Import/Export
+            📤 Import CSV
+          </button>
+          <button
+            onClick={() => {
+              // Export CSV logic
+              const csvContent = 'firstName,lastName,idNumber,email\n' + 
+                staff.map(s => `${s.firstName},${s.lastName},${s.idNumber},${s.email}`).join('\n');
+              const blob = new Blob([csvContent], { type: 'text/csv' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'staff_export.csv';
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 6,
+              border: '1px solid #17a2b8',
+              background: '#fff',
+              color: '#17a2b8',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '14px'
+            }}
+          >
+            📥 Export CSV
+          </button>
+          <button
+            onClick={() => {
+              // Download template logic
+              const template = 'firstName,lastName,idNumber,rssbNumber,dateOfBirth,gender,maritalStatus,phone,email,address,emergencyContact,startDate,position,employmentType,department,bankName,accountNumber\nJohn,Doe,123456789,RSSB123,1990-01-01,male,single,0780000000,john@example.com,123 Main St,Jane Doe,2022-01-01,Manager,Full-time,HR,Bank of Kigali,1234567890';
+              const blob = new Blob([template], { type: 'text/csv' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'staff_import_template.csv';
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 6,
+              border: '1px solid #6c757d',
+              background: '#fff',
+              color: '#6c757d',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '14px'
+            }}
+          >
+            📋 Template
           </button>
           <button
             onClick={() => setShowForm(true)}
@@ -179,10 +241,11 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               background: '#1976d2',
               color: '#fff',
               cursor: 'pointer',
-              fontWeight: 500
+              fontWeight: 500,
+              fontSize: '14px'
             }}
           >
-            + Add Staff Member
+            + Add Staff
           </button>
         </div>
       </div>
@@ -332,20 +395,6 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                 <div style={{ fontSize: '3rem', marginBottom: '16px' }}>👥</div>
                 <h3 style={{ margin: '0 0 8px 0', color: '#333' }}>No staff members yet</h3>
                 <p style={{ margin: '0 0 20px 0' }}>Get started by adding your first team member.</p>
-                <button
-                  onClick={() => setShowForm(true)}
-                  style={{
-                    padding: '12px 24px',
-                    borderRadius: 6,
-                    border: 'none',
-                    background: '#1976d2',
-                    color: '#fff',
-                    cursor: 'pointer',
-                    fontWeight: 500
-                  }}
-                >
-                  Add First Staff Member
-                </button>
               </>
             ) : (
               <>
@@ -517,24 +566,52 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
 
       {/* Modals */}
       {showForm && (
-        <StaffForm
-          companyId={companyId}
-          onAdded={() => {
-            setShowForm(false);
-            loadStaff();
-          }}
-        />
-      )}
-
-      {showImportExport && (
-        <StaffImportExport
-          companyId={companyId}
-          onImported={() => {
-            setShowImportExport(false);
-            loadStaff();
-          }}
-          staff={staff}
-        />
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '8px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowForm(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                zIndex: 1001,
+                color: '#666'
+              }}
+            >
+              ×
+            </button>
+            <StaffForm
+              companyId={companyId}
+              onAdded={() => {
+                setShowForm(false);
+                loadStaff();
+              }}
+            />
+          </div>
+        </div>
       )}
 
       {selectedStaff && (

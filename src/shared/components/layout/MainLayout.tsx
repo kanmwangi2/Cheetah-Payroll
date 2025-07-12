@@ -29,6 +29,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showCompanySettings, setShowCompanySettings] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '🏠', path: '/dashboard' },
@@ -73,8 +74,26 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
           alignItems: 'center',
           height: '64px'
         }}>
-          {/* Left Side - Logo and Company */}
+          {/* Left Side - Menu Toggle, Logo and Company */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '20px',
+                cursor: 'pointer',
+                padding: '4px',
+                color: 'var(--color-nav-text)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {sidebarCollapsed ? '☰' : '⟨'}
+            </button>
+            
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{
                 width: '32px',
@@ -284,10 +303,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
       <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)' }}>
         {/* Side Navigation */}
         <div style={{
-          width: '240px',
+          width: sidebarCollapsed ? '60px' : '240px',
           background: 'var(--color-nav-bg)',
           borderRight: '1px solid var(--color-nav-border)',
-          padding: '24px 0'
+          padding: '24px 0',
+          transition: 'width 0.3s ease',
+          overflow: 'hidden'
         }}>
           <nav>
             {navigationItems.map(item => (
@@ -296,7 +317,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                 onClick={() => navigate(item.path)}
                 style={{
                   width: '100%',
-                  padding: '12px 24px',
+                  padding: sidebarCollapsed ? '12px' : '12px 24px',
                   background: isActive(item.path) ? 'var(--color-primary-50)' : 'transparent',
                   border: 'none',
                   borderRight: isActive(item.path) ? '3px solid var(--color-primary-500)' : '3px solid transparent',
@@ -307,8 +328,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                   color: isActive(item.path) ? 'var(--color-nav-text-active)' : 'var(--color-nav-text)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  transition: 'all 0.2s'
+                  justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                  gap: sidebarCollapsed ? '0' : '12px',
+                  transition: 'all 0.2s',
+                  position: 'relative'
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive(item.path)) {
@@ -320,9 +343,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                     (e.target as HTMLButtonElement).style.background = 'transparent';
                   }
                 }}
+                title={sidebarCollapsed ? item.label : undefined}
               >
                 <span style={{ fontSize: '18px' }}>{item.icon}</span>
-                {item.label}
+                {!sidebarCollapsed && item.label}
               </button>
             ))}
           </nav>
