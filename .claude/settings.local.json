@@ -27,7 +27,8 @@
       "Bash(node:*)",
       "Bash(timeout:*)",
       "Bash(curl:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Bash(npm test:*)"
     ],
     "deny": []
   }

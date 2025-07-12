@@ -53,10 +53,15 @@ const TaxConfiguration: React.FC = () => {
       if (docSnap.exists()) {
         const data = docSnap.data() as TaxConfiguration;
         setConfig(data);
+      } else {
+        // Initialize with default configuration if document doesn't exist
+        await setDoc(docRef, config);
+        setMessage({ type: 'success', text: 'Tax configuration initialized with default values' });
+        setTimeout(() => setMessage(null), 3000);
       }
     } catch (error) {
       console.error('Error loading tax configuration:', error);
-      setMessage({ type: 'error', text: 'Failed to load tax configuration' });
+      setMessage({ type: 'error', text: 'Failed to load tax configuration. Please check your permissions.' });
     } finally {
       setLoading(false);
     }
@@ -140,7 +145,7 @@ const TaxConfiguration: React.FC = () => {
         alignItems: 'center',
         marginBottom: '24px'
       }}>
-        <h2 style={{ margin: 0, color: '#333' }}>Tax Configuration</h2>
+        <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>Tax Configuration</h2>
         <button
           onClick={saveTaxConfiguration}
           disabled={saving}
@@ -148,8 +153,8 @@ const TaxConfiguration: React.FC = () => {
             padding: '10px 20px',
             borderRadius: 6,
             border: 'none',
-            background: saving ? '#ccc' : '#1976d2',
-            color: '#fff',
+            background: saving ? 'var(--color-bg-disabled)' : 'var(--color-primary-600)',
+            color: 'var(--color-text-on-primary)',
             cursor: saving ? 'not-allowed' : 'pointer',
             fontWeight: 500
           }}
@@ -163,9 +168,9 @@ const TaxConfiguration: React.FC = () => {
           padding: '12px 16px',
           borderRadius: 6,
           marginBottom: '24px',
-          background: message.type === 'success' ? '#d4edda' : '#f8d7da',
-          color: message.type === 'success' ? '#155724' : '#721c24',
-          border: `1px solid ${message.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`
+          background: message.type === 'success' ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
+          color: message.type === 'success' ? 'var(--color-success-text)' : 'var(--color-error-text)',
+          border: `1px solid ${message.type === 'success' ? 'var(--color-success-border)' : 'var(--color-error-border)'}`
         }}>
           {message.text}
         </div>
@@ -174,8 +179,8 @@ const TaxConfiguration: React.FC = () => {
       <div style={{ display: 'grid', gap: '32px' }}>
         {/* PAYE Tax Brackets */}
         <div style={{
-          background: '#f8f9fa',
-          border: '1px solid #dee2e6',
+          background: 'var(--color-bg-tertiary)',
+          border: '1px solid var(--color-border-primary)',
           borderRadius: 8,
           padding: '24px'
         }}>
@@ -185,15 +190,15 @@ const TaxConfiguration: React.FC = () => {
             alignItems: 'center',
             marginBottom: '16px'
           }}>
-            <h3 style={{ margin: 0, color: '#333' }}>PAYE Tax Brackets</h3>
+            <h3 style={{ margin: 0, color: 'var(--color-text-primary)' }}>PAYE Tax Brackets</h3>
             <button
               onClick={addPayeBracket}
               style={{
                 padding: '6px 12px',
                 borderRadius: 4,
-                border: '1px solid #28a745',
-                background: '#fff',
-                color: '#28a745',
+                border: '1px solid var(--color-success-border)',
+                background: 'var(--color-bg-primary)',
+                color: 'var(--color-success-border)',
                 cursor: 'pointer',
                 fontSize: '12px'
               }}
@@ -210,9 +215,9 @@ const TaxConfiguration: React.FC = () => {
                 gap: '12px',
                 alignItems: 'center',
                 padding: '12px',
-                background: '#fff',
+                background: 'var(--color-bg-primary)',
                 borderRadius: 4,
-                border: '1px solid #e9ecef'
+                border: '1px solid var(--color-border-secondary)'
               }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500 }}>
@@ -225,7 +230,7 @@ const TaxConfiguration: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '8px',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--color-border-input)',
                       borderRadius: 4,
                       fontSize: '14px'
                     }}
@@ -244,7 +249,7 @@ const TaxConfiguration: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '8px',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--color-border-input)',
                       borderRadius: 4,
                       fontSize: '14px'
                     }}
@@ -265,7 +270,7 @@ const TaxConfiguration: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '8px',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--color-border-input)',
                       borderRadius: 4,
                       fontSize: '14px'
                     }}
@@ -278,9 +283,9 @@ const TaxConfiguration: React.FC = () => {
                   style={{
                     padding: '8px',
                     borderRadius: 4,
-                    border: '1px solid #dc3545',
-                    background: '#fff',
-                    color: '#dc3545',
+                    border: '1px solid var(--color-error-border)',
+                    background: 'var(--color-bg-primary)',
+                    color: 'var(--color-error-border)',
                     cursor: config.paye_brackets.length <= 1 ? 'not-allowed' : 'pointer',
                     fontSize: '12px',
                     opacity: config.paye_brackets.length <= 1 ? 0.5 : 1
@@ -302,7 +307,7 @@ const TaxConfiguration: React.FC = () => {
             borderRadius: 8,
             padding: '24px'
           }}>
-            <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Pension Contribution</h3>
+            <h3 style={{ margin: '0 0 16px 0', color: 'var(--color-text-primary)' }}>Pension Contribution</h3>
             <div style={{ display: 'grid', gap: '12px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500 }}>
@@ -354,7 +359,7 @@ const TaxConfiguration: React.FC = () => {
             borderRadius: 8,
             padding: '24px'
           }}>
-            <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Maternity Contribution</h3>
+            <h3 style={{ margin: '0 0 16px 0', color: 'var(--color-text-primary)' }}>Maternity Contribution</h3>
             <div style={{ display: 'grid', gap: '12px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500 }}>
@@ -406,7 +411,7 @@ const TaxConfiguration: React.FC = () => {
             borderRadius: 8,
             padding: '24px'
           }}>
-            <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>CBHI Contribution</h3>
+            <h3 style={{ margin: '0 0 16px 0', color: 'var(--color-text-primary)' }}>CBHI Contribution</h3>
             <div style={{ display: 'grid', gap: '12px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500 }}>
@@ -446,10 +451,10 @@ const TaxConfiguration: React.FC = () => {
                     border: '1px solid #ddd',
                     borderRadius: 4,
                     fontSize: '14px',
-                    backgroundColor: '#e9ecef'
+                    backgroundColor: 'var(--color-bg-disabled)'
                   }}
                 />
-                <small style={{ color: '#6c757d' }}>CBHI is employee-only contribution</small>
+                <small style={{ color: 'var(--color-text-secondary)' }}>CBHI is employee-only contribution</small>
               </div>
             </div>
           </div>
@@ -461,7 +466,7 @@ const TaxConfiguration: React.FC = () => {
             borderRadius: 8,
             padding: '24px'
           }}>
-            <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>RAMA Contribution</h3>
+            <h3 style={{ margin: '0 0 16px 0', color: 'var(--color-text-primary)' }}>RAMA Contribution</h3>
             <div style={{ display: 'grid', gap: '12px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500 }}>
@@ -504,7 +509,7 @@ const TaxConfiguration: React.FC = () => {
                 />
               </div>
             </div>
-            <small style={{ color: '#6c757d' }}>RAMA calculated on basic pay only (excludes allowances)</small>
+            <small style={{ color: 'var(--color-text-secondary)' }}>RAMA calculated on basic pay only (excludes allowances)</small>
           </div>
         </div>
       </div>
@@ -512,12 +517,12 @@ const TaxConfiguration: React.FC = () => {
       <div style={{
         marginTop: '32px',
         padding: '16px',
-        background: '#e3f2fd',
+        background: 'var(--color-info-bg)',
         borderRadius: 8,
-        border: '1px solid #bbdefb'
+        border: '1px solid var(--color-info-border)'
       }}>
-        <h4 style={{ margin: '0 0 8px 0', color: '#1976d2' }}>Tax Calculation Sequence</h4>
-        <ol style={{ margin: 0, paddingLeft: '20px', color: '#424242' }}>
+        <h4 style={{ margin: '0 0 8px 0', color: 'var(--color-primary-600)' }}>Tax Calculation Sequence</h4>
+        <ol style={{ margin: 0, paddingLeft: '20px', color: 'var(--color-text-secondary)' }}>
           <li>Calculate PAYE on Total Gross Pay using progressive brackets</li>
           <li>Calculate Pension (Employee: {config.pension_rates.employee}%, Employer: {config.pension_rates.employer}%) on Total Gross Pay</li>
           <li>Calculate Maternity (Employee: {config.maternity_rates.employee}%, Employer: {config.maternity_rates.employer}%) on Total Gross Pay excluding transport</li>

@@ -43,6 +43,6 @@ describe('StaffList', () => {
       </ThemeProvider>
     );
     expect(await screen.findByText(/Staff Management/i)).toBeInTheDocument();
-    expect(await screen.findByPlaceholderText(/Search by name, ID, department, or position.../i)).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText(/Search by name, ID, email, phone.../i)).toBeInTheDocument();
   });
 });

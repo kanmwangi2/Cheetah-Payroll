@@ -101,10 +101,15 @@ const GlobalSettings: React.FC = () => {
       if (docSnap.exists()) {
         const data = docSnap.data() as GlobalSettings;
         setSettings(data);
+      } else {
+        // Initialize with default configuration if document doesn't exist
+        await setDoc(docRef, settings);
+        setMessage({ type: 'success', text: 'Global settings initialized with default values' });
+        setTimeout(() => setMessage(null), 3000);
       }
     } catch (error) {
       console.error('Error loading global settings:', error);
-      setMessage({ type: 'error', text: 'Failed to load global settings' });
+      setMessage({ type: 'error', text: 'Failed to load global settings. Please check your permissions.' });
     } finally {
       setLoading(false);
     }
@@ -140,7 +145,7 @@ const GlobalSettings: React.FC = () => {
   };
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px' }}>Loading global settings...</div>;
+    return <div style={{ textAlign: 'center', padding: 'var(--spacing-4xl)' }}>Loading global settings...</div>;
   }
 
   return (
@@ -149,20 +154,20 @@ const GlobalSettings: React.FC = () => {
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        marginBottom: '24px'
+        marginBottom: 'var(--spacing-2xl)'
       }}>
-        <h2 style={{ margin: 0, color: '#333' }}>Global Application Settings</h2>
+        <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>Global Application Settings</h2>
         <button
           onClick={saveGlobalSettings}
           disabled={saving}
           style={{
-            padding: '10px 20px',
-            borderRadius: 6,
+            padding: 'var(--spacing-md) var(--spacing-xl)',
+            borderRadius: 'var(--border-radius-md)',
             border: 'none',
-            background: saving ? '#ccc' : '#1976d2',
-            color: '#fff',
+            background: saving ? 'var(--color-button-secondary)' : 'var(--color-button-primary)',
+            color: 'var(--color-text-inverse)',
             cursor: saving ? 'not-allowed' : 'pointer',
-            fontWeight: 500
+            fontWeight: 'var(--font-weight-medium)'
           }}
         >
           {saving ? 'Saving...' : 'Save Settings'}
@@ -171,29 +176,29 @@ const GlobalSettings: React.FC = () => {
 
       {message && (
         <div style={{
-          padding: '12px 16px',
-          borderRadius: 6,
-          marginBottom: '24px',
-          background: message.type === 'success' ? '#d4edda' : '#f8d7da',
-          color: message.type === 'success' ? '#155724' : '#721c24',
-          border: `1px solid ${message.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`
+          padding: 'var(--spacing-md) var(--spacing-lg)',
+          borderRadius: 'var(--border-radius-md)',
+          marginBottom: 'var(--spacing-2xl)',
+          background: message.type === 'success' ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
+          color: message.type === 'success' ? 'var(--color-success-text)' : 'var(--color-error-text)',
+          border: `1px solid ${message.type === 'success' ? 'var(--color-success-border)' : 'var(--color-error-border)'}`
         }}>
           {message.text}
         </div>
       )}
 
-      <div style={{ display: 'grid', gap: '32px' }}>
+      <div style={{ display: 'grid', gap: 'var(--spacing-3xl)' }}>
         {/* Application Settings */}
         <div style={{
-          background: '#f8f9fa',
-          border: '1px solid #dee2e6',
-          borderRadius: 8,
-          padding: '24px'
+          background: 'var(--color-card-bg)',
+          border: '1px solid var(--color-card-border)',
+          borderRadius: 'var(--border-radius-lg)',
+          padding: 'var(--spacing-2xl)'
         }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Application Settings</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <h3 style={{ margin: '0 0 var(--spacing-lg) 0', color: 'var(--color-text-primary)' }}>Application Settings</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Application Name
               </label>
               <input
@@ -202,16 +207,18 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('application', 'name', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
             
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Version
               </label>
               <input
@@ -220,16 +227,18 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('application', 'version', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
             
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Support Email
               </label>
               <input
@@ -238,16 +247,18 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('application', 'supportEmail', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
             
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Support Phone
               </label>
               <input
@@ -256,16 +267,18 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('application', 'supportPhone', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
             
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Default Theme
               </label>
               <select
@@ -273,10 +286,12 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('application', 'defaultTheme', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               >
                 <option value="light">Light</option>
@@ -285,14 +300,14 @@ const GlobalSettings: React.FC = () => {
               </select>
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
               <input
                 type="checkbox"
                 id="maintenanceMode"
                 checked={settings.application.maintenanceMode}
                 onChange={(e) => updateSetting('application', 'maintenanceMode', e.target.checked)}
               />
-              <label htmlFor="maintenanceMode" style={{ fontSize: '14px', fontWeight: 500 }}>
+              <label htmlFor="maintenanceMode" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Maintenance Mode
               </label>
             </div>
@@ -301,15 +316,15 @@ const GlobalSettings: React.FC = () => {
 
         {/* Payroll Settings */}
         <div style={{
-          background: '#f8f9fa',
-          border: '1px solid #dee2e6',
-          borderRadius: 8,
-          padding: '24px'
+          background: 'var(--color-card-bg)',
+          border: '1px solid var(--color-card-border)',
+          borderRadius: 'var(--border-radius-lg)',
+          padding: 'var(--spacing-2xl)'
         }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Payroll Settings</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <h3 style={{ margin: '0 0 var(--spacing-lg) 0', color: 'var(--color-text-primary)' }}>Payroll Settings</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Default Pay Period
               </label>
               <select
@@ -317,10 +332,12 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('payroll', 'defaultPayPeriod', e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               >
                 <option value="weekly">Weekly</option>
@@ -330,7 +347,7 @@ const GlobalSettings: React.FC = () => {
             </div>
             
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Payroll Retention (Months)
               </label>
               <input
@@ -341,16 +358,18 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('payroll', 'maxPayrollRetention', Number(e.target.value))}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
             
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Backup Frequency
               </label>
               <select
@@ -359,11 +378,12 @@ const GlobalSettings: React.FC = () => {
                 disabled={!settings.payroll.autoBackup}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px',
-                  backgroundColor: !settings.payroll.autoBackup ? '#e9ecef' : '#fff'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: !settings.payroll.autoBackup ? 'var(--color-input-disabled)' : 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               >
                 <option value="daily">Daily</option>
@@ -372,39 +392,39 @@ const GlobalSettings: React.FC = () => {
               </select>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                 <input
                   type="checkbox"
                   id="allowFuturePayrolls"
                   checked={settings.payroll.allowFuturePayrolls}
                   onChange={(e) => updateSetting('payroll', 'allowFuturePayrolls', e.target.checked)}
                 />
-                <label htmlFor="allowFuturePayrolls" style={{ fontSize: '14px', fontWeight: 500 }}>
+                <label htmlFor="allowFuturePayrolls" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                   Allow Future Payrolls
                 </label>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                 <input
                   type="checkbox"
                   id="requireApproval"
                   checked={settings.payroll.requireApproval}
                   onChange={(e) => updateSetting('payroll', 'requireApproval', e.target.checked)}
                 />
-                <label htmlFor="requireApproval" style={{ fontSize: '14px', fontWeight: 500 }}>
+                <label htmlFor="requireApproval" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                   Require Payroll Approval
                 </label>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                 <input
                   type="checkbox"
                   id="autoBackup"
                   checked={settings.payroll.autoBackup}
                   onChange={(e) => updateSetting('payroll', 'autoBackup', e.target.checked)}
                 />
-                <label htmlFor="autoBackup" style={{ fontSize: '14px', fontWeight: 500 }}>
+                <label htmlFor="autoBackup" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                   Automatic Backup
                 </label>
               </div>
@@ -414,15 +434,15 @@ const GlobalSettings: React.FC = () => {
 
         {/* Security Settings */}
         <div style={{
-          background: '#f8f9fa',
-          border: '1px solid #dee2e6',
-          borderRadius: 8,
-          padding: '24px'
+          background: 'var(--color-card-bg)',
+          border: '1px solid var(--color-card-border)',
+          borderRadius: 'var(--border-radius-lg)',
+          padding: 'var(--spacing-2xl)'
         }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Security Settings</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <h3 style={{ margin: '0 0 var(--spacing-lg) 0', color: 'var(--color-text-primary)' }}>Security Settings</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Session Timeout (Minutes)
               </label>
               <input
@@ -433,16 +453,18 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('security', 'sessionTimeout', Number(e.target.value))}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
             
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Minimum Password Length
               </label>
               <input
@@ -453,16 +475,18 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('security', 'passwordMinLength', Number(e.target.value))}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
             
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Login Attempt Limit
               </label>
               <input
@@ -473,16 +497,18 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('security', 'loginAttemptLimit', Number(e.target.value))}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
             
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Lockout Duration (Minutes)
               </label>
               <input
@@ -493,35 +519,37 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('security', 'lockoutDuration', Number(e.target.value))}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                 <input
                   type="checkbox"
                   id="requireMFA"
                   checked={settings.security.requireMFA}
                   onChange={(e) => updateSetting('security', 'requireMFA', e.target.checked)}
                 />
-                <label htmlFor="requireMFA" style={{ fontSize: '14px', fontWeight: 500 }}>
+                <label htmlFor="requireMFA" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                   Require Multi-Factor Authentication
                 </label>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                 <input
                   type="checkbox"
                   id="allowMultipleSessions"
                   checked={settings.security.allowMultipleSessions}
                   onChange={(e) => updateSetting('security', 'allowMultipleSessions', e.target.checked)}
                 />
-                <label htmlFor="allowMultipleSessions" style={{ fontSize: '14px', fontWeight: 500 }}>
+                <label htmlFor="allowMultipleSessions" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                   Allow Multiple Sessions
                 </label>
               </div>
@@ -531,15 +559,15 @@ const GlobalSettings: React.FC = () => {
 
         {/* Notifications Settings */}
         <div style={{
-          background: '#f8f9fa',
-          border: '1px solid #dee2e6',
-          borderRadius: 8,
-          padding: '24px'
+          background: 'var(--color-card-bg)',
+          border: '1px solid var(--color-card-border)',
+          borderRadius: 'var(--border-radius-lg)',
+          padding: 'var(--spacing-2xl)'
         }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Notification Settings</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <h3 style={{ margin: '0 0 var(--spacing-lg) 0', color: 'var(--color-text-primary)' }}>Notification Settings</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 500 }}>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Reminder Days Before Payroll
               </label>
               <input
@@ -550,59 +578,61 @@ const GlobalSettings: React.FC = () => {
                 onChange={(e) => updateSetting('notifications', 'reminderDaysBefore', Number(e.target.value))}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: '14px'
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
                 }}
               />
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                 <input
                   type="checkbox"
                   id="emailNotifications"
                   checked={settings.notifications.emailNotifications}
                   onChange={(e) => updateSetting('notifications', 'emailNotifications', e.target.checked)}
                 />
-                <label htmlFor="emailNotifications" style={{ fontSize: '14px', fontWeight: 500 }}>
+                <label htmlFor="emailNotifications" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                   Email Notifications
                 </label>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                 <input
                   type="checkbox"
                   id="payrollReminders"
                   checked={settings.notifications.payrollReminders}
                   onChange={(e) => updateSetting('notifications', 'payrollReminders', e.target.checked)}
                 />
-                <label htmlFor="payrollReminders" style={{ fontSize: '14px', fontWeight: 500 }}>
+                <label htmlFor="payrollReminders" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                   Payroll Reminders
                 </label>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                 <input
                   type="checkbox"
                   id="systemAlerts"
                   checked={settings.notifications.systemAlerts}
                   onChange={(e) => updateSetting('notifications', 'systemAlerts', e.target.checked)}
                 />
-                <label htmlFor="systemAlerts" style={{ fontSize: '14px', fontWeight: 500 }}>
+                <label htmlFor="systemAlerts" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                   System Alerts
                 </label>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                 <input
                   type="checkbox"
                   id="auditNotifications"
                   checked={settings.notifications.auditNotifications}
                   onChange={(e) => updateSetting('notifications', 'auditNotifications', e.target.checked)}
                 />
-                <label htmlFor="auditNotifications" style={{ fontSize: '14px', fontWeight: 500 }}>
+                <label htmlFor="auditNotifications" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                   Audit Notifications
                 </label>
               </div>
@@ -612,57 +642,57 @@ const GlobalSettings: React.FC = () => {
 
         {/* Integration Settings */}
         <div style={{
-          background: '#f8f9fa',
-          border: '1px solid #dee2e6',
-          borderRadius: 8,
-          padding: '24px'
+          background: 'var(--color-card-bg)',
+          border: '1px solid var(--color-card-border)',
+          borderRadius: 'var(--border-radius-lg)',
+          padding: 'var(--spacing-2xl)'
         }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#333' }}>Integration Settings</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h3 style={{ margin: '0 0 var(--spacing-lg) 0', color: 'var(--color-text-primary)' }}>Integration Settings</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
               <input
                 type="checkbox"
                 id="bankingAPI"
                 checked={settings.integrations.bankingAPI}
                 onChange={(e) => updateSetting('integrations', 'bankingAPI', e.target.checked)}
               />
-              <label htmlFor="bankingAPI" style={{ fontSize: '14px', fontWeight: 500 }}>
+              <label htmlFor="bankingAPI" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Banking API Integration
               </label>
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
               <input
                 type="checkbox"
                 id="hrSystemAPI"
                 checked={settings.integrations.hrSystemAPI}
                 onChange={(e) => updateSetting('integrations', 'hrSystemAPI', e.target.checked)}
               />
-              <label htmlFor="hrSystemAPI" style={{ fontSize: '14px', fontWeight: 500 }}>
+              <label htmlFor="hrSystemAPI" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 HR System API Integration
               </label>
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
               <input
                 type="checkbox"
                 id="accountingAPI"
                 checked={settings.integrations.accountingAPI}
                 onChange={(e) => updateSetting('integrations', 'accountingAPI', e.target.checked)}
               />
-              <label htmlFor="accountingAPI" style={{ fontSize: '14px', fontWeight: 500 }}>
+              <label htmlFor="accountingAPI" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Accounting API Integration
               </label>
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
               <input
                 type="checkbox"
                 id="reportsAPI"
                 checked={settings.integrations.reportsAPI}
                 onChange={(e) => updateSetting('integrations', 'reportsAPI', e.target.checked)}
               />
-              <label htmlFor="reportsAPI" style={{ fontSize: '14px', fontWeight: 500 }}>
+              <label htmlFor="reportsAPI" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Reports API Integration
               </label>
             </div>
