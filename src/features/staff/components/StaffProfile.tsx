@@ -59,14 +59,14 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
     }
   };
 
-  if (loading) {return <div aria-live="polite">Loading profile...</div>;}
+  if (loading) {return <div aria-live="polite" style={{color: 'var(--color-text-secondary)'}}>Loading profile...</div>;}
   if (error)
     {return (
-      <div style={{ color: 'red' }} role="alert" aria-live="assertive">
+      <div style={{ color: 'var(--color-error-text)' }} role="alert" aria-live="assertive">
         {error}
       </div>
     );}
-  if (!profile) {return <div aria-live="polite">Profile not found.</div>;}
+  if (!profile) {return <div aria-live="polite" style={{color: 'var(--color-text-secondary)'}}>Profile not found.</div>;}
 
   // Focus trap logic
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

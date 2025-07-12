@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo, useCallback } from 'react';
 import { getFirestore, collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,8 +15,7 @@ interface DashboardMetrics {
   thisMonthPayroll: number;
 }
 
-
-const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
+const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     staffCount: 0,
     payrollCount: 0,
@@ -26,9 +25,20 @@ const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
     thisMonthPayroll: 0
   });
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<number>(0);
   const navigate = useNavigate();
 
+  // Cache data for 5 minutes to reduce API calls
+  const CACHE_DURATION = 5 * 60 * 1000;
+
   useEffect(() => {
+    const now = Date.now();
+    // Skip API call if data is still fresh
+    if (lastUpdated && (now - lastUpdated) < CACHE_DURATION) {
+      setLoading(false);
+      return;
+    }
+
     const fetchDashboardData = async () => {
       setLoading(true);
       const db = getFirestore();
@@ -42,28 +52,59 @@ const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
         const payrollSnap = await getDocs(collection(db, 'companies', companyId, 'payrolls'));
         const payrollCount = payrollSnap.size;
 
-        // Fetch pending approvals (simulated)
-        const pendingApprovals = Math.floor(Math.random() * 5);
+        // Fetch pending approvals from payrolls with status 'pending_approval'
+        const pendingApprovalsQuery = query(
+          collection(db, 'companies', companyId, 'payrolls'),
+          where('status', '==', 'pending_approval')
+        );
+        const pendingApprovalsSnap = await getDocs(pendingApprovalsQuery);
+        const pendingApprovals = pendingApprovalsSnap.size;
 
-        // Fetch payments count
-        const paymentsSnap = await getDocs(collection(db, 'companies', companyId, 'payments'));
-        const totalPayments = paymentsSnap.size;
+        // Fetch total active payments amount
+        const activePaymentsQuery = query(
+          collection(db, 'companies', companyId, 'payments'),
+          where('status', '==', 'active')
+        );
+        const activePaymentsSnap = await getDocs(activePaymentsQuery);
+        let totalPaymentsAmount = 0;
+        activePaymentsSnap.forEach(doc => {
+          const payment = doc.data();
+          totalPaymentsAmount += payment.amount || 0;
+        });
 
-        // Fetch deductions count
-        const deductionsSnap = await getDocs(collection(db, 'companies', companyId, 'deductions'));
-        const totalDeductions = deductionsSnap.size;
+        // Fetch active deductions count
+        const activeDeductionsQuery = query(
+          collection(db, 'companies', companyId, 'deductions'),
+          where('status', '==', 'active')
+        );
+        const activeDeductionsSnap = await getDocs(activeDeductionsQuery);
+        const totalDeductions = activeDeductionsSnap.size;
 
-        // Calculate this month's payroll (simulated)
-        const thisMonthPayroll = Math.floor(Math.random() * 1000000) + 500000;
+        // Calculate this month's payroll from recent payrolls
+        const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+        const thisMonthPayrollQuery = query(
+          collection(db, 'companies', companyId, 'payrolls'),
+          where('period', '>=', currentMonth + '-01'),
+          where('period', '<=', currentMonth + '-31'),
+          orderBy('period', 'desc'),
+          limit(1)
+        );
+        const thisMonthPayrollSnap = await getDocs(thisMonthPayrollQuery);
+        let thisMonthPayroll = 0;
+        if (!thisMonthPayrollSnap.empty) {
+          const latestPayroll = thisMonthPayrollSnap.docs[0].data();
+          thisMonthPayroll = latestPayroll.totalNetPay || 0;
+        }
 
         setMetrics({
           staffCount,
           payrollCount,
           pendingApprovals,
-          totalPayments,
+          totalPayments: totalPaymentsAmount,
           totalDeductions,
           thisMonthPayroll
         });
+        setLastUpdated(Date.now());
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -73,32 +114,32 @@ const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
     };
 
     fetchDashboardData();
-  }, [companyId]);
+  }, [companyId, lastUpdated, CACHE_DURATION]);
 
   const quickActions = [
     { 
       title: 'Add New Employee', 
       description: 'Register a new staff member',
       icon: '👤',
-      action: () => navigate('/staff')
+      action: useCallback(() => navigate('/staff'), [navigate])
     },
     { 
       title: 'Process Payroll', 
       description: 'Create and calculate payroll',
       icon: '💰',
-      action: () => navigate('/payroll')
+      action: useCallback(() => navigate('/payroll'), [navigate])
     },
     { 
       title: 'Generate Reports', 
       description: 'View and export reports',
       icon: '📊',
-      action: () => navigate('/reports')
+      action: useCallback(() => navigate('/reports'), [navigate])
     },
     { 
       title: 'Manage Payments', 
       description: 'Configure employee payments',
       icon: '💳',
-      action: () => navigate('/payments')
+      action: useCallback(() => navigate('/payments'), [navigate])
     }
   ];
 
@@ -168,10 +209,23 @@ const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
             <h3 className="dashboard-metric-title">Active Payments</h3>
           </div>
           <div className="dashboard-metric-value">
-            {metrics.totalPayments}
+            {new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF' }).format(metrics.totalPayments)}
           </div>
           <div className="dashboard-metric-change">
-            Payment records
+            Total monthly amount
+          </div>
+        </div>
+
+        <div className="dashboard-metric-card">
+          <div className="dashboard-metric-header">
+            <span className="dashboard-metric-icon">📅</span>
+            <h3 className="dashboard-metric-title">This Month's Payroll</h3>
+          </div>
+          <div className="dashboard-metric-value">
+            {new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF' }).format(metrics.thisMonthPayroll)}
+          </div>
+          <div className="dashboard-metric-change">
+            Net pay distributed
           </div>
         </div>
       </div>
@@ -203,6 +257,8 @@ const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
       </div>
     </div>
   );
-};
+});
+
+Dashboard.displayName = 'Dashboard';
 
 export default Dashboard;

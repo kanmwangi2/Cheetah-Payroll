@@ -110,7 +110,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
       }}>
         <h1 style={{ 
           margin: 0, 
-          color: '#333',
+          color: 'var(--color-text-primary)',
           fontSize: '2rem',
           fontWeight: 600
         }}>
@@ -133,9 +133,9 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
             style={{
               padding: '10px 16px',
               borderRadius: 6,
-              border: '1px solid #28a745',
-              background: '#fff',
-              color: '#28a745',
+              border: '1px solid var(--color-success-500)',
+              background: 'var(--color-bg-primary)',
+              color: 'var(--color-success-500)',
               cursor: 'pointer',
               fontWeight: 500,
               fontSize: '14px'
@@ -158,9 +158,9 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
             style={{
               padding: '10px 16px',
               borderRadius: 6,
-              border: '1px solid #17a2b8',
-              background: '#fff',
-              color: '#17a2b8',
+              border: '1px solid var(--color-info-500)',
+              background: 'var(--color-bg-primary)',
+              color: 'var(--color-info-500)',
               cursor: 'pointer',
               fontWeight: 500,
               fontSize: '14px'
@@ -182,9 +182,9 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
             style={{
               padding: '10px 16px',
               borderRadius: 6,
-              border: '1px solid #6c757d',
-              background: '#fff',
-              color: '#6c757d',
+              border: '1px solid var(--color-gray-500)',
+              background: 'var(--color-bg-primary)',
+              color: 'var(--color-gray-500)',
               cursor: 'pointer',
               fontWeight: 500,
               fontSize: '14px'
@@ -198,8 +198,8 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               padding: '10px 20px',
               borderRadius: 6,
               border: 'none',
-              background: '#1976d2',
-              color: '#fff',
+              background: 'var(--color-button-primary)',
+              color: 'var(--color-text-inverse)',
               cursor: 'pointer',
               fontWeight: 500,
               fontSize: '14px'
@@ -212,12 +212,12 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
 
       {/* Search and Filters */}
       <div style={{
-        background: '#fff',
+        background: 'var(--color-card-bg)',
         padding: '20px',
         borderRadius: '8px',
-        border: '1px solid #e9ecef',
+        border: '1px solid var(--color-card-border)',
         marginBottom: '24px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        boxShadow: 'var(--shadow-md)'
       }}>
         <div className="payments-table-controls" style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
           <div style={{ flex: '2' }}>
@@ -225,7 +225,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               display: 'block', 
               marginBottom: '6px', 
               fontWeight: 500,
-              color: '#333'
+              color: 'var(--color-text-primary)'
             }}>
               Search Payments
             </label>
@@ -237,9 +237,11 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                border: '1px solid #ddd',
+                border: '1px solid var(--color-input-border)',
                 borderRadius: 4,
-                fontSize: '14px'
+                fontSize: '14px',
+                background: 'var(--color-input-bg)',
+                color: 'var(--color-text-primary)'
               }}
             />
           </div>
@@ -249,7 +251,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               display: 'block', 
               marginBottom: '6px', 
               fontWeight: 500,
-              color: '#333'
+              color: 'var(--color-text-primary)'
             }}>
               Type
             </label>
@@ -259,9 +261,11 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                border: '1px solid #ddd',
+                border: '1px solid var(--color-input-border)',
                 borderRadius: 4,
-                fontSize: '14px'
+                fontSize: '14px',
+                background: 'var(--color-input-bg)',
+                color: 'var(--color-text-primary)'
               }}
             >
               <option value="">All Types</option>
@@ -278,7 +282,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               display: 'block', 
               marginBottom: '6px', 
               fontWeight: 500,
-              color: '#333'
+              color: 'var(--color-text-primary)'
             }}>
               Status
             </label>
@@ -288,9 +292,11 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                border: '1px solid #ddd',
+                border: '1px solid var(--color-input-border)',
                 borderRadius: 4,
-                fontSize: '14px'
+                fontSize: '14px',
+                background: 'var(--color-input-bg)',
+                color: 'var(--color-text-primary)'
               }}
             >
               <option value="">All Statuses</option>
@@ -306,7 +312,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
         <div style={{ 
           marginTop: '16px', 
           fontSize: '14px', 
-          color: '#666',
+          color: 'var(--color-text-secondary)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
@@ -322,9 +328,9 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               style={{
                 padding: '4px 8px',
                 borderRadius: 4,
-                border: '1px solid #ddd',
-                background: '#fff',
-                color: '#666',
+                border: '1px solid var(--color-border-primary)',
+                background: 'var(--color-bg-primary)',
+                color: 'var(--color-text-secondary)',
                 cursor: 'pointer',
                 fontSize: '12px'
               }}
@@ -336,17 +342,17 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
       </div>
       {/* Payments Table */}
       <div style={{
-        background: '#fff',
+        background: 'var(--color-card-bg)',
         borderRadius: '8px',
-        border: '1px solid #e9ecef',
+        border: '1px solid var(--color-card-border)',
         overflow: 'hidden',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        boxShadow: 'var(--shadow-md)'
       }}>
         {loading ? (
           <div style={{ 
             padding: '60px 40px', 
             textAlign: 'center',
-            color: '#666'
+            color: 'var(--color-text-secondary)'
           }}>
             Loading payments...
           </div>
@@ -354,7 +360,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
           <div style={{ 
             padding: '60px 40px', 
             textAlign: 'center',
-            color: '#dc3545'
+            color: 'var(--color-error-600)'
           }} role="alert">
             {error}
           </div>
@@ -362,18 +368,18 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
           <div style={{ 
             padding: '60px 40px', 
             textAlign: 'center',
-            color: '#666'
+            color: 'var(--color-text-secondary)'
           }}>
             {payments.length === 0 ? (
               <>
                 <div style={{ fontSize: '3rem', marginBottom: '16px' }}>💰</div>
-                <h3 style={{ margin: '0 0 8px 0', color: '#333' }}>No payments yet</h3>
+                <h3 style={{ margin: '0 0 8px 0', color: 'var(--color-text-primary)' }}>No payments yet</h3>
                 <p style={{ margin: '0' }}>Get started by adding your first payment.</p>
               </>
             ) : (
               <>
                 <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
-                <h3 style={{ margin: '0 0 8px 0', color: '#333' }}>No payments found</h3>
+                <h3 style={{ margin: '0 0 8px 0', color: 'var(--color-text-primary)' }}>No payments found</h3>
                 <p style={{ margin: '0' }}>Try adjusting your search criteria or filters.</p>
               </>
             )}
@@ -382,12 +388,12 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #e9ecef' }}>
+                <tr style={{ background: 'var(--color-table-header)', borderBottom: '2px solid var(--color-table-border)' }}>
                   <th style={{ 
                     padding: '16px', 
                     textAlign: 'left', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Type
@@ -396,7 +402,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'right', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Amount
@@ -405,7 +411,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'left', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Employee
@@ -414,7 +420,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'center', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Gross/Net
@@ -423,7 +429,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'center', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Recurring
@@ -432,7 +438,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'center', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Status
@@ -441,7 +447,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'center', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Effective Date
@@ -450,7 +456,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'center', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Actions
@@ -459,21 +465,21 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               </thead>
               <tbody>
                 {filtered.map(p => (
-                  <tr key={p.id} style={{ borderBottom: '1px solid #e9ecef' }}>
+                  <tr key={p.id} style={{ borderBottom: '1px solid var(--color-table-border)' }}>
                     <td style={{ padding: '16px' }}>
-                      <div style={{ fontWeight: 500, color: '#333', marginBottom: '4px' }}>
+                      <div style={{ fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px' }}>
                         {p.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       </div>
                       {p.description && (
-                        <div style={{ fontSize: '13px', color: '#666' }}>
+                        <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
                           {p.description}
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: '16px', textAlign: 'right', fontWeight: '500', color: '#333' }}>
+                    <td style={{ padding: '16px', textAlign: 'right', fontWeight: '500', color: 'var(--color-text-primary)' }}>
                       RWF {p.amount.toLocaleString()}
                     </td>
-                    <td style={{ padding: '16px', color: '#333' }}>
+                    <td style={{ padding: '16px', color: 'var(--color-text-primary)' }}>
                       {getStaffName(p.staffId)}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
@@ -482,13 +488,13 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                         borderRadius: '16px',
                         fontSize: '12px',
                         fontWeight: 500,
-                        background: p.isGross ? '#e3f2fd' : '#fff3e0',
-                        color: p.isGross ? '#1976d2' : '#f57c00'
+                        background: p.isGross ? 'var(--color-info-100)' : 'var(--color-warning-100)',
+                        color: p.isGross ? 'var(--color-info-700)' : 'var(--color-warning-700)'
                       }}>
                         {p.isGross ? 'Gross' : 'Net'}
                       </span>
                     </td>
-                    <td style={{ padding: '16px', textAlign: 'center', color: '#333' }}>
+                    <td style={{ padding: '16px', textAlign: 'center', color: 'var(--color-text-primary)' }}>
                       {p.isRecurring ? '✓' : '✗'}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
@@ -498,8 +504,8 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                           padding: '4px 12px',
                           borderRadius: '16px',
                           border: 'none',
-                          background: p.status === 'active' ? '#e8f5e8' : '#f8d7da',
-                          color: p.status === 'active' ? '#2e7d32' : '#721c24',
+                          background: p.status === 'active' ? 'var(--color-success-100)' : 'var(--color-error-100)',
+                          color: p.status === 'active' ? 'var(--color-success-700)' : 'var(--color-error-700)',
                           fontSize: '12px',
                           fontWeight: 500,
                           cursor: 'pointer'
@@ -508,10 +514,10 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                         {p.status === 'active' ? 'Active' : 'Inactive'}
                       </button>
                     </td>
-                    <td style={{ padding: '16px', textAlign: 'center', color: '#333' }}>
+                    <td style={{ padding: '16px', textAlign: 'center', color: 'var(--color-text-primary)' }}>
                       <div>{new Date(p.effectiveDate).toLocaleDateString()}</div>
                       {p.endDate && (
-                        <div style={{ fontSize: '13px', color: '#666' }}>
+                        <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
                           to {new Date(p.endDate).toLocaleDateString()}
                         </div>
                       )}
@@ -522,9 +528,9 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                         style={{
                           padding: '6px 12px',
                           borderRadius: 4,
-                          border: '1px solid #dc3545',
-                          background: '#fff',
-                          color: '#dc3545',
+                          border: '1px solid var(--color-error-500)',
+                          background: 'var(--color-bg-primary)',
+                          color: 'var(--color-error-500)',
                           fontSize: '12px',
                           cursor: 'pointer'
                         }}
@@ -548,14 +554,14 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
+          background: 'var(--color-bg-overlay)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
         }}>
           <div style={{
-            background: '#fff',
+            background: 'var(--color-card-bg)',
             borderRadius: '8px',
             maxWidth: '800px',
             width: '90%',
@@ -574,7 +580,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                 fontSize: '24px',
                 cursor: 'pointer',
                 zIndex: 1001,
-                color: '#666'
+                color: 'var(--color-text-secondary)'
               }}
             >
               ×

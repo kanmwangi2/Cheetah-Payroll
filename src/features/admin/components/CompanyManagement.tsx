@@ -100,28 +100,29 @@ const CompanyManagement: React.FC = () => {
   };
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px' }}>Loading companies...</div>;
+    return <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary)' }}>Loading companies...</div>;
   }
 
   return (
-    <div>
+    <div style={{ backgroundColor: 'var(--color-bg-primary)', minHeight: '100vh', padding: 'var(--spacing-lg)' }}>
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
         marginBottom: '24px'
       }}>
-        <h2 style={{ margin: 0, color: '#333' }}>Company Management</h2>
+        <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>Company Management</h2>
         <button
           onClick={() => setShowForm(true)}
           style={{
             padding: '10px 20px',
             borderRadius: 6,
             border: 'none',
-            background: '#1976d2',
-            color: '#fff',
+            background: 'var(--color-primary-600)',
+            color: 'var(--color-text-inverse)',
             cursor: 'pointer',
-            fontWeight: 500
+            fontWeight: 500,
+            transition: 'all var(--transition-normal)'
           }}
         >
           + Add New Company
@@ -135,26 +136,28 @@ const CompanyManagement: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
+          background: 'var(--color-overlay-bg)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
         }}>
           <div style={{
-            background: '#fff',
+            background: 'var(--color-modal-bg)',
             borderRadius: 8,
             padding: '32px',
             width: '500px',
             maxHeight: '80vh',
-            overflow: 'auto'
+            overflow: 'auto',
+            border: '1px solid var(--color-border-primary)',
+            boxShadow: 'var(--shadow-lg)'
           }}>
-            <h3 style={{ marginTop: 0, color: '#333' }}>
+            <h3 style={{ marginTop: 0, color: 'var(--color-text-primary)' }}>
               {editingCompany ? 'Edit Company' : 'Add New Company'}
             </h3>
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                   Company Name *
                 </label>
                 <input
@@ -165,15 +168,18 @@ const CompanyManagement: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                   Email
                 </label>
                 <input
@@ -183,15 +189,18 @@ const CompanyManagement: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                   Phone
                 </label>
                 <input
@@ -201,15 +210,18 @@ const CompanyManagement: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                   Address
                 </label>
                 <textarea
@@ -219,16 +231,19 @@ const CompanyManagement: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
                     fontSize: '14px',
-                    resize: 'vertical'
+                    resize: 'vertical',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                   Tax ID
                 </label>
                 <input
@@ -238,15 +253,18 @@ const CompanyManagement: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
 
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+                <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                   Sector/Industry
                 </label>
                 <select
@@ -255,9 +273,12 @@ const CompanyManagement: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 >
                   <option value="">Select sector...</option>
@@ -280,9 +301,11 @@ const CompanyManagement: React.FC = () => {
                   style={{
                     padding: '10px 20px',
                     borderRadius: 4,
-                    border: '1px solid #ddd',
-                    background: '#fff',
-                    cursor: 'pointer'
+                    border: '1px solid var(--color-border-primary)',
+                    background: 'var(--color-bg-secondary)',
+                    cursor: 'pointer',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 >
                   Cancel
@@ -293,10 +316,11 @@ const CompanyManagement: React.FC = () => {
                     padding: '10px 20px',
                     borderRadius: 4,
                     border: 'none',
-                    background: '#1976d2',
-                    color: '#fff',
+                    background: 'var(--color-primary-600)',
+                    color: 'var(--color-text-inverse)',
                     cursor: 'pointer',
-                    fontWeight: 500
+                    fontWeight: 500,
+                    transition: 'all var(--transition-normal)'
                   }}
                 >
                   {editingCompany ? 'Update' : 'Create'} Company
@@ -308,20 +332,23 @@ const CompanyManagement: React.FC = () => {
       )}
 
       <div style={{
-        background: '#f8f9fa',
-        border: '1px solid #dee2e6',
+        background: 'var(--color-card-bg)',
+        border: '1px solid var(--color-border-primary)',
         borderRadius: 8,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        boxShadow: 'var(--shadow-md)',
+        transition: 'all var(--transition-normal)'
       }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
           gap: '16px',
           padding: '16px',
-          background: '#e9ecef',
+          background: 'var(--color-bg-tertiary)',
           fontWeight: 600,
           fontSize: '14px',
-          color: '#495057'
+          color: 'var(--color-text-primary)',
+          borderBottom: '1px solid var(--color-border-primary)'
         }}>
           <div>Company Name</div>
           <div>Email</div>
@@ -331,7 +358,7 @@ const CompanyManagement: React.FC = () => {
         </div>
 
         {companies.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#6c757d' }}>
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
             No companies found. Add your first company to get started.
           </div>
         ) : (
@@ -343,32 +370,35 @@ const CompanyManagement: React.FC = () => {
                 gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
                 gap: '16px',
                 padding: '16px',
-                borderBottom: '1px solid #dee2e6',
-                alignItems: 'center'
+                borderBottom: '1px solid var(--color-border-primary)',
+                alignItems: 'center',
+                backgroundColor: 'var(--color-bg-secondary)',
+                transition: 'all var(--transition-normal)'
               }}
             >
               <div>
-                <div style={{ fontWeight: 500, color: '#212529' }}>{company.name}</div>
+                <div style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>{company.name}</div>
                 {company.taxId && (
-                  <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
                     Tax ID: {company.taxId}
                   </div>
                 )}
               </div>
-              <div style={{ color: '#6c757d', fontSize: '14px' }}>{company.email || '—'}</div>
-              <div style={{ color: '#6c757d', fontSize: '14px' }}>{company.phone || '—'}</div>
-              <div style={{ color: '#6c757d', fontSize: '14px' }}>{company.sector || '—'}</div>
+              <div style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>{company.email || '—'}</div>
+              <div style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>{company.phone || '—'}</div>
+              <div style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>{company.sector || '—'}</div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
                   onClick={() => handleEdit(company)}
                   style={{
                     padding: '6px 12px',
                     borderRadius: 4,
-                    border: '1px solid #1976d2',
-                    background: '#fff',
-                    color: '#1976d2',
+                    border: '1px solid var(--color-primary-500)',
+                    background: 'var(--color-bg-secondary)',
+                    color: 'var(--color-primary-600)',
                     cursor: 'pointer',
-                    fontSize: '12px'
+                    fontSize: '12px',
+                    transition: 'all var(--transition-normal)'
                   }}
                 >
                   Edit
@@ -378,11 +408,12 @@ const CompanyManagement: React.FC = () => {
                   style={{
                     padding: '6px 12px',
                     borderRadius: 4,
-                    border: '1px solid #dc3545',
-                    background: '#fff',
-                    color: '#dc3545',
+                    border: '1px solid var(--color-error-500)',
+                    background: 'var(--color-bg-secondary)',
+                    color: 'var(--color-error-600)',
                     cursor: 'pointer',
-                    fontSize: '12px'
+                    fontSize: '12px',
+                    transition: 'all var(--transition-normal)'
                   }}
                 >
                   Delete

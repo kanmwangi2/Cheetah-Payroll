@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
-import { auth } from '../../../core/config/firebase.config';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../../core/config/firebase.config';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
 import { Company } from '../../types';
 import ThemeSwitcher from '../ui/ThemeSwitcher';
+import Logo from '../ui/Logo';
 import UserProfile from '../../../features/profile/components/UserProfile';
 import CompanySettings from '../../../features/settings/components/CompanySettings';
 
@@ -30,18 +32,41 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showCompanySettings, setShowCompanySettings] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [globalLogoUrl, setGlobalLogoUrl] = useState<string>('');
 
-  const navigationItems = [
+  const primaryNavigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '🏠', path: '/dashboard' },
     { id: 'staff', label: 'Staff', icon: '👥', path: '/staff' },
     { id: 'payments', label: 'Payments', icon: '💰', path: '/payments' },
     { id: 'deductions', label: 'Deductions', icon: '📉', path: '/deductions' },
     { id: 'payroll', label: 'Payroll', icon: '📊', path: '/payroll' },
     { id: 'reports', label: 'Reports', icon: '📋', path: '/reports' },
-    { id: 'utilities', label: 'Utilities', icon: '🔧', path: '/utilities' },
-    { id: 'faq', label: 'FAQ', icon: '❓', path: '/faq' },
-    { id: 'documentation', label: 'Documentation', icon: '📚', path: '/documentation' },
   ];
+
+  const utilityNavigationItems = [
+    { id: 'utilities', label: 'Utilities', icon: '🔧', path: '/utilities' },
+  ];
+
+  // Load global logo settings
+  useEffect(() => {
+    const loadGlobalLogo = async () => {
+      try {
+        const docRef = doc(db, 'app_settings', 'global_settings');
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data?.application?.logoUrl) {
+            setGlobalLogoUrl(data.application.logoUrl);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading global logo:', error);
+      }
+    };
+
+    loadGlobalLogo();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -95,25 +120,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
             </button>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff',
-                fontWeight: '700',
-                fontSize: '14px'
-              }}>
-                CP
-              </div>
+              {globalLogoUrl ? (
+                <img 
+                  src={globalLogoUrl} 
+                  alt="Company Logo" 
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    objectFit: 'contain',
+                    borderRadius: '4px'
+                  }}
+                />
+              ) : (
+                <Logo size="small" variant="icon" />
+              )}
               <h1 style={{ 
                 margin: 0, 
                 fontSize: '20px', 
                 fontWeight: '600', 
-                color: '#2563eb' 
+                color: 'var(--color-text-primary)'
               }}>
                 Cheetah Payroll
               </h1>
@@ -308,10 +333,64 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
           borderRight: '1px solid var(--color-nav-border)',
           padding: '24px 0',
           transition: 'width 0.3s ease',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
         }}>
+          <nav style={{ flex: 1 }}>
+            {/* Primary Navigation */}
+            {primaryNavigationItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => navigate(item.path)}
+                style={{
+                  width: '100%',
+                  padding: sidebarCollapsed ? '12px' : '12px 24px',
+                  background: isActive(item.path) ? 'var(--color-primary-50)' : 'transparent',
+                  border: 'none',
+                  borderRight: isActive(item.path) ? '3px solid var(--color-primary-500)' : '3px solid transparent',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: isActive(item.path) ? 600 : 400,
+                  color: isActive(item.path) ? 'var(--color-nav-text-active)' : 'var(--color-nav-text)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                  gap: sidebarCollapsed ? '0' : '12px',
+                  transition: 'all 0.2s',
+                  position: 'relative'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive(item.path)) {
+                    (e.target as HTMLButtonElement).style.background = 'var(--color-table-row-hover)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive(item.path)) {
+                    (e.target as HTMLButtonElement).style.background = 'transparent';
+                  }
+                }}
+                title={sidebarCollapsed ? item.label : undefined}
+              >
+                <span style={{ fontSize: '18px' }}>{item.icon}</span>
+                {!sidebarCollapsed && item.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Separator */}
+          {!sidebarCollapsed && (
+            <div style={{
+              margin: '12px 24px',
+              height: '1px',
+              background: 'var(--color-nav-border)'
+            }} />
+          )}
+          
+          {/* Utility Navigation at Bottom */}
           <nav>
-            {navigationItems.map(item => (
+            {utilityNavigationItems.map(item => (
               <button
                 key={item.id}
                 onClick={() => navigate(item.path)}

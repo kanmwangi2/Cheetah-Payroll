@@ -32,11 +32,8 @@ const Reports = lazy(() =>
 const Utilities = lazy(() => 
   import(/* webpackChunkName: "utilities" */ './features/utilities/components/Utilities')
 );
-const FAQ = lazy(() => 
-  import(/* webpackChunkName: "help" */ './features/help/components/FAQ')
-);
-const Documentation = lazy(() => 
-  import(/* webpackChunkName: "help" */ './features/help/components/Documentation')
+const AdminPanel = lazy(() => 
+  import(/* webpackChunkName: "admin" */ './features/admin/components/AdminPanel')
 );
 
 // Main App Content Component
@@ -66,8 +63,7 @@ const AppContent: React.FC = () => {
           <Route path="/payroll" element={<PayrollList companyId={company.id} />} />
           <Route path="/reports" element={<Reports companyId={company.id} />} />
           <Route path="/utilities" element={<Utilities />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/documentation" element={<Documentation />} />
+          <Route path="/admin" element={<AdminPanel />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Suspense>

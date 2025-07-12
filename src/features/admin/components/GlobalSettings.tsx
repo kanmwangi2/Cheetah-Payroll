@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '../../../core/config/firebase.config';
 
 interface GlobalSettings {
@@ -10,6 +11,7 @@ interface GlobalSettings {
     supportPhone: string;
     maintenanceMode: boolean;
     defaultTheme: 'light' | 'dark' | 'system';
+    logoUrl?: string;
   };
   payroll: {
     defaultPayPeriod: 'monthly' | 'weekly' | 'bi-weekly';
@@ -87,6 +89,7 @@ const GlobalSettings: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
@@ -144,12 +147,61 @@ const GlobalSettings: React.FC = () => {
     });
   };
 
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setMessage({ type: 'error', text: 'Please select a valid image file' });
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Logo file size must be less than 2MB' });
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const storage = getStorage();
+      const logoRef = ref(storage, `logos/${Date.now()}_${file.name}`);
+      
+      // Upload the file
+      const snapshot = await uploadBytes(logoRef, file);
+      
+      // Get the download URL
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      
+      // Update settings with new logo URL
+      updateSetting('application', 'logoUrl', downloadURL);
+      
+      setMessage({ type: 'success', text: 'Logo uploaded successfully!' });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      setMessage({ type: 'error', text: 'Failed to upload logo. Please try again.' });
+      setTimeout(() => setMessage(null), 3000);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeLogo = () => {
+    updateSetting('application', 'logoUrl', '');
+    setMessage({ type: 'success', text: 'Logo removed successfully!' });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
   if (loading) {
     return <div style={{ textAlign: 'center', padding: 'var(--spacing-4xl)' }}>Loading global settings...</div>;
   }
 
   return (
-    <div>
+    <div style={{ backgroundColor: 'var(--color-bg-primary)', minHeight: '100vh', padding: 'var(--spacing-lg)' }}>
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -310,6 +362,94 @@ const GlobalSettings: React.FC = () => {
               <label htmlFor="maintenanceMode" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
                 Maintenance Mode
               </label>
+            </div>
+          </div>
+          
+          {/* Logo Upload Section */}
+          <div style={{ marginTop: 'var(--spacing-xl)', paddingTop: 'var(--spacing-xl)', borderTop: '1px solid var(--color-border-primary)' }}>
+            <h4 style={{ margin: '0 0 var(--spacing-md) 0', color: 'var(--color-text-primary)', fontSize: 'var(--font-size-md)' }}>
+              Application Logo
+            </h4>
+            
+            {/* Current Logo Preview */}
+            {settings.application.logoUrl && (
+              <div style={{ marginBottom: 'var(--spacing-md)' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 'var(--spacing-md)',
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-border-primary)',
+                  borderRadius: 'var(--border-radius-md)',
+                  backgroundColor: 'var(--color-bg-secondary)'
+                }}>
+                  <img 
+                    src={settings.application.logoUrl} 
+                    alt="Current Logo" 
+                    style={{ 
+                      width: '64px', 
+                      height: '64px', 
+                      objectFit: 'contain',
+                      borderRadius: 'var(--border-radius-sm)'
+                    }} 
+                  />
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: '0 0 var(--spacing-xs) 0', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
+                      Current Logo
+                    </p>
+                    <button
+                      onClick={removeLogo}
+                      style={{
+                        padding: 'var(--spacing-xs) var(--spacing-sm)',
+                        fontSize: 'var(--font-size-xs)',
+                        border: '1px solid var(--color-error-border)',
+                        borderRadius: 'var(--border-radius-sm)',
+                        backgroundColor: 'transparent',
+                        color: 'var(--color-error-text)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Remove Logo
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Logo Upload Input */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+              <label style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
+                Upload New Logo
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  disabled={uploading}
+                  style={{
+                    padding: 'var(--spacing-sm)',
+                    border: '1px solid var(--color-input-border)',
+                    borderRadius: 'var(--border-radius-sm)',
+                    fontSize: 'var(--font-size-sm)',
+                    backgroundColor: uploading ? 'var(--color-input-disabled)' : 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    cursor: uploading ? 'not-allowed' : 'pointer'
+                  }}
+                />
+                {uploading && (
+                  <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+                    Uploading...
+                  </span>
+                )}
+              </div>
+              <p style={{ 
+                margin: 0, 
+                fontSize: 'var(--font-size-xs)', 
+                color: 'var(--color-text-secondary)' 
+              }}>
+                Supported formats: PNG, JPG, SVG. Maximum size: 2MB. Recommended dimensions: 200x200px.
+              </p>
             </div>
           </div>
         </div>

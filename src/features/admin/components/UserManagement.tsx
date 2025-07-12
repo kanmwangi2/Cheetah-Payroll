@@ -156,28 +156,29 @@ const UserManagement: React.FC = () => {
   };
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px' }}>Loading users...</div>;
+    return <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary)' }}>Loading users...</div>;
   }
 
   return (
-    <div>
+    <div style={{ backgroundColor: 'var(--color-bg-primary)', minHeight: '100vh', padding: 'var(--spacing-lg)' }}>
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
         marginBottom: '24px'
       }}>
-        <h2 style={{ margin: 0, color: '#333' }}>User Management</h2>
+        <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>User Management</h2>
         <button
           onClick={() => setShowForm(true)}
           style={{
             padding: '10px 20px',
             borderRadius: 6,
             border: 'none',
-            background: '#1976d2',
-            color: '#fff',
+            background: 'var(--color-primary-600)',
+            color: 'var(--color-text-inverse)',
             cursor: 'pointer',
-            fontWeight: 500
+            fontWeight: 500,
+            transition: 'all var(--transition-normal)'
           }}
         >
           + Add New User
@@ -191,27 +192,29 @@ const UserManagement: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
+          background: 'var(--color-overlay-bg)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
         }}>
           <div style={{
-            background: '#fff',
+            background: 'var(--color-modal-bg)',
             borderRadius: 8,
             padding: '32px',
             width: '600px',
             maxHeight: '80vh',
-            overflow: 'auto'
+            overflow: 'auto',
+            border: '1px solid var(--color-border-primary)',
+            boxShadow: 'var(--shadow-lg)'
           }}>
-            <h3 style={{ marginTop: 0, color: '#333' }}>
+            <h3 style={{ marginTop: 0, color: 'var(--color-text-primary)' }}>
               {editingUser ? 'Edit User' : 'Add New User'}
             </h3>
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                     Full Name *
                   </label>
                   <input
@@ -222,15 +225,18 @@ const UserManagement: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '10px',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--color-input-border)',
                       borderRadius: 4,
-                      fontSize: '14px'
+                      fontSize: '14px',
+                      backgroundColor: 'var(--color-input-bg)',
+                      color: 'var(--color-text-primary)',
+                      transition: 'all var(--transition-normal)'
                     }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                     Email *
                   </label>
                   <input
@@ -245,7 +251,7 @@ const UserManagement: React.FC = () => {
                       border: '1px solid #ddd',
                       borderRadius: 4,
                       fontSize: '14px',
-                      backgroundColor: editingUser ? '#f8f9fa' : '#fff'
+                      backgroundColor: editingUser ? 'var(--color-bg-tertiary)' : 'var(--color-input-bg)'
                     }}
                   />
                 </div>
@@ -253,7 +259,7 @@ const UserManagement: React.FC = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                     Role *
                   </label>
                   <select
@@ -263,9 +269,12 @@ const UserManagement: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '10px',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--color-input-border)',
                       borderRadius: 4,
-                      fontSize: '14px'
+                      fontSize: '14px',
+                      backgroundColor: 'var(--color-input-bg)',
+                      color: 'var(--color-text-primary)',
+                      transition: 'all var(--transition-normal)'
                     }}
                   >
                     <option value="">Select role...</option>
@@ -277,7 +286,7 @@ const UserManagement: React.FC = () => {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                     Phone
                   </label>
                   <input
@@ -287,9 +296,12 @@ const UserManagement: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '10px',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--color-input-border)',
                       borderRadius: 4,
-                      fontSize: '14px'
+                      fontSize: '14px',
+                      backgroundColor: 'var(--color-input-bg)',
+                      color: 'var(--color-text-primary)',
+                      transition: 'all var(--transition-normal)'
                     }}
                   />
                 </div>
@@ -319,14 +331,15 @@ const UserManagement: React.FC = () => {
                     Assign to Companies
                   </label>
                   <div style={{
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-border-primary)',
                     borderRadius: 4,
                     padding: '12px',
                     maxHeight: '150px',
-                    overflow: 'auto'
+                    overflow: 'auto',
+                    backgroundColor: 'var(--color-bg-secondary)'
                   }}>
                     {companies.length === 0 ? (
-                      <div style={{ color: '#6c757d', fontStyle: 'italic' }}>
+                      <div style={{ color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>
                         No companies available. Create companies first.
                       </div>
                     ) : (
@@ -357,9 +370,11 @@ const UserManagement: React.FC = () => {
                   style={{
                     padding: '10px 20px',
                     borderRadius: 4,
-                    border: '1px solid #ddd',
-                    background: '#fff',
-                    cursor: 'pointer'
+                    border: '1px solid var(--color-border-primary)',
+                    background: 'var(--color-bg-secondary)',
+                    cursor: 'pointer',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 >
                   Cancel
@@ -370,10 +385,11 @@ const UserManagement: React.FC = () => {
                     padding: '10px 20px',
                     borderRadius: 4,
                     border: 'none',
-                    background: '#1976d2',
-                    color: '#fff',
+                    background: 'var(--color-primary-600)',
+                    color: 'var(--color-text-inverse)',
                     cursor: 'pointer',
-                    fontWeight: 500
+                    fontWeight: 500,
+                    transition: 'all var(--transition-normal)'
                   }}
                 >
                   {editingUser ? 'Update' : 'Create'} User
@@ -385,20 +401,23 @@ const UserManagement: React.FC = () => {
       )}
 
       <div style={{
-        background: '#f8f9fa',
-        border: '1px solid #dee2e6',
+        background: 'var(--color-card-bg)',
+        border: '1px solid var(--color-border-primary)',
         borderRadius: 8,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        boxShadow: 'var(--shadow-md)',
+        transition: 'all var(--transition-normal)'
       }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: '2fr 1.5fr 1fr 1fr auto',
           gap: '16px',
           padding: '16px',
-          background: '#e9ecef',
+          background: 'var(--color-bg-tertiary)',
           fontWeight: 600,
           fontSize: '14px',
-          color: '#495057'
+          color: 'var(--color-text-primary)',
+          borderBottom: '1px solid var(--color-border-primary)'
         }}>
           <div>User Details</div>
           <div>Email</div>
@@ -408,7 +427,7 @@ const UserManagement: React.FC = () => {
         </div>
 
         {users.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#6c757d' }}>
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
             No users found. Add your first user to get started.
           </div>
         ) : (
@@ -420,30 +439,32 @@ const UserManagement: React.FC = () => {
                 gridTemplateColumns: '2fr 1.5fr 1fr 1fr auto',
                 gap: '16px',
                 padding: '16px',
-                borderBottom: '1px solid #dee2e6',
-                alignItems: 'center'
+                borderBottom: '1px solid var(--color-border-primary)',
+                alignItems: 'center',
+                backgroundColor: 'var(--color-bg-secondary)',
+                transition: 'all var(--transition-normal)'
               }}
             >
               <div>
-                <div style={{ fontWeight: 500, color: '#212529' }}>{user.name}</div>
+                <div style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>{user.name}</div>
                 {user.phone && (
-                  <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
                     {user.phone}
                   </div>
                 )}
                 {user.department && (
-                  <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
                     {user.department}
                   </div>
                 )}
               </div>
-              <div style={{ color: '#6c757d', fontSize: '14px' }}>{user.email}</div>
+              <div style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>{user.email}</div>
               <div>
                 <span style={{
-                  backgroundColor: user.role === 'primary_admin' ? '#dc3545' : 
-                                 user.role === 'app_admin' ? '#fd7e14' :
-                                 user.role === 'company_admin' ? '#198754' : '#0d6efd',
-                  color: '#fff',
+                  backgroundColor: user.role === 'primary_admin' ? 'var(--color-error-500)' : 
+                                 user.role === 'app_admin' ? 'var(--color-warning-500)' :
+                                 user.role === 'company_admin' ? 'var(--color-success-500)' : 'var(--color-primary-500)',
+                  color: 'var(--color-text-inverse)',
                   padding: '4px 8px',
                   borderRadius: 12,
                   fontSize: '11px',
@@ -452,7 +473,7 @@ const UserManagement: React.FC = () => {
                   {roleLabels[user.role] || user.role}
                 </span>
               </div>
-              <div style={{ color: '#6c757d', fontSize: '12px' }}>
+              <div style={{ color: 'var(--color-text-secondary)', fontSize: '12px' }}>
                 {user.companyIds?.length || 0} companies
               </div>
               <div style={{ display: 'flex', gap: '6px' }}>
@@ -461,11 +482,12 @@ const UserManagement: React.FC = () => {
                   style={{
                     padding: '4px 8px',
                     borderRadius: 4,
-                    border: '1px solid #1976d2',
-                    background: '#fff',
-                    color: '#1976d2',
+                    border: '1px solid var(--color-primary-500)',
+                    background: 'var(--color-bg-secondary)',
+                    color: 'var(--color-primary-600)',
                     cursor: 'pointer',
-                    fontSize: '11px'
+                    fontSize: '11px',
+                    transition: 'all var(--transition-normal)'
                   }}
                 >
                   Edit
@@ -475,11 +497,12 @@ const UserManagement: React.FC = () => {
                   style={{
                     padding: '4px 8px',
                     borderRadius: 4,
-                    border: '1px solid #28a745',
-                    background: '#fff',
-                    color: '#28a745',
+                    border: '1px solid var(--color-success-500)',
+                    background: 'var(--color-bg-secondary)',
+                    color: 'var(--color-success-600)',
                     cursor: 'pointer',
-                    fontSize: '11px'
+                    fontSize: '11px',
+                    transition: 'all var(--transition-normal)'
                   }}
                 >
                   Reset
@@ -490,11 +513,12 @@ const UserManagement: React.FC = () => {
                     style={{
                       padding: '4px 8px',
                       borderRadius: 4,
-                      border: '1px solid #dc3545',
-                      background: '#fff',
-                      color: '#dc3545',
+                      border: '1px solid var(--color-error-500)',
+                      background: 'var(--color-bg-secondary)',
+                      color: 'var(--color-error-600)',
                       cursor: 'pointer',
-                      fontSize: '11px'
+                      fontSize: '11px',
+                      transition: 'all var(--transition-normal)'
                     }}
                   >
                     Delete

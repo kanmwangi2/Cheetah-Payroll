@@ -130,7 +130,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
         alignItems: 'center', 
         height: '400px',
         fontSize: '1.1rem',
-        color: '#666'
+        color: 'var(--color-text-secondary)'
       }}>
         Loading staff members...
       </div>
@@ -147,7 +147,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
       }}>
         <h1 style={{ 
           margin: 0, 
-          color: '#333',
+          color: 'var(--color-text-primary)',
           fontSize: '2rem',
           fontWeight: 600
         }}>
@@ -171,9 +171,9 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
             style={{
               padding: '10px 16px',
               borderRadius: 6,
-              border: '1px solid #28a745',
-              background: '#fff',
-              color: '#28a745',
+              border: '1px solid var(--color-success-border)',
+              background: 'var(--color-card-bg)',
+              color: 'var(--color-success-text)',
               cursor: 'pointer',
               fontWeight: 500,
               fontSize: '14px'
@@ -197,9 +197,9 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
             style={{
               padding: '10px 16px',
               borderRadius: 6,
-              border: '1px solid #17a2b8',
-              background: '#fff',
-              color: '#17a2b8',
+              border: '1px solid var(--color-info-border)',
+              background: 'var(--color-card-bg)',
+              color: 'var(--color-info-text)',
               cursor: 'pointer',
               fontWeight: 500,
               fontSize: '14px'
@@ -222,9 +222,9 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
             style={{
               padding: '10px 16px',
               borderRadius: 6,
-              border: '1px solid #6c757d',
-              background: '#fff',
-              color: '#6c757d',
+              border: '1px solid var(--color-text-disabled)',
+              background: 'var(--color-card-bg)',
+              color: 'var(--color-text-disabled)',
               cursor: 'pointer',
               fontWeight: 500,
               fontSize: '14px'
@@ -238,13 +238,12 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               padding: '10px 20px',
               borderRadius: 6,
               border: 'none',
-              background: '#1976d2',
-              color: '#fff',
+              background: 'var(--color-button-primary)',
+              color: 'var(--color-text-inverse)',
               cursor: 'pointer',
               fontWeight: 500,
               fontSize: '14px'
-            }}
-          >
+            }}>
             + Add Staff
           </button>
         </div>
@@ -252,12 +251,12 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
 
       {/* Search and Filters */}
       <div style={{
-        background: '#fff',
+        background: 'var(--color-card-bg)',
         padding: '20px',
         borderRadius: '8px',
-        border: '1px solid #e9ecef',
+        border: '1px solid var(--color-card-border)',
         marginBottom: '24px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        boxShadow: 'var(--shadow-sm)'
       }}>
         <div style={{ 
           display: 'grid', 
@@ -270,7 +269,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               display: 'block', 
               marginBottom: '6px', 
               fontWeight: 500,
-              color: '#333'
+              color: 'var(--color-text-primary)'
             }}>
               Search Staff
             </label>
@@ -282,9 +281,11 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                border: '1px solid #ddd',
+                border: '1px solid var(--color-input-border)',
                 borderRadius: 4,
-                fontSize: '14px'
+                fontSize: '14px',
+                backgroundColor: 'var(--color-input-bg)',
+                color: 'var(--color-text-primary)'
               }}
             />
           </div>
@@ -294,7 +295,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               display: 'block', 
               marginBottom: '6px', 
               fontWeight: 500,
-              color: '#333'
+              color: 'var(--color-text-primary)'
             }}>
               Department
             </label>
@@ -304,9 +305,11 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                border: '1px solid #ddd',
+                border: '1px solid var(--color-input-border)',
                 borderRadius: 4,
-                fontSize: '14px'
+                fontSize: '14px',
+                backgroundColor: 'var(--color-input-bg)',
+                color: 'var(--color-text-primary)'
               }}
             >
               <option value="">All Departments</option>
@@ -321,7 +324,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               display: 'block', 
               marginBottom: '6px', 
               fontWeight: 500,
-              color: '#333'
+              color: 'var(--color-text-primary)'
             }}>
               Status
             </label>
@@ -331,9 +334,11 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                border: '1px solid #ddd',
+                border: '1px solid var(--color-input-border)',
                 borderRadius: 4,
-                fontSize: '14px'
+                fontSize: '14px',
+                backgroundColor: 'var(--color-input-bg)',
+                color: 'var(--color-text-primary)'
               }}
             >
               <option value="">All Status</option>
@@ -347,7 +352,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
         <div style={{ 
           marginTop: '16px', 
           fontSize: '14px', 
-          color: '#666',
+          color: 'var(--color-text-secondary)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
@@ -363,9 +368,9 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               style={{
                 padding: '4px 8px',
                 borderRadius: 4,
-                border: '1px solid #ddd',
-                background: '#fff',
-                color: '#666',
+                border: '1px solid var(--color-border-secondary)',
+                background: 'var(--color-card-bg)',
+                color: 'var(--color-text-secondary)',
                 cursor: 'pointer',
                 fontSize: '12px'
               }}
@@ -378,28 +383,28 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
 
       {/* Staff Table */}
       <div style={{
-        background: '#fff',
+        background: 'var(--color-card-bg)',
         borderRadius: '8px',
-        border: '1px solid #e9ecef',
+        border: '1px solid var(--color-card-border)',
         overflow: 'hidden',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        boxShadow: 'var(--shadow-sm)'
       }}>
         {filteredStaff.length === 0 ? (
           <div style={{ 
             padding: '60px 40px', 
             textAlign: 'center',
-            color: '#666'
+            color: 'var(--color-text-secondary)'
           }}>
             {staff.length === 0 ? (
               <>
                 <div style={{ fontSize: '3rem', marginBottom: '16px' }}>👥</div>
-                <h3 style={{ margin: '0 0 8px 0', color: '#333' }}>No staff members yet</h3>
+                <h3 style={{ margin: '0 0 8px 0', color: 'var(--color-text-primary)' }}>No staff members yet</h3>
                 <p style={{ margin: '0 0 20px 0' }}>Get started by adding your first team member.</p>
               </>
             ) : (
               <>
                 <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
-                <h3 style={{ margin: '0 0 8px 0', color: '#333' }}>No staff members found</h3>
+                <h3 style={{ margin: '0 0 8px 0', color: 'var(--color-text-primary)' }}>No staff members found</h3>
                 <p style={{ margin: '0' }}>Try adjusting your search criteria or filters.</p>
               </>
             )}
@@ -408,12 +413,12 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #e9ecef' }}>
+                <tr style={{ background: 'var(--color-table-header)', borderBottom: '2px solid var(--color-table-border)' }}>
                   <th style={{ 
                     padding: '16px', 
                     textAlign: 'left', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Employee Details
@@ -422,7 +427,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'left', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     ID/RSSB Number
@@ -431,7 +436,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'left', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Department
@@ -440,7 +445,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'left', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Position
@@ -449,7 +454,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'left', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Status
@@ -458,7 +463,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                     padding: '16px', 
                     textAlign: 'left', 
                     fontWeight: 600,
-                    color: '#333',
+                    color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
                     Actions
@@ -469,43 +474,43 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                 {filteredStaff.map((member) => (
                   <tr 
                     key={member.id}
-                    style={{ borderBottom: '1px solid #e9ecef' }}
+                    style={{ borderBottom: '1px solid var(--color-table-border)' }}
                   >
                     <td style={{ padding: '16px' }}>
                       <div>
                         <div style={{ 
                           fontWeight: 500, 
-                          color: '#333',
+                          color: 'var(--color-text-primary)',
                           marginBottom: '4px'
                         }}>
                           {member.firstName} {member.lastName}
                         </div>
                         <div style={{ 
                           fontSize: '13px', 
-                          color: '#666'
+                          color: 'var(--color-text-secondary)'
                         }}>
                           {member.email}
                         </div>
                         <div style={{ 
                           fontSize: '13px', 
-                          color: '#666'
+                          color: 'var(--color-text-secondary)'
                         }}>
                           {member.phone}
                         </div>
                       </div>
                     </td>
                     <td style={{ padding: '16px' }}>
-                      <div style={{ fontSize: '14px', color: '#333' }}>
+                      <div style={{ fontSize: '14px', color: 'var(--color-text-primary)' }}>
                         ID: {member.idNumber}
                       </div>
-                      <div style={{ fontSize: '13px', color: '#666' }}>
+                      <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
                         RSSB: {member.rssbNumber}
                       </div>
                     </td>
-                    <td style={{ padding: '16px', color: '#333' }}>
+                    <td style={{ padding: '16px', color: 'var(--color-text-primary)' }}>
                       {member.department}
                     </td>
-                    <td style={{ padding: '16px', color: '#333' }}>
+                    <td style={{ padding: '16px', color: 'var(--color-text-primary)' }}>
                       {member.position}
                     </td>
                     <td style={{ padding: '16px' }}>
@@ -515,11 +520,11 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                         fontSize: '12px',
                         fontWeight: 500,
                         background: 
-                          member.status === 'active' ? '#e8f5e8' :
-                          member.status === 'inactive' ? '#fff3cd' : '#f8d7da',
+                          member.status === 'active' ? 'var(--color-success-bg)' :
+                          member.status === 'inactive' ? 'var(--color-warning-bg)' : 'var(--color-error-bg)',
                         color: 
-                          member.status === 'active' ? '#2e7d32' :
-                          member.status === 'inactive' ? '#856404' : '#721c24'
+                          member.status === 'active' ? 'var(--color-success-text)' :
+                          member.status === 'inactive' ? 'var(--color-warning-text)' : 'var(--color-error-text)'
                       }}>
                         {member.status}
                       </span>
@@ -531,9 +536,9 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                           style={{
                             padding: '6px 12px',
                             borderRadius: 4,
-                            border: '1px solid #1976d2',
-                            background: '#fff',
-                            color: '#1976d2',
+                            border: '1px solid var(--color-button-primary)',
+                            background: 'var(--color-card-bg)',
+                            color: 'var(--color-button-primary)',
                             cursor: 'pointer',
                             fontSize: '12px'
                           }}
@@ -545,9 +550,9 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                           style={{
                             padding: '6px 12px',
                             borderRadius: 4,
-                            border: '1px solid #dc3545',
-                            background: '#fff',
-                            color: '#dc3545',
+                            border: '1px solid var(--color-error-border)',
+                            background: 'var(--color-card-bg)',
+                            color: 'var(--color-error-text)',
                             cursor: 'pointer',
                             fontSize: '12px'
                           }}
@@ -572,14 +577,14 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
+          background: 'var(--color-bg-overlay)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
         }}>
           <div style={{
-            background: '#fff',
+            background: 'var(--color-card-bg)',
             borderRadius: '8px',
             maxWidth: '800px',
             width: '90%',
@@ -598,7 +603,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                 fontSize: '24px',
                 cursor: 'pointer',
                 zIndex: 1001,
-                color: '#666'
+                color: 'var(--color-text-secondary)'
               }}
             >
               ×

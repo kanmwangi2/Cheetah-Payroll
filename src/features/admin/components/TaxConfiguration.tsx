@@ -134,11 +134,11 @@ const TaxConfiguration: React.FC = () => {
   };
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px' }}>Loading tax configuration...</div>;
+    return <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary)' }}>Loading tax configuration...</div>;
   }
 
   return (
-    <div>
+    <div style={{ backgroundColor: 'var(--color-bg-primary)', minHeight: '100vh', padding: 'var(--spacing-lg)' }}>
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -179,10 +179,12 @@ const TaxConfiguration: React.FC = () => {
       <div style={{ display: 'grid', gap: '32px' }}>
         {/* PAYE Tax Brackets */}
         <div style={{
-          background: 'var(--color-bg-tertiary)',
+          background: 'var(--color-card-bg)',
           border: '1px solid var(--color-border-primary)',
           borderRadius: 8,
-          padding: '24px'
+          padding: '24px',
+          boxShadow: 'var(--shadow-md)',
+          transition: 'all var(--transition-normal)'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -197,8 +199,8 @@ const TaxConfiguration: React.FC = () => {
                 padding: '6px 12px',
                 borderRadius: 4,
                 border: '1px solid var(--color-success-border)',
-                background: 'var(--color-bg-primary)',
-                color: 'var(--color-success-border)',
+                background: 'var(--color-bg-secondary)',
+                color: 'var(--color-success-600)',
                 cursor: 'pointer',
                 fontSize: '12px'
               }}
@@ -215,12 +217,12 @@ const TaxConfiguration: React.FC = () => {
                 gap: '12px',
                 alignItems: 'center',
                 padding: '12px',
-                background: 'var(--color-bg-primary)',
+                background: 'var(--color-bg-secondary)',
                 borderRadius: 4,
-                border: '1px solid var(--color-border-secondary)'
+                border: '1px solid var(--color-border-primary)'
               }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500 }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                     Minimum (RWF)
                   </label>
                   <input
@@ -230,15 +232,18 @@ const TaxConfiguration: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '8px',
-                      border: '1px solid var(--color-border-input)',
+                      border: '1px solid var(--color-input-border)',
                       borderRadius: 4,
-                      fontSize: '14px'
+                      fontSize: '14px',
+                      backgroundColor: 'var(--color-input-bg)',
+                      color: 'var(--color-text-primary)',
+                      transition: 'all var(--transition-normal)'
                     }}
                   />
                 </div>
                 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500 }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                     Maximum (RWF)
                   </label>
                   <input
@@ -249,15 +254,18 @@ const TaxConfiguration: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '8px',
-                      border: '1px solid var(--color-border-input)',
+                      border: '1px solid var(--color-input-border)',
                       borderRadius: 4,
-                      fontSize: '14px'
+                      fontSize: '14px',
+                      backgroundColor: 'var(--color-input-bg)',
+                      color: 'var(--color-text-primary)',
+                      transition: 'all var(--transition-normal)'
                     }}
                   />
                 </div>
                 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500 }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                     Tax Rate (%)
                   </label>
                   <input
@@ -270,9 +278,12 @@ const TaxConfiguration: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '8px',
-                      border: '1px solid var(--color-border-input)',
+                      border: '1px solid var(--color-input-border)',
                       borderRadius: 4,
-                      fontSize: '14px'
+                      fontSize: '14px',
+                      backgroundColor: 'var(--color-input-bg)',
+                      color: 'var(--color-text-primary)',
+                      transition: 'all var(--transition-normal)'
                     }}
                   />
                 </div>
@@ -284,8 +295,8 @@ const TaxConfiguration: React.FC = () => {
                     padding: '8px',
                     borderRadius: 4,
                     border: '1px solid var(--color-error-border)',
-                    background: 'var(--color-bg-primary)',
-                    color: 'var(--color-error-border)',
+                    background: 'var(--color-bg-secondary)',
+                    color: 'var(--color-error-600)',
                     cursor: config.paye_brackets.length <= 1 ? 'not-allowed' : 'pointer',
                     fontSize: '12px',
                     opacity: config.paye_brackets.length <= 1 ? 0.5 : 1
@@ -302,10 +313,12 @@ const TaxConfiguration: React.FC = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           {/* Pension Rates */}
           <div style={{
-            background: '#f8f9fa',
-            border: '1px solid #dee2e6',
+            background: 'var(--color-card-bg)',
+            border: '1px solid var(--color-border-primary)',
             borderRadius: 8,
-            padding: '24px'
+            padding: '24px',
+            boxShadow: 'var(--shadow-md)',
+            transition: 'all var(--transition-normal)'
           }}>
             <h3 style={{ margin: '0 0 16px 0', color: 'var(--color-text-primary)' }}>Pension Contribution</h3>
             <div style={{ display: 'grid', gap: '12px' }}>
@@ -323,9 +336,12 @@ const TaxConfiguration: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
@@ -343,9 +359,12 @@ const TaxConfiguration: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
@@ -354,10 +373,12 @@ const TaxConfiguration: React.FC = () => {
 
           {/* Maternity Rates */}
           <div style={{
-            background: '#f8f9fa',
-            border: '1px solid #dee2e6',
+            background: 'var(--color-card-bg)',
+            border: '1px solid var(--color-border-primary)',
             borderRadius: 8,
-            padding: '24px'
+            padding: '24px',
+            boxShadow: 'var(--shadow-md)',
+            transition: 'all var(--transition-normal)'
           }}>
             <h3 style={{ margin: '0 0 16px 0', color: 'var(--color-text-primary)' }}>Maternity Contribution</h3>
             <div style={{ display: 'grid', gap: '12px' }}>
@@ -375,9 +396,12 @@ const TaxConfiguration: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
@@ -395,9 +419,12 @@ const TaxConfiguration: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
@@ -406,10 +433,12 @@ const TaxConfiguration: React.FC = () => {
 
           {/* CBHI Rates */}
           <div style={{
-            background: '#f8f9fa',
-            border: '1px solid #dee2e6',
+            background: 'var(--color-card-bg)',
+            border: '1px solid var(--color-border-primary)',
             borderRadius: 8,
-            padding: '24px'
+            padding: '24px',
+            boxShadow: 'var(--shadow-md)',
+            transition: 'all var(--transition-normal)'
           }}>
             <h3 style={{ margin: '0 0 16px 0', color: 'var(--color-text-primary)' }}>CBHI Contribution</h3>
             <div style={{ display: 'grid', gap: '12px' }}>
@@ -427,9 +456,12 @@ const TaxConfiguration: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
@@ -461,10 +493,12 @@ const TaxConfiguration: React.FC = () => {
 
           {/* RAMA Rates */}
           <div style={{
-            background: '#f8f9fa',
-            border: '1px solid #dee2e6',
+            background: 'var(--color-card-bg)',
+            border: '1px solid var(--color-border-primary)',
             borderRadius: 8,
-            padding: '24px'
+            padding: '24px',
+            boxShadow: 'var(--shadow-md)',
+            transition: 'all var(--transition-normal)'
           }}>
             <h3 style={{ margin: '0 0 16px 0', color: 'var(--color-text-primary)' }}>RAMA Contribution</h3>
             <div style={{ display: 'grid', gap: '12px' }}>
@@ -482,9 +516,12 @@ const TaxConfiguration: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>
@@ -502,9 +539,12 @@ const TaxConfiguration: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '10px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--color-input-border)',
                     borderRadius: 4,
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--color-input-bg)',
+                    color: 'var(--color-text-primary)',
+                    transition: 'all var(--transition-normal)'
                   }}
                 />
               </div>

@@ -18,6 +18,23 @@ interface CompanySettingsProps {
 }
 const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
   const { user } = useAuthContext();
+  
+  const getInputStyle = () => ({
+    width: '100%',
+    padding: '12px',
+    border: '1px solid var(--color-input-border)',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    backgroundColor: 'var(--color-input-bg)',
+    color: 'var(--color-text-primary)'
+  });
+  
+  const getLabelStyle = () => ({
+    display: 'block',
+    marginBottom: '8px',
+    fontWeight: 500,
+    color: 'var(--color-text-primary)'
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
@@ -173,12 +190,12 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
           display: 'inline-block',
           width: '40px',
           height: '40px',
-          border: '4px solid #f3f3f3',
-          borderTop: '4px solid #1976d2',
+          border: '4px solid var(--color-border-primary)',
+          borderTop: '4px solid var(--color-primary-500)',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         }} />
-        <p style={{ marginTop: '16px', color: '#666' }}>Loading company settings...</p>
+        <p style={{ marginTop: '16px', color: 'var(--color-text-secondary)' }}>Loading company settings...</p>
       </div>
     );
   }
@@ -186,12 +203,17 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
   const isAdmin = user?.role === 'primary_admin' || user?.role === 'app_admin' || user?.role === 'company_admin';
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div style={{ 
+      padding: '24px',
+      backgroundColor: 'var(--color-bg-primary)',
+      color: 'var(--color-text-primary)',
+      minHeight: '100vh'
+    }}>
       <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ margin: '0 0 8px 0', fontSize: '1.5rem', fontWeight: 600, color: '#333' }}>
+        <h2 style={{ margin: '0 0 8px 0', fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
           Company Settings
         </h2>
-        <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
+        <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
           Manage your company information and system preferences
         </p>
       </div>
@@ -199,7 +221,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
       {/* Tab Navigation */}
       <div style={{ 
         display: 'flex', 
-        borderBottom: '2px solid #e9ecef',
+        borderBottom: '2px solid var(--color-border-primary)',
         marginBottom: '24px',
         gap: '4px'
       }}>
@@ -209,8 +231,8 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
             onClick={() => setActiveTab(tab.id)}
             style={{
               padding: '12px 20px',
-              background: activeTab === tab.id ? '#1976d2' : 'transparent',
-              color: activeTab === tab.id ? '#fff' : '#666',
+              background: activeTab === tab.id ? 'var(--color-primary-500)' : 'transparent',
+              color: activeTab === tab.id ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
               border: 'none',
               borderRadius: '8px 8px 0 0',
               cursor: 'pointer',
@@ -223,7 +245,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
             }}
             onMouseEnter={(e) => {
               if (activeTab !== tab.id) {
-                (e.target as HTMLButtonElement).style.background = '#f8f9fa';
+                (e.target as HTMLButtonElement).style.background = 'var(--color-bg-secondary)';
               }
             }}
             onMouseLeave={(e) => {
@@ -243,7 +265,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
         {activeTab === 'general' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Company Name *
               </label>
               <input
@@ -251,108 +273,71 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                 required
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                style={getInputStyle()}
                 disabled={!isAdmin}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Email Address
               </label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                style={getInputStyle()}
                 disabled={!isAdmin}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Phone Number
               </label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                style={getInputStyle()}
                 disabled={!isAdmin}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Tax ID / TIN
               </label>
               <input
                 type="text"
                 value={formData.taxId}
                 onChange={(e) => handleInputChange('taxId', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                style={getInputStyle()}
                 disabled={!isAdmin}
               />
             </div>
 
             <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Business Address
               </label>
               <textarea
                 value={formData.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
                 rows={3}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem',
-                  resize: 'vertical'
-                }}
+                style={{...getInputStyle(), resize: 'vertical'}}
                 disabled={!isAdmin}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Business Sector
               </label>
               <select
                 value={formData.sector}
                 onChange={(e) => handleInputChange('sector', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                style={getInputStyle()}
                 disabled={!isAdmin}
               >
                 <option value="">Select sector...</option>
@@ -368,19 +353,13 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
         {activeTab === 'payroll' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Timezone
               </label>
               <select
                 value={formData.settings.timezone}
                 onChange={(e) => handleSettingsChange('timezone', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                style={getInputStyle()}
                 disabled={!isAdmin}
               >
                 {timezones.map(tz => (
@@ -390,19 +369,13 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Currency
               </label>
               <select
                 value={formData.settings.currency}
                 onChange={(e) => handleSettingsChange('currency', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                style={getInputStyle()}
                 disabled={!isAdmin}
               >
                 {currencies.map(currency => (
@@ -414,7 +387,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Default Working Days per Month
               </label>
               <input
@@ -423,19 +396,13 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                 max="31"
                 value={formData.settings.defaultWorkingDays}
                 onChange={(e) => handleSettingsChange('defaultWorkingDays', parseInt(e.target.value))}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                style={getInputStyle()}
                 disabled={!isAdmin}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Default Working Hours per Day
               </label>
               <input
@@ -444,13 +411,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                 max="24"
                 value={formData.settings.defaultWorkingHours}
                 onChange={(e) => handleSettingsChange('defaultWorkingHours', parseInt(e.target.value))}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                style={getInputStyle()}
                 disabled={!isAdmin}
               />
             </div>
@@ -464,14 +425,14 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                   onChange={(e) => handleSettingsChange('enableOvertimeCalculation', e.target.checked)}
                   disabled={!isAdmin}
                 />
-                <label htmlFor="enableOvertimeCalculation" style={{ fontWeight: 500, color: '#333' }}>
+                <label htmlFor="enableOvertimeCalculation" style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
                   Enable Overtime Calculation
                 </label>
               </div>
               
               {formData.settings.enableOvertimeCalculation && (
                 <div style={{ marginLeft: '24px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+                  <label style={getLabelStyle()}>
                     Overtime Multiplier
                   </label>
                   <input
@@ -481,13 +442,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                     max="3"
                     value={formData.settings.overtimeMultiplier}
                     onChange={(e) => handleSettingsChange('overtimeMultiplier', parseFloat(e.target.value))}
-                    style={{
-                      width: '200px',
-                      padding: '12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '6px',
-                      fontSize: '0.9rem'
-                    }}
+                    style={{...getInputStyle(), width: '200px'}}
                     disabled={!isAdmin}
                   />
                 </div>
@@ -507,19 +462,19 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                 onChange={(e) => handleSettingsChange('requirePayrollApproval', e.target.checked)}
                 disabled={!isAdmin}
               />
-              <label htmlFor="requirePayrollApproval" style={{ fontWeight: 500, color: '#333' }}>
+              <label htmlFor="requirePayrollApproval" style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
                 Require Payroll Approval Workflow
               </label>
             </div>
 
             <div>
-              <h4 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', fontWeight: 600, color: '#333' }}>
+              <h4 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
                 Password Policy
               </h4>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+                  <label style={getLabelStyle()}>
                     Minimum Password Length
                   </label>
                   <input
@@ -528,19 +483,13 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                     max="32"
                     value={formData.settings.passwordPolicy.minLength}
                     onChange={(e) => handlePasswordPolicyChange('minLength', parseInt(e.target.value))}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '6px',
-                      fontSize: '0.9rem'
-                    }}
+                    style={getInputStyle()}
                     disabled={!isAdmin}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+                  <label style={getLabelStyle()}>
                     Password Max Age (days)
                   </label>
                   <input
@@ -549,13 +498,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                     max="365"
                     value={formData.settings.passwordPolicy.maxAge}
                     onChange={(e) => handlePasswordPolicyChange('maxAge', parseInt(e.target.value))}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '6px',
-                      fontSize: '0.9rem'
-                    }}
+                    style={getInputStyle()}
                     disabled={!isAdmin}
                   />
                 </div>
@@ -575,7 +518,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                         onChange={(e) => handlePasswordPolicyChange(policy.key, e.target.checked)}
                         disabled={!isAdmin}
                       />
-                      <label htmlFor={policy.key} style={{ fontSize: '0.9rem', color: '#333' }}>
+                      <label htmlFor={policy.key} style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>
                         {policy.label}
                       </label>
                     </div>
@@ -597,25 +540,19 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                 onChange={(e) => handleSettingsChange('enableAuditTrail', e.target.checked)}
                 disabled={!isAdmin}
               />
-              <label htmlFor="enableAuditTrail" style={{ fontWeight: 500, color: '#333' }}>
+              <label htmlFor="enableAuditTrail" style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
                 Enable Audit Trail Logging
               </label>
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#333' }}>
+              <label style={getLabelStyle()}>
                 Automatic Backup Frequency
               </label>
               <select
                 value={formData.settings.backupFrequency}
                 onChange={(e) => handleSettingsChange('backupFrequency', e.target.value)}
-                style={{
-                  width: '300px',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                style={{...getInputStyle(), width: '300px'}}
                 disabled={!isAdmin}
               >
                 <option value="daily">Daily</option>
@@ -626,15 +563,15 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
             </div>
 
             <div style={{
-              background: '#f8f9fa',
-              border: '1px solid #dee2e6',
+              background: 'var(--color-bg-secondary)',
+              border: '1px solid var(--color-border-primary)',
               borderRadius: '8px',
               padding: '16px'
             }}>
-              <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', fontWeight: 600, color: '#333' }}>
+              <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
                 Data Retention Information
               </h4>
-              <ul style={{ margin: 0, paddingLeft: '20px', color: '#666', fontSize: '0.9rem' }}>
+              <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
                 <li>Payroll records are retained indefinitely for compliance</li>
                 <li>Audit logs are retained for a minimum of 7 years</li>
                 <li>User activity logs are retained for 1 year</li>
@@ -649,7 +586,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
           <div style={{ 
             marginTop: '32px', 
             padding: '24px 0',
-            borderTop: '1px solid #e9ecef',
+            borderTop: '1px solid var(--color-border-primary)',
             display: 'flex',
             gap: '12px',
             justifyContent: 'flex-end'
@@ -659,8 +596,8 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
               disabled={saving}
               style={{
                 padding: '12px 24px',
-                background: saving ? '#6c757d' : '#1976d2',
-                color: '#fff',
+                background: saving ? 'var(--color-neutral-500)' : 'var(--color-primary-500)',
+                color: 'var(--color-text-inverse)',
                 border: 'none',
                 borderRadius: '6px',
                 fontSize: '0.9rem',
@@ -677,7 +614,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                     width: '16px',
                     height: '16px',
                     border: '2px solid transparent',
-                    borderTop: '2px solid #fff',
+                    borderTop: '2px solid var(--color-text-inverse)',
                     borderRadius: '50%',
                     animation: 'spin 1s linear infinite'
                   }} />
@@ -696,10 +633,10 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
           <div style={{
             marginTop: '32px',
             padding: '16px',
-            background: '#fff3cd',
-            border: '1px solid #ffeaa7',
+            background: 'var(--color-warning-bg)',
+            border: '1px solid var(--color-warning-border)',
             borderRadius: '8px',
-            color: '#856404',
+            color: 'var(--color-warning-text)',
             fontSize: '0.9rem'
           }}>
             <strong>View Only:</strong> You do not have permission to modify company settings. Contact your administrator if changes are needed.

@@ -5,10 +5,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
 import { signUp, onUserChanged } from '../../../core/providers/auth.provider';
+import { db } from '../../../core/config/firebase.config';
 import { useThemeContext } from '../../../core/providers/ThemeProvider';
 import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
 import LoadingSpinner from '../../../shared/components/ui/LoadingSpinner';
+import Logo from '../../../shared/components/ui/Logo';
 import ThemeBoundary from '../../../shared/components/ui/ThemeBoundary';
 import { logger } from '../../../shared/utils/logger';
 import { getFirebaseErrorMessage, isCredentialError, isRetryableError } from '../../../shared/utils/firebase-errors';
@@ -27,8 +30,30 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const [errorType, setErrorType] = useState<'credential' | 'network' | 'general'>('general');
   const [loading, setLoading] = useState(false);
+  const [globalLogoUrl, setGlobalLogoUrl] = useState<string>('');
 
   const { isDark, resolvedTheme } = useThemeContext();
+
+  // Load global logo settings
+  useEffect(() => {
+    const loadGlobalLogo = async () => {
+      try {
+        const docRef = doc(db, 'app_settings', 'global_settings');
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data?.application?.logoUrl) {
+            setGlobalLogoUrl(data.application.logoUrl);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading global logo:', error);
+      }
+    };
+
+    loadGlobalLogo();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onUserChanged(user => {
@@ -118,7 +143,20 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
         {/* Header */}
         <div style={headerStyles}>
           <div style={logoStyles}>
-            🐆
+            {globalLogoUrl ? (
+              <img 
+                src={globalLogoUrl} 
+                alt="Company Logo" 
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  objectFit: 'contain',
+                  borderRadius: '8px'
+                }}
+              />
+            ) : (
+              <Logo size="large" variant="icon" />
+            )}
           </div>
           <h1 style={titleStyles}>
             Join Cheetah Payroll

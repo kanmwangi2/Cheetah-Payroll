@@ -3,7 +3,7 @@
  * Reusable loading indicator with customizable size and message
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 
 interface LoadingSpinnerProps {
   size?: 'small' | 'medium' | 'large';
@@ -11,7 +11,7 @@ interface LoadingSpinnerProps {
   center?: boolean;
 }
 
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = memo(({
   size = 'medium',
   message = 'Loading...',
   center = true,
@@ -64,6 +64,8 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       `}</style>
     </div>
   );
-};
+});
+
+LoadingSpinner.displayName = 'LoadingSpinner';
 
 export default LoadingSpinner;
