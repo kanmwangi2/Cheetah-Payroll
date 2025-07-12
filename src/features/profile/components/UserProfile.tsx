@@ -70,7 +70,7 @@ const UserProfile: React.FC = () => {
       });
 
       // Update Firebase Auth display name if changed
-      if (user.displayName !== profileForm.name) {
+      if ((user as any).displayName !== profileForm.name) {
         await updateProfile(user as any, { displayName: profileForm.name });
       }
 

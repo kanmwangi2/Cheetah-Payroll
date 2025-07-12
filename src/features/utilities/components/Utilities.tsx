@@ -581,7 +581,7 @@ const Utilities: React.FC = () => {
           <div className="audit-content">
             <h3>Audit Trail</h3>
             <p style={{ marginBottom: '24px', color: 'var(--color-text-secondary)' }}>Complete audit log of all system activities, user actions, and data changes.</p>
-            <AuditTrail />
+            <AuditTrail entityId="system" entityType="utilities" />
           </div>
         );
 
