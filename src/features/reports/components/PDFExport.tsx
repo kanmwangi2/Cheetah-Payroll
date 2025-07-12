@@ -1,8 +1,9 @@
 import React from 'react';
-import jsPDF from 'jspdf';
 
 export default function PDFExport({ data, type }: { data: any[]; type: 'report' | 'payroll' }) {
-  const handleExport = () => {
+  const handleExport = async () => {
+    // Dynamic import for jsPDF to reduce initial bundle size
+    const { default: jsPDF } = await import(/* webpackChunkName: "jspdf" */ 'jspdf');
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text(type === 'report' ? 'Report PDF Export' : 'Payroll PDF Export', 10, 15);

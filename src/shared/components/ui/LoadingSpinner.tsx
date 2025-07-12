@@ -25,8 +25,8 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   const spinnerStyle: React.CSSProperties = {
     width: sizeMap[size],
     height: sizeMap[size],
-    border: '3px solid #f3f3f3',
-    borderTop: '3px solid #007bff',
+    border: '3px solid var(--color-border-primary)',
+    borderTop: '3px solid var(--color-primary-500)',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
     margin: center ? '0 auto' : '0',
@@ -47,9 +47,9 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       {message && (
         <p
           style={{
-            marginTop: '10px',
-            color: '#666',
-            fontSize: '14px',
+            marginTop: 'var(--spacing-md)',
+            color: 'var(--color-text-secondary)',
+            fontSize: 'var(--font-size-sm)',
             textAlign: 'center',
           }}
         >

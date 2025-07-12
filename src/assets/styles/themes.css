@@ -195,6 +195,21 @@
   --color-error-text: #b91c1c;
   --color-error-border: #ef4444;
 
+  /* Success State Colors */
+  --color-success-bg: #ecfdf5;
+  --color-success-text: #047857;
+  --color-success-border: #10b981;
+
+  /* Warning State Colors */
+  --color-warning-bg: #fef3c7;
+  --color-warning-text: #92400e;
+  --color-warning-border: #fbbf24;
+
+  /* Info State Colors */
+  --color-info-bg: #eff6ff;
+  --color-info-text: #1e40af;
+  --color-info-border: #3b82f6;
+
   /* Status Colors */
   --color-status-approved: #10b981;
   --color-status-pending: #f59e0b;
@@ -304,6 +319,21 @@
   --color-error-bg: #1f1517;
   --color-error-text: #fca5a5;
   --color-error-border: #ef4444;
+
+  /* Success State Colors (Dark Theme) */
+  --color-success-bg: #064e3b;
+  --color-success-text: #6ee7b7;
+  --color-success-border: #10b981;
+
+  /* Warning State Colors (Dark Theme) */
+  --color-warning-bg: #451a03;
+  --color-warning-text: #fcd34d;
+  --color-warning-border: #fbbf24;
+
+  /* Info State Colors (Dark Theme) */
+  --color-info-bg: #1e3a8a;
+  --color-info-text: #93c5fd;
+  --color-info-border: #3b82f6;
 
   /* Status Colors */
   --color-status-approved: #10b981;
