@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import AdvancedCharts from '../../dashboard/components/AdvancedCharts';
 import {
   generatePayeReturn,
   generatePensionReport,
@@ -35,7 +34,7 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [selectedPayroll, setSelectedPayroll] = useState<string>('');
   const [availablePeriods, setAvailablePeriods] = useState<string[]>([]);
   const [payrolls, setPayrolls] = useState<Payroll[]>([]);
-  const [activeTab, setActiveTab] = useState<'statutory' | 'management' | 'payslips' | 'bank'>('statutory');
+  const [activeTab, setActiveTab] = useState<'statutory' | 'payslips' | 'bank'>('statutory');
 
   // Mock company data - in real app, this would come from props or context
   const company: Company = {
@@ -368,16 +367,6 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
           </div>
         );
 
-      case 'management':
-        return (
-          <div className="management-reports">
-            <h3>Management Reports</h3>
-            <p>Analytical reports for management decision making.</p>
-            <AdvancedCharts data={{}} />
-            <p style={{ color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>Advanced analytics and management reports coming soon...</p>
-          </div>
-        );
-
       default:
         return null;
     }
@@ -395,8 +384,7 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
         {[
           { key: 'statutory', label: 'Statutory Reports' },
           { key: 'payslips', label: 'Payslips' },
-          { key: 'bank', label: 'Bank Files' },
-          { key: 'management', label: 'Management Reports' }
+          { key: 'bank', label: 'Bank Files' }
         ].map(tab => (
           <button
             key={tab.key}

@@ -571,17 +571,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
           }}>
             <button
               onClick={() => setShowForm(false)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'none',
-                border: 'none',
-                fontSize: '24px',
-                cursor: 'pointer',
-                zIndex: 1001,
-                color: 'var(--color-text-secondary)'
-              }}
+              className="modal-close-btn"
             >
               ×
             </button>

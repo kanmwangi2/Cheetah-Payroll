@@ -70,7 +70,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
         isSystemTheme: themeState.isSystemTheme,
       });
     }
-  }, [themeState.theme, themeState.resolvedTheme, themeState.systemTheme]);
+  }, [themeState.theme, themeState.resolvedTheme, themeState.systemTheme, themeState.isSystemTheme]);
 
   return <ThemeContext.Provider value={themeState}>{children}</ThemeContext.Provider>;
 };

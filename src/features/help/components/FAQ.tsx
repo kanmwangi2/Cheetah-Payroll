@@ -41,13 +41,13 @@ const faqData = [
     content: (
       <div>
         <h4>How do I add new employees?</h4>
-        <p>Navigate to the Staff section and click "Add Staff". Fill in the required information including personal details, employment information, and bank details.</p>
+        <p>Navigate to the Staff section and click "Add Staff". Fill in the required information including personal details, employment information (including staff number and department), and bank details. You can also specify an optional end date for employment tracking.</p>
         
-        <h4>Can I import employee data from Excel?</h4>
-        <p>Yes! Use the Import/Export feature in the Staff section to upload employee data via CSV or Excel files. Make sure your file follows the required format.</p>
+        <h4>Can I import employee data from CSV/Excel?</h4>
+        <p>Yes! Use the Import/Export feature in the Staff section to upload employee data via CSV files. The system supports both DD/MM/YYYY and YYYY-MM-DD date formats. Download the template to see all available fields including staff numbers, departments, and employment dates.</p>
         
         <h4>How do I update employee information?</h4>
-        <p>Click on any employee in the Staff list to view and edit their details. Changes are automatically saved and reflected in future payroll calculations.</p>
+        <p>Click on any employee in the Staff list to view and edit their details. The staff form now includes staff numbers for unique identification and department dropdowns populated from your company's existing departments. Changes are automatically saved and reflected in future payroll calculations.</p>
         
         <h4>What happens when an employee leaves?</h4>
         <p>You can deactivate employees rather than deleting them to maintain historical payroll records. Set their end date in the employment details.</p>
@@ -59,8 +59,16 @@ const faqData = [
     title: 'Payroll Processing',
     content: (
       <div>
-        <h4>How often can I run payroll?</h4>
-        <p>You can run payroll as frequently as needed - monthly, bi-weekly, weekly, or even daily. The system calculates taxes and deductions automatically based on your configured settings.</p>
+        <h4>How do I create a new payroll?</h4>
+        <p>Click "Create New Payroll" and select the month/year using the date picker. The system defaults to the current month for convenience. Payroll can be run as frequently as needed - monthly, bi-weekly, weekly, or even daily.</p>
+        
+        <h4>What are the payroll permissions?</h4>
+        <p>Payroll permissions depend on your role and the payroll status:</p>
+        <ul>
+          <li>Draft/Pending payrolls: Can be edited/deleted by payroll preparers and approvers</li>
+          <li>Approved/Processed payrolls: Can only be deleted by admins</li>
+          <li>All users can view payrolls within their access level</li>
+        </ul>
         
         <h4>How are Rwanda taxes calculated?</h4>
         <p>The system automatically calculates:</p>
@@ -72,11 +80,11 @@ const faqData = [
           <li>RAMA (Rwanda Medical Association) - 7.5% each for employee and employer</li>
         </ul>
         
-        <h4>Can I customize deductions?</h4>
-        <p>Yes! You can add custom deductions for loans, advances, insurance, or any other items specific to your organization.</p>
+        <h4>How does deduction balance tracking work?</h4>
+        <p>The system automatically tracks loan and deduction balances. When payroll is processed, deduction balances decrease by the monthly amount. If a processed payroll is deleted, balances are restored. You can also manually record payments against loans in the deductions section.</p>
         
-        <h4>How do I handle salary advances?</h4>
-        <p>Use the Deductions section to record salary advances, which will be automatically deducted from future payrolls until fully recovered.</p>
+        <h4>Can I customize deductions?</h4>
+        <p>Yes! You can add loans, advances, and other deductions with monthly installment amounts. The system includes balance validation to prevent over-payments and provides real-time balance tracking.</p>
       </div>
     )
   },
@@ -98,10 +106,13 @@ const faqData = [
         </ul>
         
         <h4>How do I set up recurring allowances?</h4>
-        <p>In the Payments section, you can configure allowances to be automatically included in every payroll run for specific employees or departments.</p>
+        <p>In the Payments section, you can configure allowances to be automatically included in every payroll run for specific employees or departments. Mark payments as recurring and set effective/end dates as needed.</p>
+        
+        <h4>Can I import payment data?</h4>
+        <p>Yes! The enhanced import/export feature now includes all form details: type, amount, staff ID, gross/net flag, recurring status, effective/end dates, description, and status. The system supports both DD/MM/YYYY and YYYY-MM-DD date formats with comprehensive validation.</p>
         
         <h4>Can I backdate payments?</h4>
-        <p>Yes, you can specify effective dates for payments and allowances to handle backdated salary adjustments or corrections.</p>
+        <p>Yes, you can specify effective dates for payments and allowances to handle backdated salary adjustments or corrections. Use the end date field for temporary allowances or bonuses.</p>
       </div>
     )
   },

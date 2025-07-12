@@ -3,6 +3,7 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy 
 import { db } from '../../../core/config/firebase.config';
 import StaffForm from './StaffForm';
 import StaffProfile from './StaffProfile';
+import StaffImportExport from './StaffImportExport';
 
 interface StaffMember {
   id: string;
@@ -10,6 +11,7 @@ interface StaffMember {
   lastName: string;
   idNumber: string;
   rssbNumber: string;
+  staffNumber: string;
   email: string;
   phone: string;
   dateOfBirth: string;
@@ -29,6 +31,7 @@ interface StaffMember {
   department: string;
   position: string;
   startDate: string;
+  endDate?: string;
   employmentType: 'full-time' | 'part-time' | 'contract' | 'intern';
   status: 'active' | 'inactive' | 'terminated';
   createdAt: Date;
@@ -47,6 +50,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [showImportExport, setShowImportExport] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [departments, setDepartments] = useState<string[]>([]);
 
@@ -155,19 +159,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
         </h1>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
-            onClick={() => {
-              const input = document.createElement('input');
-              input.type = 'file';
-              input.accept = '.csv';
-              input.onchange = (e) => {
-                const file = (e.target as HTMLInputElement).files?.[0];
-                if (file) {
-                  // Handle CSV import logic here
-                  console.log('Import CSV:', file);
-                }
-              };
-              input.click();
-            }}
+            onClick={() => setShowImportExport(true)}
             style={{
               padding: '10px 16px',
               borderRadius: 6,
@@ -179,58 +171,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               fontSize: '14px'
             }}
           >
-            📤 Import CSV
-          </button>
-          <button
-            onClick={() => {
-              // Export CSV logic
-              const csvContent = 'firstName,lastName,idNumber,email\n' + 
-                staff.map(s => `${s.firstName},${s.lastName},${s.idNumber},${s.email}`).join('\n');
-              const blob = new Blob([csvContent], { type: 'text/csv' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'staff_export.csv';
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 6,
-              border: '1px solid var(--color-info-border)',
-              background: 'var(--color-card-bg)',
-              color: 'var(--color-info-text)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px'
-            }}
-          >
-            📥 Export CSV
-          </button>
-          <button
-            onClick={() => {
-              // Download template logic
-              const template = 'firstName,lastName,idNumber,rssbNumber,dateOfBirth,gender,maritalStatus,phone,email,address,emergencyContact,startDate,position,employmentType,department,bankName,accountNumber\nJohn,Doe,123456789,RSSB123,1990-01-01,male,single,0780000000,john@example.com,123 Main St,Jane Doe,2022-01-01,Manager,Full-time,HR,Bank of Kigali,1234567890';
-              const blob = new Blob([template], { type: 'text/csv' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'staff_import_template.csv';
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 6,
-              border: '1px solid var(--color-text-disabled)',
-              background: 'var(--color-card-bg)',
-              color: 'var(--color-text-disabled)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px'
-            }}
-          >
-            📋 Template
+            📤 Import/Export
           </button>
           <button
             onClick={() => setShowForm(true)}
@@ -430,6 +371,15 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                     color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
+                    Staff Number
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'left', 
+                    fontWeight: 600,
+                    color: 'var(--color-text-primary)',
+                    fontSize: '14px'
+                  }}>
                     ID/RSSB Number
                   </th>
                   <th style={{ 
@@ -498,6 +448,9 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                           {member.phone}
                         </div>
                       </div>
+                    </td>
+                    <td style={{ padding: '16px', color: 'var(--color-text-primary)', fontWeight: 500 }}>
+                      {member.staffNumber || 'N/A'}
                     </td>
                     <td style={{ padding: '16px' }}>
                       <div style={{ fontSize: '14px', color: 'var(--color-text-primary)' }}>
@@ -594,17 +547,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
           }}>
             <button
               onClick={() => setShowForm(false)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'none',
-                border: 'none',
-                fontSize: '24px',
-                cursor: 'pointer',
-                zIndex: 1001,
-                color: 'var(--color-text-secondary)'
-              }}
+              className="modal-close-btn"
             >
               ×
             </button>
@@ -625,6 +568,47 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
           staffId={selectedStaff.id}
           onClose={() => setSelectedStaff(null)}
         />
+      )}
+
+      {/* Import/Export Modal */}
+      {showImportExport && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'var(--color-bg-overlay)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'var(--color-card-bg)',
+            borderRadius: '8px',
+            padding: '24px',
+            width: '90%',
+            maxWidth: '800px',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowImportExport(false)}
+              className="modal-close-btn"
+            >
+              ×
+            </button>
+            <StaffImportExport 
+              companyId={companyId} 
+              onImportComplete={() => {
+                setShowImportExport(false);
+                loadStaff();
+              }} 
+            />
+          </div>
+        </div>
       )}
     </div>
   );

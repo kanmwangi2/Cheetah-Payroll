@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import SystemNotifications from '../../../shared/components/SystemNotifications';
-import BulkOperations from './BulkOperations';
 import AdvancedUtilities from './AdvancedUtilities';
 import AuditTrail from '../../../shared/components/AuditTrail';
 import FAQ from '../../help/components/FAQ';
@@ -8,42 +6,25 @@ import Documentation from '../../help/components/Documentation';
 
 
 const Utilities: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'bulk' | 'advanced' | 'notifications' | 'audit' | 'faq' | 'docs'>('bulk');
+  const [activeTab, setActiveTab] = useState<'faq' | 'docs' | 'advanced' | 'audit'>('faq');
 
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'bulk':
-        return (
-          <div className="bulk-operations-content">
-            <h3 style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-lg)' }}>Bulk Operations</h3>
-            <p style={{ marginBottom: 'var(--spacing-xl)', color: 'var(--color-text-secondary)' }}>
-              Perform bulk operations on staff, payroll, and other data to save time and increase efficiency.
-            </p>
-            <BulkOperations type="staff" />
-            <BulkOperations type="payroll" />
-          </div>
-        );
+      case 'faq':
+        return <FAQ />;
+
+      case 'docs':
+        return <Documentation />;
 
       case 'advanced':
         return (
           <div className="advanced-utilities-content">
-            <h3 style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-lg)' }}>Advanced Utilities</h3>
+            <h3 style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-lg)' }}>Advanced Tools</h3>
             <p style={{ marginBottom: 'var(--spacing-xl)', color: 'var(--color-text-secondary)' }}>
               Advanced system utilities for data management, system maintenance, and administrative tasks.
             </p>
             <AdvancedUtilities />
-          </div>
-        );
-
-      case 'notifications':
-        return (
-          <div className="notifications-content">
-            <h3 style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-lg)' }}>System Notifications</h3>
-            <p style={{ marginBottom: 'var(--spacing-xl)', color: 'var(--color-text-secondary)' }}>
-              Manage system notifications, alerts, and communication settings.
-            </p>
-            <SystemNotifications />
           </div>
         );
 
@@ -57,12 +38,6 @@ const Utilities: React.FC = () => {
             <AuditTrail entityId="system" entityType="utilities" />
           </div>
         );
-
-      case 'faq':
-        return <FAQ />;
-
-      case 'docs':
-        return <Documentation />;
 
       default:
         return null;
@@ -86,12 +61,10 @@ const Utilities: React.FC = () => {
         flexWrap: 'wrap'
       }}>
         {[
-          { key: 'bulk', label: 'Bulk Operations', icon: '📦' },
-          { key: 'advanced', label: 'Advanced Tools', icon: '⚙️' },
-          { key: 'notifications', label: 'Notifications', icon: '🔔' },
-          { key: 'audit', label: 'Audit Trail', icon: '📊' },
           { key: 'faq', label: 'FAQ', icon: '❓' },
-          { key: 'docs', label: 'Documentation', icon: '📄' }
+          { key: 'docs', label: 'Documentation', icon: '📄' },
+          { key: 'advanced', label: 'Advanced', icon: '⚙️' },
+          { key: 'audit', label: 'Audit Trail', icon: '📊' }
         ].map(tab => (
           <button
             key={tab.key}

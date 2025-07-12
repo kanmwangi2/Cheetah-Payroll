@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
@@ -14,15 +14,17 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const comboboxRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user } = useAuthContext();
-  const { isDark, resolvedTheme } = useThemeContext();
+  // const { isDark, resolvedTheme } = useThemeContext();
 
-  // Load ALL companies from Firestore
+  // Load companies based on user access
   useEffect(() => {
-    const loadAllCompanies = async () => {
+    const loadUserCompanies = async () => {
       setLoading(true);
       try {
         const companiesSnapshot = await getDocs(collection(db, 'companies'));
@@ -35,16 +37,44 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
           } as Company);
         });
         
-        setCompanies(allCompanies);
+        // Filter companies based on user role and access
+        let userCompanies: Company[] = [];
+        
+        if (user?.role === 'primary_admin' || user?.role === 'app_admin') {
+          // Admins can see all companies
+          userCompanies = allCompanies;
+        } else {
+          // Other users can only see companies they're assigned to
+          userCompanies = allCompanies.filter(company => {
+            // Check if user is assigned to this company
+                  return user?.companyIds?.includes(company.id);
+          });
+        }
+        
+        setCompanies(userCompanies);
       } catch (error) {
-        console.error('Error loading companies:', error);
+        // console.error('Error loading companies:', error);
         setError('Failed to load companies');
       } finally {
         setLoading(false);
       }
     };
 
-    loadAllCompanies();
+    if (user) {
+      loadUserCompanies();
+    }
+  }, [user]);
+
+  // Handle clicking outside combobox to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (comboboxRef.current && !comboboxRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Filter companies based on search term
@@ -57,16 +87,27 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
       await signOut(auth);
       navigate('/login');
     } catch (error) {
-      console.error('Error signing out:', error);
+      // console.error('Error signing out:', error);
     }
   };
 
   const handleProceedToCompany = () => {
-    if (!selectedCompanyId) return;
-    
-    const selectedCompany = companies.find(c => c.id === selectedCompanyId);
-    if (selectedCompany) {
-      onSelect(selectedCompany);
+    if (!selectedCompany) return;
+    onSelect(selectedCompany);
+  };
+
+  const handleCompanySelect = (company: Company) => {
+    setSelectedCompany(company);
+    setSearchTerm(company.name || '');
+    setIsDropdownOpen(false);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setIsDropdownOpen(true);
+    // Clear selection if search doesn't match selected company
+    if (selectedCompany && !selectedCompany.name?.toLowerCase().includes(value.toLowerCase())) {
+      setSelectedCompany(null);
     }
   };
 
@@ -128,43 +169,106 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
             </div>
           </div>
 
-          {/* Company search and selection */}
+          {/* Company search and selection combobox */}
           <div style={formSectionStyles}>
             <label style={labelStyles}>
               Search and Select Company:
             </label>
             
-            {/* Search input */}
-            <input
-              type="text"
-              placeholder="Search companies..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={inputStyles}
-            />
+            <div ref={comboboxRef} style={{ position: 'relative' }}>
+              {/* Combobox input */}
+              <input
+                type="text"
+                placeholder="Type to search companies..."
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onFocus={() => setIsDropdownOpen(true)}
+                style={{
+                  ...inputStyles,
+                  paddingRight: '40px'
+                }}
+              />
+              
+              {/* Dropdown arrow */}
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--color-text-secondary)',
+                  fontSize: '16px'
+                }}
+              >
+                {isDropdownOpen ? '▲' : '▼'}
+              </button>
 
-            {/* Company dropdown */}
-            <select
-              value={selectedCompanyId}
-              onChange={(e) => setSelectedCompanyId(e.target.value)}
-              style={selectStyles}
-            >
-              <option value="">
-                {filteredCompanies.length === 0 ? 'No companies found' : 'Select a company...'}
-              </option>
-              {filteredCompanies.map(company => (
-                <option key={company.id} value={company.id}>
-                  {company.name}
-                </option>
-              ))}
-            </select>
+              {/* Dropdown options */}
+              {isDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: '0',
+                  right: '0',
+                  backgroundColor: 'var(--color-card-bg)',
+                  border: '1px solid var(--color-card-border)',
+                  borderRadius: 'var(--border-radius-md)',
+                  boxShadow: 'var(--shadow-lg)',
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  zIndex: 1000
+                }}>
+                  {filteredCompanies.length === 0 ? (
+                    <div style={{
+                      padding: '12px',
+                      color: 'var(--color-text-secondary)',
+                      textAlign: 'center'
+                    }}>
+                      No companies found
+                    </div>
+                  ) : (
+                    filteredCompanies.map(company => (
+                      <button
+                        key={company.id}
+                        type="button"
+                        onClick={() => handleCompanySelect(company)}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          textAlign: 'left',
+                          background: selectedCompany?.id === company.id ? 'var(--color-button-ghost-hover)' : 'transparent',
+                          border: 'none',
+                          borderBottom: '1px solid var(--color-card-border)',
+                          color: 'var(--color-text-primary)',
+                          cursor: 'pointer',
+                          fontSize: '14px'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--color-button-ghost-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = selectedCompany?.id === company.id ? 'var(--color-button-ghost-hover)' : 'transparent';
+                        }}
+                      >
+                        {company.name}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Proceed button */}
           <button
             onClick={handleProceedToCompany}
-            disabled={!selectedCompanyId}
-            style={getProceedButtonStyles(!!selectedCompanyId)}
+            disabled={!selectedCompany}
+            style={getProceedButtonStyles(!!selectedCompany)}
           >
             Proceed to Company Dashboard
           </button>

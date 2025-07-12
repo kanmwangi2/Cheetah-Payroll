@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { createStaff } from '../services/staff.service';
+import { normalizeDate } from '../../../shared/utils/date.utils';
 
 const staffTemplate = [
-  'firstName,lastName,idNumber,rssbNumber,dateOfBirth,gender,maritalStatus,phone,email,address,emergencyContact,startDate,position,employmentType,department,bankName,accountNumber',
-  'John,Doe,123456789,RSSB123,1990-01-01,male,single,0780000000,john@example.com,123 Main St,Jane Doe,2022-01-01,Manager,Full-time,HR,Bank of Kigali,1234567890',
+  'firstName,lastName,idNumber,rssbNumber,dateOfBirth,gender,maritalStatus,phone,email,address,emergencyContact,staffNumber,startDate,endDate,position,employmentType,department,bankName,accountNumber',
+  'John,Doe,123456789,RSSB123,01/01/1990,male,single,0780000000,john@example.com,123 Main St,Jane Doe,EMP001,01/01/2022,,Manager,Full-time,HR,Bank of Kigali,1234567890',
 ].join('\n');
 
 const REQUIRED_FIELDS = [
@@ -19,6 +20,7 @@ const REQUIRED_FIELDS = [
   'email',
   'address',
   'emergencyContact',
+  'staffNumber',
   'startDate',
   'position',
   'employmentType',
@@ -54,7 +56,7 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
   const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>([]);
 
   // Enhanced validation for imported rows
-  function validateRow(row: any, idx: number, idNumbers: Set<string>): string | null {
+  function validateRow(row: any, idx: number, idNumbers: Set<string>, staffNumbers: Set<string>): string | null {
     for (const field of REQUIRED_FIELDS) {
       if (!row[field] || String(row[field]).trim() === '') {
         return `Missing required field "${field}"`;
@@ -65,13 +67,39 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
       return `Duplicate ID number in file (${row.idNumber})`;
     }
     idNumbers.add(row.idNumber);
-    // Date format check (YYYY-MM-DD)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(row.dateOfBirth)) {
-      return `Invalid dateOfBirth format (expected YYYY-MM-DD)`;
+    
+    // Duplicate staff number in file
+    if (staffNumbers.has(row.staffNumber)) {
+      return `Duplicate staff number in file (${row.staffNumber})`;
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(row.startDate)) {
-      return `Invalid startDate format (expected YYYY-MM-DD)`;
+    staffNumbers.add(row.staffNumber);
+    // Date format check and conversion (accepts DD/MM/YYYY or YYYY-MM-DD)
+    const normalizedDateOfBirth = normalizeDate(row.dateOfBirth);
+    if (!normalizedDateOfBirth) {
+      return `Invalid dateOfBirth format (expected DD/MM/YYYY or YYYY-MM-DD)`;
     }
+    row.dateOfBirth = normalizedDateOfBirth;
+    
+    const normalizedStartDate = normalizeDate(row.startDate);
+    if (!normalizedStartDate) {
+      return `Invalid startDate format (expected DD/MM/YYYY or YYYY-MM-DD)`;
+    }
+    row.startDate = normalizedStartDate;
+    
+    // End date validation (optional field)
+    if (row.endDate && row.endDate.trim() !== '') {
+      const normalizedEndDate = normalizeDate(row.endDate);
+      if (!normalizedEndDate) {
+        return `Invalid endDate format (expected DD/MM/YYYY or YYYY-MM-DD)`;
+      }
+      row.endDate = normalizedEndDate;
+      
+      // Validate end date is after start date
+      if (new Date(normalizedEndDate) <= new Date(normalizedStartDate)) {
+        return `End date must be after start date`;
+      }
+    }
+    
     // Email format check
     if (!/^\S+@\S+\.\S+$/.test(row.email)) {
       return `Invalid email address`;
@@ -98,12 +126,13 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
       complete: async results => {
         const rows = results.data as any[];
         const idNumbers = new Set<string>();
+        const staffNumbers = new Set<string>();
         const errors: { row: number; error: string }[] = [];
         setImportProgress({ processed: 0, total: rows.length });
         let success = 0;
         for (let i = 0; i < rows.length; i++) {
           const row = rows[i];
-          const validationError = validateRow(row, i, idNumbers);
+          const validationError = validateRow(row, i, idNumbers, staffNumbers);
           if (validationError) {
             errors.push({ row: i + 2, error: validationError });
             setRowErrors([...errors]);

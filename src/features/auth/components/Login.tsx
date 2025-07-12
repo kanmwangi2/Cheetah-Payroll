@@ -11,7 +11,6 @@ import { db } from '../../../core/config/firebase.config';
 import { useThemeContext } from '../../../core/providers/ThemeProvider';
 import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
 import LoadingSpinner from '../../../shared/components/ui/LoadingSpinner';
-import Logo from '../../../shared/components/ui/Logo';
 import ThemeBoundary from '../../../shared/components/ui/ThemeBoundary';
 import { logger } from '../../../shared/utils/logger';
 import { getFirebaseErrorMessage, isCredentialError, isRetryableError } from '../../../shared/utils/firebase-errors';
@@ -129,11 +128,24 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
                 }}
               />
             ) : (
-              <Logo size="large" variant="icon" />
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '8px',
+                background: 'var(--color-button-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-text-inverse)',
+                fontSize: '24px',
+                fontWeight: 'bold'
+              }}>
+                📊
+              </div>
             )}
           </div>
           <h1 style={titleStyles}>
-            Welcome to Cheetah Payroll
+            Welcome to Payroll System
           </h1>
           <p style={subtitleStyles}>
             Sign in to your account to continue
@@ -250,7 +262,7 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
       {/* Footer */}
       <div style={pageFooterStyles}>
         <p style={copyrightStyles}>
-          © 2025 Cheetah Payroll. Built for Rwanda's workforce.
+          © 2025 Payroll Management System. Built for efficient workforce management.
         </p>
       </div>
       </div>

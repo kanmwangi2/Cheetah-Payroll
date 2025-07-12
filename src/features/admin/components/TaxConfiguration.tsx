@@ -60,7 +60,7 @@ const TaxConfiguration: React.FC = () => {
         setTimeout(() => setMessage(null), 3000);
       }
     } catch (error) {
-      console.error('Error loading tax configuration:', error);
+
       setMessage({ type: 'error', text: 'Failed to load tax configuration. Please check your permissions.' });
     } finally {
       setLoading(false);
@@ -82,7 +82,7 @@ const TaxConfiguration: React.FC = () => {
       
       setTimeout(() => setMessage(null), 3000);
     } catch (error) {
-      console.error('Error saving tax configuration:', error);
+
       setMessage({ type: 'error', text: 'Failed to save tax configuration' });
     } finally {
       setSaving(false);

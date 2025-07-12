@@ -120,6 +120,12 @@ export async function processLoanPayment(companyId: string, deductionId: string,
   const deduction = await getDeduction(companyId, deductionId);
   if (!deduction) {throw new Error('Deduction not found');}
   
+  // Validate the payment amount
+  const validationError = validateDeductionPayment(deduction, paymentAmount);
+  if (validationError) {
+    throw new Error(validationError);
+  }
+  
   const newBalance = Math.max(0, deduction.remainingBalance - paymentAmount);
   const isCompleted = newBalance === 0;
   
@@ -228,4 +234,45 @@ export function validateDeduction(deduction: Omit<Deduction, 'id' | 'companyId' 
   }
   
   return errors;
+}
+
+// Balance validation functions
+export function validateDeductionPayment(deduction: Deduction, paymentAmount: number): string | null {
+  if (paymentAmount <= 0) {
+    return 'Payment amount must be greater than 0';
+  }
+  
+  if (paymentAmount > deduction.remainingBalance) {
+    return `Payment amount (${paymentAmount.toLocaleString()}) cannot exceed remaining balance (${deduction.remainingBalance.toLocaleString()})`;
+  }
+  
+  return null;
+}
+
+export function validateDeductionBalance(deduction: Deduction): string | null {
+  if (deduction.remainingBalance < 0) {
+    return 'Remaining balance cannot be negative';
+  }
+  
+  if (deduction.remainingBalance > deduction.originalAmount) {
+    return 'Remaining balance cannot exceed original amount';
+  }
+  
+  return null;
+}
+
+export function canProcessDeduction(deduction: Deduction, amount: number): boolean {
+  if (deduction.status !== 'active') {
+    return false;
+  }
+  
+  if (deduction.remainingBalance <= 0) {
+    return false;
+  }
+  
+  if (amount > deduction.remainingBalance) {
+    return false;
+  }
+  
+  return true;
 }

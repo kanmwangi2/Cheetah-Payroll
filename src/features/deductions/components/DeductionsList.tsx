@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getDeductions, processLoanPayment, deleteDeduction, DEDUCTION_TYPE_LABELS } from '../services/deductions.service';
+import { getDeductions, processLoanPayment, deleteDeduction, DEDUCTION_TYPE_LABELS, validateDeductionPayment } from '../services/deductions.service';
 import { getStaff } from '../../staff/services/staff.service';
 import { Deduction, Staff } from '../../../shared/types';
 import DeductionsForm from './DeductionsForm';
@@ -69,8 +69,20 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
       return;
     }
 
+    const amount = parseFloat(paymentAmount);
+    const deduction = deductions.find(d => d.id === deductionId);
+    
+    if (deduction) {
+      // Validate payment amount against remaining balance
+      const validationError = validateDeductionPayment(deduction, amount);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+    }
+
     try {
-      await processLoanPayment(companyId, deductionId, parseFloat(paymentAmount));
+      await processLoanPayment(companyId, deductionId, amount);
       setPaymentModalOpen(null);
       setPaymentAmount('');
       setRefresh(r => r + 1);
@@ -154,8 +166,8 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
           </button>
           <button
             onClick={() => {
-              const csvContent = 'type,staffId,originalAmount,description\n' + 
-                deductions.map(d => `${d.type},${d.staffId},${d.originalAmount},${d.description || ''}`).join('\n');
+              const csvContent = 'type,staffId,originalAmount,monthlyAmount,description\n' + 
+                deductions.map(d => `${d.type},${d.staffId},${d.originalAmount},${d.monthlyInstallment || ''},${d.description || ''}`).join('\n');
               const blob = new Blob([csvContent], { type: 'text/csv' });
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
@@ -432,6 +444,15 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
+                    Monthly Amount
+                  </th>
+                  <th style={{ 
+                    padding: '16px', 
+                    textAlign: 'right', 
+                    fontWeight: 600,
+                    color: 'var(--color-text-primary)',
+                    fontSize: '14px'
+                  }}>
                     Remaining
                   </th>
                   <th style={{ 
@@ -490,6 +511,9 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     </td>
                     <td style={{ padding: '16px', textAlign: 'right', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                       RWF {d.originalAmount.toLocaleString()}
+                    </td>
+                    <td style={{ padding: '16px', textAlign: 'right', fontWeight: 500, color: 'var(--color-primary-600)' }}>
+                      {d.monthlyInstallment ? `RWF ${d.monthlyInstallment.toLocaleString()}` : 'N/A'}
                     </td>
                     <td style={{ 
                       padding: '16px', 
@@ -614,17 +638,7 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
           }}>
             <button
               onClick={() => setShowForm(false)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'none',
-                border: 'none',
-                fontSize: '24px',
-                cursor: 'pointer',
-                zIndex: 1001,
-                color: 'var(--color-text-secondary)'
-              }}
+              className="modal-close-btn"
             >
               ×
             </button>
@@ -662,6 +676,24 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
             position: 'relative'
           }}>
             <h3 style={{ margin: '0 0 16px 0', color: 'var(--color-text-primary)' }}>Record Loan Payment</h3>
+            {(() => {
+              const deduction = deductions.find(d => d.id === paymentModalOpen);
+              return deduction && (
+                <div style={{ 
+                  marginBottom: '16px', 
+                  padding: '12px',
+                  background: 'var(--color-info-100)',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  color: 'var(--color-text-secondary)'
+                }}>
+                  <div><strong>Remaining Balance:</strong> RWF {deduction.remainingBalance.toLocaleString()}</div>
+                  {deduction.monthlyInstallment && (
+                    <div><strong>Monthly Installment:</strong> RWF {deduction.monthlyInstallment.toLocaleString()}</div>
+                  )}
+                </div>
+              );
+            })()}
             <div style={{ marginBottom: '24px' }}>
               <label style={{ 
                 display: 'block', 
@@ -676,6 +708,10 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                 value={paymentAmount}
                 onChange={e => setPaymentAmount(e.target.value)}
                 placeholder="Enter payment amount"
+                max={(() => {
+                  const deduction = deductions.find(d => d.id === paymentModalOpen);
+                  return deduction ? deduction.remainingBalance : undefined;
+                })()}
                 style={{
                   width: '100%',
                   padding: '10px 12px',

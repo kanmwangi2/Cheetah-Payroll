@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getPayrolls, createComprehensivePayroll } from '../services/payroll.service';
+import { getPayrolls, createComprehensivePayroll, deletePayroll } from '../services/payroll.service';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
 
 const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
@@ -10,7 +10,12 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [refresh, setRefresh] = useState(0);
   const [search, setSearch] = useState('');
   const [showPayrollForm, setShowPayrollForm] = useState(false);
-  const [payrollPeriod, setPayrollPeriod] = useState('');
+  const [payrollPeriod, setPayrollPeriod] = useState(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  });
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
@@ -22,7 +27,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
 
   const handleCreatePayroll = async () => {
     if (!payrollPeriod.trim()) {
-      setError('Please enter a payroll period (e.g., "2025-07" or "July 2025")');
+      setError('Please select a payroll period');
       return;
     }
 
@@ -43,6 +48,40 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
     } finally {
       setCreating(false);
     }
+  };
+
+  const handleDeletePayroll = async (payrollId: string, payrollPeriod: string) => {
+    if (!confirm(`Are you sure you want to delete the payroll for ${payrollPeriod}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await deletePayroll(companyId, payrollId);
+      setRefresh(r => r + 1);
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete payroll');
+    }
+  };
+
+  // Helper function to check permissions
+  const canEditPayroll = (payroll: any) => {
+    // Can edit if payroll is not approved/processed
+    return payroll.status === 'draft' || payroll.status === 'pending_approval';
+  };
+
+  const canDeletePayroll = (payroll: any) => {
+    // Non-approved payrolls: can be deleted by payroll preparers/approvers
+    if (payroll.status === 'draft' || payroll.status === 'pending_approval') {
+      return user?.role === 'payroll_preparer' || user?.role === 'payroll_approver' || 
+             user?.role === 'company_admin' || user?.role === 'app_admin' || user?.role === 'primary_admin';
+    }
+    
+    // Approved/processed payrolls: only admins can delete
+    if (payroll.status === 'approved' || payroll.status === 'processed') {
+      return user?.role === 'company_admin' || user?.role === 'app_admin' || user?.role === 'primary_admin';
+    }
+    
+    return false;
   };
 
   if (loading) {return <div className="payroll-loading" aria-live="polite" style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading payrolls...</div>;}
@@ -79,84 +118,6 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
         </h1>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
-            onClick={() => {
-              const input = document.createElement('input');
-              input.type = 'file';
-              input.accept = '.csv';
-              input.onchange = (e) => {
-                const file = (e.target as HTMLInputElement).files?.[0];
-                if (file) {
-                  console.log('Import CSV:', file);
-                }
-              };
-              input.click();
-            }}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 6,
-              border: '1px solid var(--color-success-500)',
-              background: 'var(--color-bg-secondary)',
-              color: 'var(--color-success-600)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px',
-              transition: 'all var(--transition-normal)'
-            }}
-          >
-            📤 Import CSV
-          </button>
-          <button
-            onClick={() => {
-              const csvContent = 'gross,finalNet,paye\n' + 
-                payrolls.map(p => `${p.gross},${p.finalNet},${p.paye}`).join('\n');
-              const blob = new Blob([csvContent], { type: 'text/csv' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'payroll_export.csv';
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 6,
-              border: '1px solid var(--color-info-500)',
-              background: 'var(--color-bg-secondary)',
-              color: 'var(--color-info-600)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px',
-              transition: 'all var(--transition-normal)'
-            }}
-          >
-            📥 Export CSV
-          </button>
-          <button
-            onClick={() => {
-              const template = 'gross,basic,transport,otherDeductions\n500000,400000,50000,0';
-              const blob = new Blob([template], { type: 'text/csv' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'payroll_import_template.csv';
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 6,
-              border: '1px solid var(--color-neutral-500)',
-              background: 'var(--color-bg-secondary)',
-              color: 'var(--color-text-secondary)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px',
-              transition: 'all var(--transition-normal)'
-            }}
-          >
-            📋 Template
-          </button>
-          <button
             onClick={() => setShowPayrollForm(true)}
             style={{
               padding: '10px 20px',
@@ -170,7 +131,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
               transition: 'all var(--transition-normal)'
             }}
           >
-            + Create Comprehensive Payroll
+            + Create New Payroll
           </button>
         </div>
       </div>
@@ -380,7 +341,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                         {p.createdAt ? new Date(p.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
                       </td>
                       <td style={{ padding: '16px', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
                           <button
                             onClick={() => console.log('View payroll:', p.id)}
                             style={{
@@ -396,7 +357,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                           >
                             View
                           </button>
-                          {p.status !== 'completed' && (
+                          {canEditPayroll(p) && (
                             <button
                               onClick={() => console.log('Edit payroll:', p.id)}
                               style={{
@@ -411,6 +372,23 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                               }}
                             >
                               Edit
+                            </button>
+                          )}
+                          {canDeletePayroll(p) && (
+                            <button
+                              onClick={() => handleDeletePayroll(p.id, p.period)}
+                              style={{
+                                padding: '6px 12px',
+                                borderRadius: 4,
+                                border: '1px solid var(--color-error-500)',
+                                background: 'var(--color-bg-secondary)',
+                                color: 'var(--color-error-600)',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                transition: 'all var(--transition-normal)'
+                              }}
+                            >
+                              Delete
                             </button>
                           )}
                         </div>
@@ -432,14 +410,14 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'var(--color-overlay-bg)',
+          background: 'var(--color-bg-overlay)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
         }}>
           <div style={{
-            background: 'var(--color-modal-bg)',
+            background: 'var(--color-card-bg)',
             borderRadius: '8px',
             maxWidth: '500px',
             width: '90%',
@@ -456,18 +434,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                 setPayrollPeriod('');
                 setError(null);
               }}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'none',
-                border: 'none',
-                fontSize: '24px',
-                cursor: 'pointer',
-                zIndex: 1001,
-                color: 'var(--color-text-secondary)',
-                transition: 'color var(--transition-normal)'
-              }}
+              className="modal-close-btn"
             >
               ×
             </button>
@@ -478,7 +445,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
               fontSize: '1.5rem',
               fontWeight: 600
             }}>
-              Create Comprehensive Payroll
+              Create New Payroll
             </h3>
             
             <div style={{ display: 'grid', gap: '20px' }}>
@@ -493,10 +460,11 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                   Payroll Period *
                 </label>
                 <input
-                  type="text"
-                  placeholder='Enter period (e.g., "2025-07" or "July 2025")'
+                  type="month"
                   value={payrollPeriod}
                   onChange={e => setPayrollPeriod(e.target.value)}
+                  min="2020-01"
+                  max="2030-12"
                   style={{
                     width: '100%',
                     padding: '12px 16px',
@@ -523,7 +491,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                   marginTop: '6px',
                   lineHeight: '1.4'
                 }}>
-                  This will create a comprehensive payroll for all active staff members in the company for the specified period.
+                  Select the month and year for this payroll run. This will create a comprehensive payroll for all active staff members.
                 </div>
               </div>
 

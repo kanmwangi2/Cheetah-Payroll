@@ -436,14 +436,7 @@ const UserProfile: React.FC = () => {
                   }}>Change Email Address</h3>
                   <button
                     onClick={() => setShowEmailChange(false)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      fontSize: '24px',
-                      cursor: 'pointer',
-                      color: 'var(--color-text-secondary)',
-                      padding: '4px'
-                    }}
+                    className="modal-close-btn"
                   >
                     ×
                   </button>

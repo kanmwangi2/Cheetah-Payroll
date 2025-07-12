@@ -1,14 +1,16 @@
 import React, { useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { createPayment } from '../services/payments.service';
+import { normalizeDate } from '../../../shared/utils/date.utils';
 
 const paymentTemplate = [
-  'type,amount,staff_id,is_gross,effective_date',
-  'Salary,500000,EMP001,true,2025-07-01',
-  'Bonus,100000,EMP002,false,2025-07-01',
+  'type,amount,staff_id,is_gross,is_recurring,effective_date,end_date,description,status',
+  'basic_salary,500000,EMP001,true,true,01/07/2025,,Monthly basic salary,active',
+  'transport_allowance,50000,EMP001,false,true,01/07/2025,,Transport allowance,active',
+  'bonus,100000,EMP002,false,false,01/07/2025,31/07/2025,Performance bonus,active',
 ].join('\n');
 
-const REQUIRED_FIELDS = ['type', 'amount', 'staff_id', 'is_gross', 'effective_date'];
+const REQUIRED_FIELDS = ['type', 'amount', 'staff_id', 'is_gross', 'is_recurring', 'effective_date', 'status'];
 
 interface ImportHistoryEntry {
   date: string;
@@ -52,10 +54,32 @@ const PaymentsImportExport: React.FC<{
     ) {
       return `is_gross must be true or false`;
     }
-    // Date format check (YYYY-MM-DD)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(row.effective_date)) {
-      return `Invalid effective_date format (expected YYYY-MM-DD)`;
+    // is_recurring must be true/false
+    if (
+      !(row.is_recurring === 'true' || row.is_recurring === 'false' || typeof row.is_recurring === 'boolean')
+    ) {
+      return `is_recurring must be true or false`;
     }
+    // status must be active or inactive
+    if (row.status !== 'active' && row.status !== 'inactive') {
+      return `status must be either 'active' or 'inactive'`;
+    }
+    // Date format check and conversion (accepts DD/MM/YYYY or YYYY-MM-DD)
+    const normalizedEffectiveDate = normalizeDate(row.effective_date);
+    if (!normalizedEffectiveDate) {
+      return `Invalid effective_date format (expected DD/MM/YYYY or YYYY-MM-DD)`;
+    }
+    row.effective_date = normalizedEffectiveDate;
+    
+    // end_date is optional but if provided, validate format
+    if (row.end_date && row.end_date.trim()) {
+      const normalizedEndDate = normalizeDate(row.end_date);
+      if (!normalizedEndDate) {
+        return `Invalid end_date format (expected DD/MM/YYYY or YYYY-MM-DD)`;
+      }
+      row.end_date = normalizedEndDate;
+    }
+    
     // Duplicate staff_id for same date in file
     const key = row.staff_id + '-' + row.effective_date;
     if (staffIds.has(key)) {
@@ -93,7 +117,19 @@ const PaymentsImportExport: React.FC<{
             continue;
           }
           try {
-            await createPayment(companyId, row);
+            // Transform row data to match Payment interface
+            const paymentData = {
+              type: row.type,
+              amount: parseFloat(row.amount),
+              staffId: row.staff_id,
+              isGross: row.is_gross === 'true' || row.is_gross === true,
+              isRecurring: row.is_recurring === 'true' || row.is_recurring === true,
+              effectiveDate: row.effective_date,
+              endDate: row.end_date && row.end_date.trim() ? row.end_date : undefined,
+              description: row.description && row.description.trim() ? row.description : undefined,
+              status: row.status || 'active'
+            };
+            await createPayment(companyId, paymentData);
             success++;
           } catch (err: any) {
             errors.push({ row: i + 2, error: err.message || 'Import failed' });
@@ -130,7 +166,19 @@ const PaymentsImportExport: React.FC<{
   // Export CSV
   const handleExport = () => {
     setExporting(true);
-    const csv = Papa.unparse(payments);
+    // Transform payments data to match import template format
+    const exportData = payments.map(payment => ({
+      type: payment.type,
+      amount: payment.amount,
+      staff_id: payment.staffId,
+      is_gross: payment.isGross,
+      is_recurring: payment.isRecurring,
+      effective_date: payment.effectiveDate,
+      end_date: payment.endDate || '',
+      description: payment.description || '',
+      status: payment.status
+    }));
+    const csv = Papa.unparse(exportData);
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

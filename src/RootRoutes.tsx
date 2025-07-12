@@ -16,12 +16,12 @@ class ErrorBoundary extends React.Component<
   }
 
   static getDerivedStateFromError(error: Error) {
-    console.error('Error boundary caught error:', error);
+    // console.error('Error boundary caught error:', error);
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error details:', error, errorInfo);
+    // console.error('Error details:', error, errorInfo);
   }
 
   render() {

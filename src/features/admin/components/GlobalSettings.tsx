@@ -111,7 +111,7 @@ const GlobalSettings: React.FC = () => {
         setTimeout(() => setMessage(null), 3000);
       }
     } catch (error) {
-      console.error('Error loading global settings:', error);
+      // console.error('Error loading global settings:', error);
       setMessage({ type: 'error', text: 'Failed to load global settings. Please check your permissions.' });
     } finally {
       setLoading(false);
@@ -133,14 +133,14 @@ const GlobalSettings: React.FC = () => {
       
       setTimeout(() => setMessage(null), 3000);
     } catch (error) {
-      console.error('Error saving global settings:', error);
+      // console.error('Error saving global settings:', error);
       setMessage({ type: 'error', text: 'Failed to save global settings' });
     } finally {
       setSaving(false);
     }
   };
 
-  const updateSetting = (section: keyof Omit<GlobalSettings, 'updatedAt'>, field: string, value: any) => {
+  const updateSetting = (section: keyof Omit<GlobalSettings, 'updatedAt'>, field: string, value: unknown) => {
     setSettings({
       ...settings,
       [section]: { ...settings[section], [field]: value }
@@ -149,7 +149,7 @@ const GlobalSettings: React.FC = () => {
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) { return; }
 
     // Validate file type
     if (!file.type.startsWith('image/')) {

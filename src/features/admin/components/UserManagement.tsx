@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '../../../core/config/firebase.config';
 import { User, Company } from '../../../shared/types';
@@ -40,7 +40,7 @@ const UserManagement: React.FC = () => {
       })) as User[];
       setUsers(usersData);
     } catch (error) {
-      console.error('Error loading users:', error);
+      // console.error('Error loading users:', error);
     }
   };
 
@@ -53,7 +53,7 @@ const UserManagement: React.FC = () => {
       })) as Company[];
       setCompanies(companiesData);
     } catch (error) {
-      console.error('Error loading companies:', error);
+      // console.error('Error loading companies:', error);
     }
   };
 
@@ -90,7 +90,7 @@ const UserManagement: React.FC = () => {
       resetForm();
       loadUsers();
     } catch (error) {
-      console.error('Error saving user:', error);
+      // console.error('Error saving user:', error);
       alert('Error creating user. Please try again.');
     }
   };
@@ -119,7 +119,7 @@ const UserManagement: React.FC = () => {
         await deleteDoc(doc(db, 'app_settings/users', userId));
         loadUsers();
       } catch (error) {
-        console.error('Error deleting user:', error);
+        // console.error('Error deleting user:', error);
       }
     }
   };
@@ -129,7 +129,7 @@ const UserManagement: React.FC = () => {
       await sendPasswordResetEmail(auth, email);
       alert('Password reset email sent successfully!');
     } catch (error) {
-      console.error('Error sending password reset:', error);
+      // console.error('Error sending password reset:', error);
       alert('Error sending password reset email.');
     }
   };

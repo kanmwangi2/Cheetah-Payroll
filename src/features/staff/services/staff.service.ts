@@ -21,6 +21,7 @@ const db = getFirestore();
 // Types
 export interface Staff {
   id?: string;
+  staffNumber: string;
   name: string;
   email: string;
   phone?: string;
@@ -28,11 +29,13 @@ export interface Staff {
   department?: string;
   salary: number;
   startDate: string;
+  endDate?: string;
   status: 'active' | 'inactive';
   [key: string]: any;
 }
 
 export interface StaffInput {
+  staffNumber: string;
   name: string;
   email: string;
   phone?: string;
@@ -40,12 +43,14 @@ export interface StaffInput {
   department?: string;
   salary: number;
   startDate: string;
+  endDate?: string;
   status?: 'active' | 'inactive';
 }
 
 // Validation functions
 const validateStaffInput = (data: StaffInput): string | null => {
   return validators.combine(
+    () => validators.required(data.staffNumber, 'Staff Number'),
     () => validators.required(data.name, 'Name'),
     () => validators.required(data.email, 'Email'),
     () => validators.email(data.email),

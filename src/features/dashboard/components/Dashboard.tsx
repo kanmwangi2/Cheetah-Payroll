@@ -44,52 +44,68 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
       const db = getFirestore();
       
       try {
-        // Fetch staff count
-        const staffSnap = await getDocs(collection(db, 'companies', companyId, 'staff'));
+        // Prepare all queries to run in parallel
+        const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+        
+        const queries = [
+          // Staff count
+          getDocs(collection(db, 'companies', companyId, 'staff')),
+          
+          // Payroll count
+          getDocs(collection(db, 'companies', companyId, 'payrolls')),
+          
+          // Pending approvals count
+          getDocs(query(
+            collection(db, 'companies', companyId, 'payrolls'),
+            where('status', '==', 'pending_approval')
+          )),
+          
+          // Active payments (for amount calculation)
+          getDocs(query(
+            collection(db, 'companies', companyId, 'payments'),
+            where('status', '==', 'active')
+          )),
+          
+          // Active deductions count
+          getDocs(query(
+            collection(db, 'companies', companyId, 'deductions'),
+            where('status', '==', 'active')
+          )),
+          
+          // This month's payroll
+          getDocs(query(
+            collection(db, 'companies', companyId, 'payrolls'),
+            where('period', '>=', currentMonth + '-01'),
+            where('period', '<=', currentMonth + '-31'),
+            orderBy('period', 'desc'),
+            limit(1)
+          ))
+        ];
+
+        // Execute all queries in parallel
+        const [
+          staffSnap,
+          payrollSnap, 
+          pendingApprovalsSnap,
+          activePaymentsSnap,
+          activeDeductionsSnap,
+          thisMonthPayrollSnap
+        ] = await Promise.all(queries);
+
+        // Process results
         const staffCount = staffSnap.size;
-
-        // Fetch payroll count
-        const payrollSnap = await getDocs(collection(db, 'companies', companyId, 'payrolls'));
         const payrollCount = payrollSnap.size;
-
-        // Fetch pending approvals from payrolls with status 'pending_approval'
-        const pendingApprovalsQuery = query(
-          collection(db, 'companies', companyId, 'payrolls'),
-          where('status', '==', 'pending_approval')
-        );
-        const pendingApprovalsSnap = await getDocs(pendingApprovalsQuery);
         const pendingApprovals = pendingApprovalsSnap.size;
+        const totalDeductions = activeDeductionsSnap.size;
 
-        // Fetch total active payments amount
-        const activePaymentsQuery = query(
-          collection(db, 'companies', companyId, 'payments'),
-          where('status', '==', 'active')
-        );
-        const activePaymentsSnap = await getDocs(activePaymentsQuery);
+        // Calculate total payments amount
         let totalPaymentsAmount = 0;
         activePaymentsSnap.forEach(doc => {
           const payment = doc.data();
           totalPaymentsAmount += payment.amount || 0;
         });
 
-        // Fetch active deductions count
-        const activeDeductionsQuery = query(
-          collection(db, 'companies', companyId, 'deductions'),
-          where('status', '==', 'active')
-        );
-        const activeDeductionsSnap = await getDocs(activeDeductionsQuery);
-        const totalDeductions = activeDeductionsSnap.size;
-
-        // Calculate this month's payroll from recent payrolls
-        const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
-        const thisMonthPayrollQuery = query(
-          collection(db, 'companies', companyId, 'payrolls'),
-          where('period', '>=', currentMonth + '-01'),
-          where('period', '<=', currentMonth + '-31'),
-          orderBy('period', 'desc'),
-          limit(1)
-        );
-        const thisMonthPayrollSnap = await getDocs(thisMonthPayrollQuery);
+        // Calculate this month's payroll
         let thisMonthPayroll = 0;
         if (!thisMonthPayrollSnap.empty) {
           const latestPayroll = thisMonthPayrollSnap.docs[0].data();

@@ -16,7 +16,7 @@ import {
 } from 'firebase/firestore';
 import { logAuditAction } from '../../../shared/services/audit.service';
 import { getActivePayments, calculateStaffPayments } from '../../payments/services/payments.service';
-import { calculateStaffDeductions } from '../../deductions/services/deductions.service';
+import { calculateStaffDeductions, processLoanPayment, reverseLoanPayment, getDeductions, canProcessDeduction, validateDeductionPayment } from '../../deductions/services/deductions.service';
 import { getStaff } from '../../staff/services/staff.service';
 import { 
   Payroll, 
@@ -107,6 +107,9 @@ export async function processPayroll(
   if (!payroll) {throw new Error('Payroll not found');}
   if (payroll.status !== 'approved') {throw new Error('Only approved payrolls can be processed');}
   
+  // Update deduction balances for all staff in this payroll
+  await updateDeductionBalancesForPayroll(companyId, payrollId, 'process');
+  
   await updatePayroll(companyId, payrollId, {
     status: 'processed',
     processedBy: userId,
@@ -120,6 +123,65 @@ export async function processPayroll(
     action: 'update',
     details: { action: 'processed', period: payroll.period },
   });
+}
+
+// Update deduction balances when payroll is processed or deleted
+async function updateDeductionBalancesForPayroll(
+  companyId: string,
+  payrollId: string,
+  action: 'process' | 'reverse'
+): Promise<void> {
+  try {
+    // Get all staff payroll records for this payroll
+    const staffPayrolls = await getStaffPayrollData(companyId, payrollId);
+    
+    // Get all active deductions for the company
+    const deductions = await getDeductions(companyId);
+    
+    for (const staffPayroll of staffPayrolls) {
+      // Find active deductions for this staff member
+      const staffDeductions = deductions.filter(d => 
+        d.staffId === staffPayroll.staffId && 
+        d.status === 'active' && 
+        d.remainingBalance > 0
+      );
+      
+      for (const deduction of staffDeductions) {
+        try {
+          // Calculate the deduction amount for this payroll cycle
+          let deductionAmount = 0;
+          
+          if (deduction.type === 'loan' && deduction.monthlyInstallment) {
+            // For loans, use the monthly installment amount
+            deductionAmount = Math.min(deduction.monthlyInstallment, deduction.remainingBalance);
+          } else {
+            // For one-time deductions, deduct the full remaining balance
+            deductionAmount = deduction.remainingBalance;
+          }
+          
+          if (deductionAmount > 0) {
+            if (action === 'process') {
+              // Validate before processing the deduction
+              if (canProcessDeduction(deduction, deductionAmount)) {
+                await processLoanPayment(companyId, deduction.id, deductionAmount);
+              } else {
+                console.warn(`Cannot process deduction ${deduction.id}: insufficient balance or inactive status`);
+              }
+            } else if (action === 'reverse') {
+              // Reverse the deduction (increase balance back)
+              await reverseLoanPayment(companyId, deduction.id, deductionAmount);
+            }
+          }
+        } catch (deductionError) {
+          console.error(`Error updating deduction ${deduction.id} for staff ${staffPayroll.staffId}:`, deductionError);
+          // Continue with other deductions even if one fails
+        }
+      }
+    }
+  } catch (error) {
+    console.error(`Error updating deduction balances for payroll ${payrollId}:`, error);
+    throw new Error(`Failed to update deduction balances: ${error.message}`);
+  }
 }
 
 // Validation functions
@@ -518,6 +580,14 @@ export async function updatePayroll(companyId: string, payrollId: string, data: 
 }
 
 export async function deletePayroll(companyId: string, payrollId: string) {
+  // Get payroll status before deletion to check if deduction balances need reversal
+  const payroll = await getPayroll(companyId, payrollId);
+  
+  // If payroll was processed, reverse the deduction balance updates
+  if (payroll && payroll.status === 'processed') {
+    await updateDeductionBalancesForPayroll(companyId, payrollId, 'reverse');
+  }
+  
   return deleteDoc(doc(db, 'companies', companyId, 'payrolls', payrollId));
 }
 

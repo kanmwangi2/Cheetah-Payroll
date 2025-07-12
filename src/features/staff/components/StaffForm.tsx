@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../../core/config/firebase.config';
 import { createStaff } from '../services/staff.service';
 
 const initialState = {
@@ -16,7 +18,9 @@ const initialState = {
     emergencyContact: '',
   },
   employmentDetails: {
+    staffNumber: '',
     startDate: '',
+    endDate: '',
     position: '',
     employmentType: '',
     department: '',
@@ -34,6 +38,26 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const [form, setForm] = useState<any>(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [departments, setDepartments] = useState<string[]>([]);
+
+  // Load existing departments from staff
+  useEffect(() => {
+    const loadDepartments = async () => {
+      try {
+        const staffSnapshot = await getDocs(collection(db, 'companies', companyId, 'staff'));
+        const uniqueDepartments = [...new Set(
+          staffSnapshot.docs
+            .map(doc => doc.data().department)
+            .filter(Boolean)
+        )].sort();
+        setDepartments(uniqueDepartments);
+      } catch (error) {
+        console.error('Error loading departments:', error);
+      }
+    };
+
+    loadDepartments();
+  }, [companyId]);
 
   const handleChange = (section: string, field: string, value: string) => {
     setForm((prev: any) => ({
@@ -49,15 +73,26 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
     const p = form.personalDetails;
     const e = form.employmentDetails;
     if (!p.firstName || !p.lastName || !p.idNumber || !p.rssbNumber || !e.department) { return false; }
-    if (!e.startDate || !e.position || !e.employmentType) { return false; }
+    if (!e.staffNumber || !e.startDate || !e.position || !e.employmentType) { return false; }
     if (!p.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) { return false; }
+    
+    // Validate end date is after start date (if both are provided)
+    if (e.endDate && e.startDate && new Date(e.endDate) <= new Date(e.startDate)) {
+      return false;
+    }
+    
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
-      setError('Please fill all required fields with valid data.');
+      const e = form.employmentDetails;
+      if (e.endDate && e.startDate && new Date(e.endDate) <= new Date(e.startDate)) {
+        setError('End date must be after the start date.');
+      } else {
+        setError('Please fill all required fields with valid data.');
+      }
       return;
     }
     setLoading(true);
@@ -157,11 +192,25 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
       </div>
       <div className="staff-form-row">
         <input
-          placeholder="Department*"
-          value={form.employmentDetails.department}
-          onChange={e => handleChange('employmentDetails', 'department', e.target.value)}
+          placeholder="Staff Number*"
+          value={form.employmentDetails.staffNumber}
+          onChange={e => handleChange('employmentDetails', 'staffNumber', e.target.value)}
           required
         />
+        <div style={{ position: 'relative' }}>
+          <input
+            placeholder="Department* (type or select)"
+            value={form.employmentDetails.department}
+            onChange={e => handleChange('employmentDetails', 'department', e.target.value)}
+            list="departments-list"
+            required
+          />
+          <datalist id="departments-list">
+            {departments.map(dept => (
+              <option key={dept} value={dept} />
+            ))}
+          </datalist>
+        </div>
         <input
           placeholder="Position*"
           value={form.employmentDetails.position}
@@ -180,6 +229,12 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
           value={form.employmentDetails.startDate}
           onChange={e => handleChange('employmentDetails', 'startDate', e.target.value)}
           required
+        />
+        <input
+          placeholder="End Date (optional)"
+          type="date"
+          value={form.employmentDetails.endDate}
+          onChange={e => handleChange('employmentDetails', 'endDate', e.target.value)}
         />
       </div>
       <div className="staff-form-row">

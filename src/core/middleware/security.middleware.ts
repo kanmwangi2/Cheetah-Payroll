@@ -35,9 +35,9 @@ export const securityMiddleware = (options: SecurityOptions = {}) => {
     maxInputLength = 10000,
   } = options;
 
-  return (formData: Record<string, any>, userIdentifier: string) => {
+  return (formData: Record<string, unknown>, userIdentifier: string) => {
     const errors: string[] = [];
-    const sanitizedData: Record<string, any> = {};
+    const sanitizedData: Record<string, unknown> = {};
 
     // Rate limiting
     if (enableRateLimiting) {

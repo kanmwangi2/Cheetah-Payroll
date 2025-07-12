@@ -3,12 +3,12 @@ import Papa from 'papaparse';
 import { createDeduction } from '../services/deductions.service';
 
 const deductionTemplate = [
-  'type,amount,staff_id,balance',
-  'Loan,100000,EMP001,50000',
-  'Tax,20000,EMP002,0',
+  'type,amount,staff_id,balance,monthlyAmount',
+  'Loan,100000,EMP001,50000,10000',
+  'Tax,20000,EMP002,0,5000',
 ].join('\n');
 
-const REQUIRED_FIELDS = ['type', 'amount', 'staff_id', 'balance'];
+const REQUIRED_FIELDS = ['type', 'amount', 'staff_id', 'balance', 'monthlyAmount'];
 
 interface ImportHistoryEntry {
   date: string;
@@ -42,12 +42,15 @@ const DeductionsImportExport: React.FC<{
         return `Missing required field "${field}"`;
       }
     }
-    // Amount and balance must be numbers
+    // Amount, balance, and monthlyAmount must be numbers
     if (isNaN(Number(row.amount)) || Number(row.amount) < 0) {
       return `Invalid amount (must be a non-negative number)`;
     }
     if (isNaN(Number(row.balance)) || Number(row.balance) < 0) {
       return `Invalid balance (must be a non-negative number)`;
+    }
+    if (isNaN(Number(row.monthlyAmount)) || Number(row.monthlyAmount) <= 0) {
+      return `Invalid monthlyAmount (must be a positive number)`;
     }
     // Duplicate deduction for staff_id and type in file
     const key = row.staff_id + '-' + row.type;

@@ -3,7 +3,53 @@
 ## Overview
 
 A comprehensive multi-company payroll management application designed to handle complex payroll
-processing, tax calculations, and statutory reporting with role-based access control.
+processing, tax calculations, and statutory reporting with role-based access control. The application
+features enhanced import/export functionality, comprehensive deduction management with balance tracking,
+and streamlined user experience with improved navigation and permissions.
+
+## Recent Enhancements (2025)
+
+### User Experience Improvements
+- **Enhanced Navigation**: Utilities now accessible from all pages via top header button
+- **Improved Dialog UX**: Added proper padding and styling to close buttons across all dialogs
+- **Theme Integration**: Dynamic logo support from global settings, consistent theme switching
+- **Performance Optimization**: Dashboard loading optimized with parallel query execution (6x faster)
+
+### Payroll Module Enhancements
+- **Smart Period Selection**: Month/year picker with YYYY-MM format and current month default
+- **Role-Based Permissions**: Edit/delete controls based on approval status and user roles
+- **Balance Integration**: Automatic deduction balance updates when payroll is processed/deleted
+- **Streamlined Interface**: Removed unnecessary import/export, renamed to "Create New Payroll"
+
+### Deduction Management System
+- **Real-Time Balance Tracking**: Calculated balance field with payroll integration
+- **Payment Validation**: Balance validation controls prevent over-payment scenarios
+- **Monthly Amount Display**: Prominent monthly installment column for better visibility
+- **Payment Recording**: Enhanced payment modal with balance information and limits
+
+### Staff Management Features
+- **Staff Number Field**: Unique identifier system for all staff records
+- **Department Management**: Dynamic dropdown populated from existing company departments
+- **Employment Tracking**: Optional end date field for comprehensive employment history
+- **Enhanced Import/Export**: CSV templates include all form fields with validation
+
+### Data Import/Export Improvements
+- **Universal Date Support**: DD/MM/YYYY and YYYY-MM-DD format compatibility across all modules
+- **Enhanced Validation**: Comprehensive field validation with detailed error reporting
+- **Complete Field Coverage**: Import/export templates include all form details
+- **Progress Tracking**: Real-time import progress with Firebase integration
+
+### Company & Authentication
+- **Smart Company Selection**: Single combobox with search, role-based filtering
+- **Enhanced Access Control**: Users see only assigned companies based on role
+- **Dynamic Branding**: Global logo integration in Application Administration
+- **Improved Layout**: Fixed button overlaps and spacing issues
+
+### Reports & Utilities Reorganization
+- **Focused Reporting**: Removed management reports, streamlined to core functionality
+- **Reorganized Utilities**: FAQ, Documentation, Advanced Tools, Audit Trail structure
+- **Integrated Notifications**: Moved from utilities to global settings for better organization
+- **Enhanced Accessibility**: Utilities visible from all pages with improved navigation
 
 ## User Types & Permissions
 
