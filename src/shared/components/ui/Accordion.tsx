@@ -98,21 +98,24 @@ export const Accordion: React.FC<AccordionProps> = ({
       {showExpandCollapseAll && (
         <div style={{
           display: 'flex',
-          gap: '8px',
-          marginBottom: '16px',
+          gap: 'var(--spacing-sm)',
+          marginBottom: 'var(--spacing-lg)',
           justifyContent: 'flex-end'
         }}>
           <button
             onClick={expandAll}
             disabled={allExpanded}
             style={{
-              padding: '8px 16px',
-              background: allExpanded ? 'var(--color-bg-tertiary)' : 'var(--color-primary-500)',
+              padding: 'var(--spacing-sm) var(--spacing-lg)',
+              background: allExpanded ? 'var(--color-bg-tertiary)' : 'var(--color-button-primary)',
               color: allExpanded ? 'var(--color-text-secondary)' : 'var(--color-text-inverse)',
               border: '1px solid var(--color-border-primary)',
-              borderRadius: '6px',
+              borderRadius: 'var(--border-radius-md)',
               cursor: allExpanded ? 'not-allowed' : 'pointer',
-              fontSize: '0.9rem'
+              fontSize: 'var(--font-size-sm)',
+              fontWeight: 'var(--font-weight-medium)',
+              transition: 'all var(--transition-fast)',
+              opacity: allExpanded ? 0.6 : 1
             }}
           >
             Expand All
@@ -121,13 +124,16 @@ export const Accordion: React.FC<AccordionProps> = ({
             onClick={collapseAll}
             disabled={allCollapsed}
             style={{
-              padding: '8px 16px',
-              background: allCollapsed ? 'var(--color-bg-tertiary)' : 'var(--color-secondary-500)',
-              color: allCollapsed ? 'var(--color-text-secondary)' : 'var(--color-text-inverse)',
+              padding: 'var(--spacing-sm) var(--spacing-lg)',
+              background: allCollapsed ? 'var(--color-bg-tertiary)' : 'var(--color-bg-secondary)',
+              color: allCollapsed ? 'var(--color-text-secondary)' : 'var(--color-text-primary)',
               border: '1px solid var(--color-border-primary)',
-              borderRadius: '6px',
+              borderRadius: 'var(--border-radius-md)',
               cursor: allCollapsed ? 'not-allowed' : 'pointer',
-              fontSize: '0.9rem'
+              fontSize: 'var(--font-size-sm)',
+              fontWeight: 'var(--font-weight-medium)',
+              transition: 'all var(--transition-fast)',
+              opacity: allCollapsed ? 0.6 : 1
             }}
           >
             Collapse All

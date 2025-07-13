@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../core/config/firebase.config';
-import Button from '../../../shared/components/ui/Button';
 
 interface TaxBracket {
   min: number;
@@ -147,15 +146,24 @@ const TaxConfiguration: React.FC = () => {
         marginBottom: '24px'
       }}>
         <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>Tax Configuration</h2>
-        <Button
-          variant="primary"
-          size="md"
+        <button
           onClick={saveTaxConfiguration}
           disabled={saving}
-          loading={saving}
+          style={{
+            padding: '10px 20px',
+            borderRadius: 6,
+            border: 'none',
+            background: saving ? 'var(--color-bg-tertiary)' : 'var(--color-primary-600)',
+            color: saving ? 'var(--color-text-secondary)' : 'var(--color-text-inverse)',
+            cursor: saving ? 'not-allowed' : 'pointer',
+            fontWeight: 500,
+            fontSize: '14px',
+            transition: 'all var(--transition-normal)',
+            opacity: saving ? 0.6 : 1
+          }}
         >
-          Save Configuration
-        </Button>
+          {saving ? 'Saving...' : 'Save Configuration'}
+        </button>
       </div>
 
       {message && (

@@ -5,8 +5,10 @@ import { normalizeDate } from '../../../shared/utils/date.utils';
 import Button from '../../../shared/components/ui/Button';
 
 const staffTemplate = [
-  'firstName,lastName,idNumber,rssbNumber,dateOfBirth,gender,maritalStatus,phone,email,address,emergencyContact,staffNumber,startDate,endDate,position,employmentType,department,bankName,accountNumber',
-  'John,Doe,123456789,RSSB123,01/01/1990,male,single,0780000000,john@example.com,123 Main St,Jane Doe,EMP001,01/01/2022,,Manager,Full-time,HR,Bank of Kigali,1234567890',
+  'firstName,lastName,idNumber,rssbNumber,staffNumber,dateOfBirth,gender,maritalStatus,nationality,phone,email,address,emergencyContactName,emergencyContactPhone,emergencyContactRelationship,startDate,endDate,position,employmentType,department,bankName,accountNumber',
+  'John,Doe,123456789012345,RSSB123456,EMP001,01/01/1990,Male,Single,Rwanda,0780123456,john.doe@example.com,123 Main St Kigali,Jane Doe,0780654321,Spouse,01/01/2022,,Manager,Full-time,HR,Bank of Kigali,1234567890123',
+  'Alice,Smith,987654321098765,RSSB789012,EMP002,15/03/1985,Female,Married,Uganda,+256701234567,alice.smith@example.com,456 Business Ave Kigali,Bob Smith,+256701987654,Spouse,15/02/2021,,Developer,Full-time,IT,Equity Bank,9876543210987',
+  'David,Johnson,456789123456789,RSSB345678,EMP003,22/07/1992,Male,Single,Kenya,254712345678,david.j@example.com,789 Tech Road Kigali,Mary Johnson,254798765432,Mother,10/06/2023,31/12/2023,Consultant,Contract,Finance,KCB Bank,4567891234567'
 ].join('\n');
 
 const REQUIRED_FIELDS = [
@@ -14,14 +16,17 @@ const REQUIRED_FIELDS = [
   'lastName',
   'idNumber',
   'rssbNumber',
+  'staffNumber',
   'dateOfBirth',
   'gender',
   'maritalStatus',
+  'nationality',
   'phone',
   'email',
   'address',
-  'emergencyContact',
-  'staffNumber',
+  'emergencyContactName',
+  'emergencyContactPhone',
+  'emergencyContactRelationship',
   'startDate',
   'position',
   'employmentType',
@@ -105,10 +110,16 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
     if (!/^\S+@\S+\.\S+$/.test(row.email)) {
       return `Invalid email address`;
     }
-    // Phone format (Rwanda: 07XXXXXXXX)
-    if (!/^07\d{8}$/.test(row.phone)) {
-      return `Invalid phone number (expected 07XXXXXXXX)`;
+    // Phone validation (simple number check)
+    if (!/^\+?[\d\s\-\(\)]+$/.test(row.phone.toString().trim())) {
+      return `Invalid phone number format`;
     }
+    
+    // Emergency contact phone validation
+    if (!/^\+?[\d\s\-\(\)]+$/.test(row.emergencyContactPhone.toString().trim())) {
+      return `Invalid emergency contact phone number format`;
+    }
+    
     return null;
   }
 
@@ -141,7 +152,26 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
             continue;
           }
           try {
-            await createStaff({ companyId, data: row });
+            // Transform CSV data to match service interface
+            const transformedData = {
+              staffNumber: row.staffNumber,
+              name: `${row.firstName} ${row.lastName}`.trim(),
+              email: row.email,
+              phone: row.phone,
+              position: row.position,
+              department: row.department,
+              startDate: row.startDate,
+              endDate: row.endDate || undefined,
+              status: 'active' as const,
+              // Keep all original fields for backward compatibility
+              ...row,
+              // Combine emergency contact fields for backward compatibility
+              emergencyContact: `${row.emergencyContactName} (${row.emergencyContactRelationship}) - ${row.emergencyContactPhone}`
+            };
+            const result = await createStaff({ companyId, data: transformedData });
+            if (!result.success) {
+              throw new Error(result.error || 'Failed to create staff');
+            }
             success++;
           } catch (err: any) {
             errors.push({ row: i + 2, error: err.message || 'Import failed' });

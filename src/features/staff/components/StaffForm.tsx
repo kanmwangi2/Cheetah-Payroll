@@ -9,16 +9,19 @@ const initialState = {
     lastName: '',
     idNumber: '',
     rssbNumber: '',
+    staffNumber: '',
     dateOfBirth: '',
     gender: '',
     maritalStatus: '',
+    nationality: '',
     phone: '',
     email: '',
     address: '',
-    emergencyContact: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    emergencyContactRelationship: '',
   },
   employmentDetails: {
-    staffNumber: '',
     startDate: '',
     endDate: '',
     position: '',
@@ -39,20 +42,38 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [departments, setDepartments] = useState<string[]>([]);
+  
+  // Common countries list
+  const countries = [
+    'Afghanistan', 'Albania', 'Algeria', 'Argentina', 'Australia', 'Austria', 'Bangladesh', 'Belgium', 
+    'Brazil', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'China', 'Colombia', 'Congo', 'Denmark', 
+    'Egypt', 'Ethiopia', 'France', 'Germany', 'Ghana', 'India', 'Indonesia', 'Iran', 'Iraq', 'Italy', 
+    'Japan', 'Kenya', 'Madagascar', 'Malaysia', 'Mexico', 'Morocco', 'Netherlands', 'Nigeria', 'Norway', 
+    'Pakistan', 'Peru', 'Philippines', 'Poland', 'Romania', 'Russia', 'Rwanda', 'Saudi Arabia', 
+    'South Africa', 'South Korea', 'Spain', 'Sri Lanka', 'Sudan', 'Sweden', 'Switzerland', 'Tanzania', 
+    'Thailand', 'Turkey', 'Uganda', 'Ukraine', 'United Kingdom', 'United States', 'Vietnam', 'Yemen'
+  ];
+  
+  // Common departments
+  const commonDepartments = [
+    'Human Resources', 'Finance', 'Accounting', 'IT', 'Marketing', 'Sales', 'Operations', 
+    'Administration', 'Legal', 'Customer Service', 'Procurement', 'Security', 'Maintenance'
+  ];
 
-  // Load existing departments from staff
+  // Load existing departments from staff and combine with common ones
   useEffect(() => {
     const loadDepartments = async () => {
       try {
         const staffSnapshot = await getDocs(collection(db, 'companies', companyId, 'staff'));
-        const uniqueDepartments = [...new Set(
-          staffSnapshot.docs
-            .map(doc => doc.data().department)
-            .filter(Boolean)
-        )].sort();
-        setDepartments(uniqueDepartments);
+        const existingDepartments = staffSnapshot.docs
+          .map(doc => doc.data().department)
+          .filter(Boolean);
+        
+        const allDepartments = [...new Set([...commonDepartments, ...existingDepartments])].sort();
+        setDepartments(allDepartments);
       } catch (error) {
         console.error('Error loading departments:', error);
+        setDepartments(commonDepartments);
       }
     };
 
@@ -72,8 +93,9 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const validate = () => {
     const p = form.personalDetails;
     const e = form.employmentDetails;
-    if (!p.firstName || !p.lastName || !p.idNumber || !p.rssbNumber || !e.department) { return false; }
-    if (!e.staffNumber || !e.startDate || !e.position || !e.employmentType) { return false; }
+    if (!p.firstName || !p.lastName || !p.idNumber || !p.rssbNumber || !p.staffNumber) { return false; }
+    if (!p.nationality || !p.emergencyContactName || !p.emergencyContactPhone || !p.emergencyContactRelationship) { return false; }
+    if (!e.department || !e.startDate || !e.position || !e.employmentType) { return false; }
     if (!p.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email)) { return false; }
     
     // Validate end date is after start date (if both are provided)
@@ -98,7 +120,17 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
     setLoading(true);
     setError(null);
     try {
-      await createStaff({ companyId, data: form });
+      // Flatten form data to match service interface
+      const flatData = {
+        ...form.personalDetails,
+        ...form.employmentDetails,
+        ...form.bankDetails,
+        name: `${form.personalDetails.firstName} ${form.personalDetails.lastName}`.trim(),
+        // Create legacy emergencyContact for backward compatibility
+        emergencyContact: `${form.personalDetails.emergencyContactName} (${form.personalDetails.emergencyContactRelationship}) - ${form.personalDetails.emergencyContactPhone}`
+      };
+      
+      await createStaff({ companyId, data: flatData });
       setForm(initialState);
       onAdded();
     } catch (err: any) {
@@ -138,6 +170,12 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
           onChange={e => handleChange('personalDetails', 'rssbNumber', e.target.value)}
           required
         />
+        <input
+          placeholder="Staff Number*"
+          value={form.personalDetails.staffNumber}
+          onChange={e => handleChange('personalDetails', 'staffNumber', e.target.value)}
+          required
+        />
       </div>
       <div className="staff-form-row">
         <input
@@ -164,6 +202,15 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
           <option value="married">Married</option>
           <option value="divorced">Divorced</option>
         </select>
+        <select
+          value={form.personalDetails.nationality}
+          onChange={e => handleChange('personalDetails', 'nationality', e.target.value)}
+        >
+          <option value="">Nationality*</option>
+          {countries.map(country => (
+            <option key={country} value={country}>{country}</option>
+          ))}
+        </select>
       </div>
       <div className="staff-form-row">
         <input
@@ -184,33 +231,49 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
           value={form.personalDetails.address}
           onChange={e => handleChange('personalDetails', 'address', e.target.value)}
         />
-        <input
-          placeholder="Emergency Contact"
-          value={form.personalDetails.emergencyContact}
-          onChange={e => handleChange('personalDetails', 'emergencyContact', e.target.value)}
-        />
       </div>
+      <h4>Emergency Contact</h4>
       <div className="staff-form-row">
         <input
-          placeholder="Staff Number*"
-          value={form.employmentDetails.staffNumber}
-          onChange={e => handleChange('employmentDetails', 'staffNumber', e.target.value)}
+          placeholder="Emergency Contact Name*"
+          value={form.personalDetails.emergencyContactName}
+          onChange={e => handleChange('personalDetails', 'emergencyContactName', e.target.value)}
           required
         />
-        <div style={{ position: 'relative' }}>
-          <input
-            placeholder="Department* (type or select)"
-            value={form.employmentDetails.department}
-            onChange={e => handleChange('employmentDetails', 'department', e.target.value)}
-            list="departments-list"
-            required
-          />
-          <datalist id="departments-list">
-            {departments.map(dept => (
-              <option key={dept} value={dept} />
-            ))}
-          </datalist>
-        </div>
+        <input
+          placeholder="Emergency Contact Phone*"
+          value={form.personalDetails.emergencyContactPhone}
+          onChange={e => handleChange('personalDetails', 'emergencyContactPhone', e.target.value)}
+          required
+        />
+        <select
+          value={form.personalDetails.emergencyContactRelationship}
+          onChange={e => handleChange('personalDetails', 'emergencyContactRelationship', e.target.value)}
+          required
+        >
+          <option value="">Relationship*</option>
+          <option value="Spouse">Spouse</option>
+          <option value="Parent">Parent</option>
+          <option value="Mother">Mother</option>
+          <option value="Father">Father</option>
+          <option value="Child">Child</option>
+          <option value="Sibling">Sibling</option>
+          <option value="Friend">Friend</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <h4>Employment Details</h4>
+      <div className="staff-form-row">
+        <select
+          value={form.employmentDetails.department}
+          onChange={e => handleChange('employmentDetails', 'department', e.target.value)}
+          required
+        >
+          <option value="">Department*</option>
+          {departments.map(dept => (
+            <option key={dept} value={dept}>{dept}</option>
+          ))}
+        </select>
         <input
           placeholder="Position*"
           value={form.employmentDetails.position}

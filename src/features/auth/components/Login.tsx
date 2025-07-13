@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
-import { login, onUserChanged } from '../../../core/providers/auth.provider';
+import { signInUser, onUserChanged } from '../../../core/providers/auth.provider';
 import { db } from '../../../core/config/firebase.config';
 import { useThemeContext } from '../../../core/providers/ThemeProvider';
 import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
@@ -70,7 +70,7 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 
     try {
       logger.info('Attempting user authentication');
-      await login(email, password);
+      await signInUser(email, password);
       logger.info('Login successful');
       // Auth state change will handle the redirect
     } catch (err: any) {

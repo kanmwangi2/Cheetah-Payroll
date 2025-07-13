@@ -7,6 +7,7 @@ const deductionTemplate = [
   'type,originalAmount,staffId,remainingBalance,monthlyInstallment,description',
   'loan,100000,EMP001,50000,10000,Employee loan',
   'advance,20000,EMP002,15000,5000,Salary advance',
+  'equipment,75000,EMP003,60000,15000,Laptop purchase deduction',
 ].join('\n');
 
 const REQUIRED_FIELDS = ['type', 'originalAmount', 'staffId', 'remainingBalance'];

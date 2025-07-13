@@ -122,25 +122,35 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
           <button
             onClick={() => setShowImportExport(true)}
             style={{
-              padding: '10px 16px',
+              padding: '10px 20px',
               borderRadius: 6,
-              border: '1px solid var(--color-success-border)',
-              background: 'var(--color-card-bg)',
-              color: 'var(--color-success-text)',
+              border: 'none',
+              background: 'var(--color-primary-600)',
+              color: 'var(--color-text-inverse)',
               cursor: 'pointer',
               fontWeight: 500,
-              fontSize: '14px'
+              fontSize: '14px',
+              transition: 'all var(--transition-normal)'
             }}
           >
             📤 Import/Export
           </button>
-          <Button
-            variant="primary"
-            size="md"
+          <button
             onClick={() => setShowForm(true)}
+            style={{
+              padding: '10px 20px',
+              borderRadius: 6,
+              border: 'none',
+              background: 'var(--color-primary-600)',
+              color: 'var(--color-text-inverse)',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '14px',
+              transition: 'all var(--transition-normal)'
+            }}
           >
             + Add Payment
-          </Button>
+          </button>
         </div>
       </div>
 

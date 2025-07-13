@@ -199,7 +199,7 @@ const UserProfile: React.FC = () => {
   };
 
   const handleProfilePictureUpload = async () => {
-    if (!selectedFile || !user?.id) return;
+    if (!selectedFile || !user?.id) {return;}
     
     setUploading(true);
     setError(null);
@@ -244,7 +244,7 @@ const UserProfile: React.FC = () => {
   };
 
   const handleRemoveProfilePicture = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {return;}
     
     setUploading(true);
     setError(null);

@@ -89,7 +89,3 @@ export const resetPassword = async (email: string) => {
   }
 };
 
-// Legacy compatibility exports
-export const login = signInUser;
-export const logout = signOutUser;
-export const signUp = signUpUser;

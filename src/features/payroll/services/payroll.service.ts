@@ -99,10 +99,6 @@ export async function grossUpAmountWithCurrentConfig(
   return grossUpAmount(targetNetAmount, basicPayPortion, transportAllowance, otherDeductions, taxConfig, companyTaxSettings);
 }
 
-// Legacy function - use submitPayrollForApproval instead
-export async function submitPayroll(companyId: string, payrollId: string, userId: string) {
-  return submitPayrollForApproval(companyId, payrollId, userId);
-}
 
 export async function approvePayroll(
   companyId: string,
@@ -426,52 +422,6 @@ export function calculatePayrollForAmount(
     cbhiEmployee,
     otherDeductions: Math.round(otherDeductions),
     finalNetPay: Math.round(finalNetPay)
-  };
-}
-
-// Legacy function for backward compatibility - now uses dynamic tax config
-export async function calculatePayroll({
-  gross,
-  basic,
-  transport,
-  brackets,
-  pensionRates,
-  maternityRates,
-  cbhiRates,
-  ramaRates,
-  otherDeductions,
-}: any) {
-  // Load current tax configuration from database
-  const currentConfig = await getTaxConfiguration();
-  
-  const taxConfig: TaxConfiguration = {
-    payeBrackets: brackets || currentConfig.payeBrackets,
-    pensionRates: pensionRates || currentConfig.pensionRates,
-    maternityRates: maternityRates || currentConfig.maternityRates,
-    cbhiRates: cbhiRates || currentConfig.cbhiRates,
-    ramaRates: ramaRates || currentConfig.ramaRates,
-    effectiveDate: new Date().toISOString(),
-  };
-  
-  const calculation = calculatePayrollForAmount(
-    gross,
-    basic,
-    transport || 0,
-    otherDeductions || 0,
-    taxConfig
-    // Note: Legacy function doesn't have company context, so no tax exemptions
-  );
-  
-  return {
-    paye: calculation.payeBeforeReliefs,
-    pensionEmployee: calculation.pensionEmployee,
-    pensionEmployer: calculation.pensionEmployer,
-    maternityEmployee: calculation.maternityEmployee,
-    maternityEmployer: calculation.maternityEmployer,
-    ramaEmployee: calculation.ramaEmployee,
-    ramaEmployer: calculation.ramaEmployer,
-    cbhiEmployee: calculation.cbhiEmployee,
-    finalNet: calculation.finalNetPay,
   };
 }
 

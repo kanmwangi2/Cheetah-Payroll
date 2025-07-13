@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { fetchPayroll } from '../../features/payroll/services/fetchPayroll';
 import {
-  submitPayroll,
+  submitPayrollForApproval,
   approvePayroll,
   rejectPayroll,
 } from '../../features/payroll/services/payroll.service';
+import { isPayrollPreparerOrHigher, isCompanyAdminOrHigher } from '../constants/app.constants';
 
 // TODO: Replace with real user/role context
 const mockUser = { id: 'demo-user', role: 'company_admin' };
@@ -35,17 +36,17 @@ export default function ApprovalWorkflow({
   const canSubmit =
     payroll &&
     payroll.status === 'draft' &&
-    ['payroll_preparer', 'company_admin', 'app_admin', 'primary_admin'].includes(mockUser.role);
+    isPayrollPreparerOrHigher(mockUser.role as any);
   const canApprove =
     payroll &&
     payroll.status === 'submitted' &&
-    ['company_admin', 'app_admin', 'primary_admin'].includes(mockUser.role);
+    isCompanyAdminOrHigher(mockUser.role as any);
   const canReject = canApprove;
 
   const handleSubmit = async () => {
     setActionError(null);
     try {
-      await submitPayroll(companyId, payrollId, mockUser.id);
+      await submitPayrollForApproval(companyId, payrollId, mockUser.id);
       setRefresh(r => r + 1);
     } catch (e: any) {
       setActionError(e.message || 'Failed to submit payroll');

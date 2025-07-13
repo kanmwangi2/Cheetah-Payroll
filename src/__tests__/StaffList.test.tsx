@@ -14,12 +14,15 @@ jest.mock('firebase/firestore', () => ({
   getDoc: jest.fn()
 }));
 
-// Mock getStaffLegacy to return valid staff data
+// Mock getStaff to return valid staff data
 jest.mock('../features/staff/services/staff.service', () => ({
-  getStaffLegacy: jest.fn(() => Promise.resolve([
-    { id: '1', name: 'John Doe', position: 'Manager', companyId: 'demo-company' },
-    { id: '2', name: 'Jane Smith', position: 'Developer', companyId: 'demo-company' },
-  ])),
+  getStaff: jest.fn(() => Promise.resolve({
+    success: true,
+    data: [
+      { id: '1', name: 'John Doe', position: 'Manager', companyId: 'demo-company' },
+      { id: '2', name: 'Jane Smith', position: 'Developer', companyId: 'demo-company' },
+    ]
+  })),
 }));
 
 // Mock useAuth to provide a valid companyId

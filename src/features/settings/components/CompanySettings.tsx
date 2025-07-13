@@ -12,6 +12,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../core/config/firebase.config';
 import { Company, PayrollTaxSettings } from '../../../shared/types';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
+import { isCompanyAdminOrHigher } from '../../../shared/constants/app.constants';
 
 interface CompanySettingsProps {
   companyId: string;
@@ -256,7 +257,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
     );
   }
 
-  const isAdmin = user?.role === 'primary_admin' || user?.role === 'app_admin' || user?.role === 'company_admin';
+  const isAdmin = user?.role && isCompanyAdminOrHigher(user.role);
 
   return (
     <div style={{ 

@@ -4,6 +4,7 @@ import { signOut } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../../core/config/firebase.config';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
+import { getRoleDisplayName } from '../../../shared/constants/app.constants';
 import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
 import LoadingSpinner from '../../../shared/components/ui/LoadingSpinner';
 import ThemeBoundary from '../../../shared/components/ui/ThemeBoundary';
@@ -161,11 +162,7 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
               Welcome, {user?.name}
             </div>
             <div style={roleBadgeStyles}>
-              {user?.role === 'primary_admin' ? 'Primary Admin' : 
-               user?.role === 'app_admin' ? 'App Admin' : 
-               user?.role === 'company_admin' ? 'Company Admin' :
-               user?.role === 'payroll_approver' ? 'Payroll Approver' :
-               user?.role === 'payroll_preparer' ? 'Payroll Preparer' : user?.role}
+              {user?.role ? getRoleDisplayName(user.role) : 'Unknown Role'}
             </div>
           </div>
 

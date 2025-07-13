@@ -29,7 +29,6 @@ export default function AuditTrail({
 
   return (
     <div className="audit-trail">
-      <h4>Audit Trail</h4>
       {loading && <div>Loading...</div>}
       {error && (
         <div className="audit-error" role="alert">

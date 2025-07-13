@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
-import { signUp, onUserChanged } from '../../../core/providers/auth.provider';
+import { signUpUser, onUserChanged } from '../../../core/providers/auth.provider';
 import { db } from '../../../core/config/firebase.config';
 import { useThemeContext } from '../../../core/providers/ThemeProvider';
 import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
@@ -93,7 +93,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
 
     try {
       logger.info('Attempting user registration');
-      await signUp(email, password, name.trim());
+      await signUpUser(email, password, name.trim());
       logger.info('Registration successful');
       // Auth state change will handle the redirect
     } catch (err: any) {

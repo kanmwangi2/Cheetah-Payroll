@@ -161,26 +161,16 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
             onClick={() => setShowImportExport(true)}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 6,
-              border: '1px solid var(--color-success-border)',
-              background: 'var(--color-card-bg)',
-              color: 'var(--color-success-text)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px'
-            }}
+            className="btn-primary"
           >
             📤 Import/Export
           </button>
-          <Button
-            variant="primary"
-            size="md"
+          <button
             onClick={() => setShowForm(true)}
+            className="btn-primary"
           >
             + Add Staff
-          </Button>
+          </button>
         </div>
       </div>
 

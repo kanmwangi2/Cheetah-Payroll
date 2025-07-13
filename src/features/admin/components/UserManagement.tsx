@@ -3,14 +3,7 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase
 import { createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '../../../core/config/firebase.config';
 import { User, Company } from '../../../shared/types';
-
-const roleLabels: Record<string, string> = {
-  primary_admin: 'Primary Admin',
-  app_admin: 'App Admin',
-  company_admin: 'Company Admin',
-  payroll_approver: 'Payroll Approver',
-  payroll_preparer: 'Payroll Preparer',
-};
+import { isPayrollPreparerOrHigher, getRoleDisplayName } from '../../../shared/constants/app.constants';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -325,7 +318,7 @@ const UserManagement: React.FC = () => {
                 />
               </div>
 
-              {(formData.role === 'company_admin' || formData.role === 'payroll_approver' || formData.role === 'payroll_preparer') && (
+              {formData.role && isPayrollPreparerOrHigher(formData.role as any) && (
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
                     Assign to Companies
@@ -470,7 +463,7 @@ const UserManagement: React.FC = () => {
                   fontSize: '11px',
                   fontWeight: 500
                 }}>
-                  {roleLabels[user.role] || user.role}
+                  {getRoleDisplayName(user.role)}
                 </span>
               </div>
               <div style={{ color: 'var(--color-text-secondary)', fontSize: '12px' }}>

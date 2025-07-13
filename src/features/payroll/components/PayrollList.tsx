@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getPayrolls, createComprehensivePayroll, deletePayroll } from '../services/payroll.service';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
+import { isPayrollPreparerOrHigher, isCompanyAdminOrHigher } from '../../../shared/constants/app.constants';
 import PayrollImportExport from './PayrollImportExport';
 
 const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
@@ -74,13 +75,12 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const canDeletePayroll = (payroll: any) => {
     // Non-approved payrolls: can be deleted by payroll preparers/approvers
     if (payroll.status === 'draft' || payroll.status === 'pending_approval') {
-      return user?.role === 'payroll_preparer' || user?.role === 'payroll_approver' || 
-             user?.role === 'company_admin' || user?.role === 'app_admin' || user?.role === 'primary_admin';
+      return user?.role && isPayrollPreparerOrHigher(user.role);
     }
     
     // Approved/processed payrolls: only admins can delete
     if (payroll.status === 'approved' || payroll.status === 'processed') {
-      return user?.role === 'company_admin' || user?.role === 'app_admin' || user?.role === 'primary_admin';
+      return user?.role && isCompanyAdminOrHigher(user.role);
     }
     
     return false;
@@ -122,14 +122,15 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
           <button
             onClick={() => setShowImportExport(true)}
             style={{
-              padding: '10px 16px',
+              padding: '10px 20px',
               borderRadius: 6,
-              border: '1px solid var(--color-success-border)',
-              background: 'var(--color-card-bg)',
-              color: 'var(--color-success-text)',
+              border: 'none',
+              background: 'var(--color-primary-600)',
+              color: 'var(--color-text-inverse)',
               cursor: 'pointer',
               fontWeight: 500,
-              fontSize: '14px'
+              fontSize: '14px',
+              transition: 'all var(--transition-normal)'
             }}
           >
             📤 Import/Export

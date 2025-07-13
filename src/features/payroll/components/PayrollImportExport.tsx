@@ -7,6 +7,7 @@ const payrollTemplate = [
   'period,status,totalGrossPay,totalNetPay,totalEmployeeTax,staffCount,createdBy',
   '2023-01,draft,5000000,4000000,500000,10,admin@company.com',
   '2023-02,approved,5200000,4100000,520000,10,admin@company.com',
+  '2023-03,processed,5100000,4050000,510000,12,hr@company.com',
 ].join('\n');
 
 const REQUIRED_FIELDS = ['period', 'status', 'totalGrossPay', 'totalNetPay', 'staffCount', 'createdBy'];

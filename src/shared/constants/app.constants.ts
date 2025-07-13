@@ -169,4 +169,55 @@ export type UserRole = (typeof APP_CONSTANTS.USER_ROLES)[keyof typeof APP_CONSTA
 export type Permission = (typeof APP_CONSTANTS.PERMISSIONS)[keyof typeof APP_CONSTANTS.PERMISSIONS];
 export type Theme = (typeof APP_CONSTANTS.THEMES)[keyof typeof APP_CONSTANTS.THEMES];
 
+// Role utility functions
+export const isPayrollPreparerOrHigher = (role: UserRole): boolean => {
+  const allowedRoles: UserRole[] = [
+    APP_CONSTANTS.USER_ROLES.PAYROLL_PREPARER,
+    APP_CONSTANTS.USER_ROLES.PAYROLL_APPROVER,
+    APP_CONSTANTS.USER_ROLES.COMPANY_ADMIN,
+    APP_CONSTANTS.USER_ROLES.APP_ADMIN,
+    APP_CONSTANTS.USER_ROLES.PRIMARY_ADMIN,
+  ];
+  return allowedRoles.includes(role);
+};
+
+export const isPayrollApproverOrHigher = (role: UserRole): boolean => {
+  const allowedRoles: UserRole[] = [
+    APP_CONSTANTS.USER_ROLES.PAYROLL_APPROVER,
+    APP_CONSTANTS.USER_ROLES.COMPANY_ADMIN,
+    APP_CONSTANTS.USER_ROLES.APP_ADMIN,
+    APP_CONSTANTS.USER_ROLES.PRIMARY_ADMIN,
+  ];
+  return allowedRoles.includes(role);
+};
+
+export const isCompanyAdminOrHigher = (role: UserRole): boolean => {
+  const allowedRoles: UserRole[] = [
+    APP_CONSTANTS.USER_ROLES.COMPANY_ADMIN,
+    APP_CONSTANTS.USER_ROLES.APP_ADMIN,
+    APP_CONSTANTS.USER_ROLES.PRIMARY_ADMIN,
+  ];
+  return allowedRoles.includes(role);
+};
+
+export const isAppAdminOrHigher = (role: UserRole): boolean => {
+  const allowedRoles: UserRole[] = [
+    APP_CONSTANTS.USER_ROLES.APP_ADMIN,
+    APP_CONSTANTS.USER_ROLES.PRIMARY_ADMIN,
+  ];
+  return allowedRoles.includes(role);
+};
+
+// Role display utility
+export const getRoleDisplayName = (role: UserRole): string => {
+  const roleLabels: Record<UserRole, string> = {
+    [APP_CONSTANTS.USER_ROLES.PRIMARY_ADMIN]: 'Primary Admin',
+    [APP_CONSTANTS.USER_ROLES.APP_ADMIN]: 'App Admin',
+    [APP_CONSTANTS.USER_ROLES.COMPANY_ADMIN]: 'Company Admin',
+    [APP_CONSTANTS.USER_ROLES.PAYROLL_APPROVER]: 'Payroll Approver',
+    [APP_CONSTANTS.USER_ROLES.PAYROLL_PREPARER]: 'Payroll Preparer',
+  };
+  return roleLabels[role] || role;
+};
+
 export default APP_CONSTANTS;

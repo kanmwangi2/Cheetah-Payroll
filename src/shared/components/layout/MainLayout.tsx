@@ -5,6 +5,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../../core/config/firebase.config';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
 import { Company } from '../../types';
+import { isCompanyAdminOrHigher } from '../../constants/app.constants';
 import ThemeSwitcher from '../ui/ThemeSwitcher';
 import Logo from '../ui/Logo';
 import UserProfile from '../../../features/profile/components/UserProfile';
@@ -238,7 +239,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
                       👤 User Profile
                     </button>
                     
-                    {(user?.role === 'primary_admin' || user?.role === 'app_admin' || user?.role === 'company_admin') && (
+                    {(user?.role && isCompanyAdminOrHigher(user.role)) && (
                       <button
                         onClick={() => {
                           setShowCompanySettings(true);
