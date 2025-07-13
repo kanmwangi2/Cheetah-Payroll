@@ -25,7 +25,8 @@ import {
   PayrollCalculation, 
   TaxConfiguration,
   PayeTaxBracket,
-  Staff 
+  Staff,
+  PayrollTaxSettings 
 } from '../../../shared/types';
 
 // Note: Tax configuration is now loaded dynamically from database
@@ -39,10 +40,26 @@ export async function calculatePayrollWithCurrentConfig(
   grossPay: number,
   basicPay: number,
   transportAllowance: number,
-  otherDeductions: number
+  otherDeductions: number,
+  companyId?: string
 ): Promise<PayrollCalculation> {
   const taxConfig = await getTaxConfiguration();
-  return calculatePayrollForAmount(grossPay, basicPay, transportAllowance, otherDeductions, taxConfig);
+  
+  // Load company tax settings if companyId is provided
+  let companyTaxSettings: PayrollTaxSettings | undefined;
+  if (companyId) {
+    try {
+      const companyDoc = await getDoc(doc(db, 'companies', companyId));
+      if (companyDoc.exists()) {
+        const companyData = companyDoc.data();
+        companyTaxSettings = companyData.payrollTaxSettings;
+      }
+    } catch (error) {
+      console.warn('Could not load company tax settings, using defaults:', error);
+    }
+  }
+  
+  return calculatePayrollForAmount(grossPay, basicPay, transportAllowance, otherDeductions, taxConfig, companyTaxSettings);
 }
 
 /**
@@ -60,10 +77,26 @@ export async function grossUpAmountWithCurrentConfig(
   targetNetAmount: number,
   basicPayPortion: number,
   transportAllowance: number,
-  otherDeductions: number
+  otherDeductions: number,
+  companyId?: string
 ): Promise<{ grossAmount: number; calculations: PayrollCalculation }> {
   const taxConfig = await getTaxConfiguration();
-  return grossUpAmount(targetNetAmount, basicPayPortion, transportAllowance, otherDeductions, taxConfig);
+  
+  // Load company tax settings if companyId is provided
+  let companyTaxSettings: PayrollTaxSettings | undefined;
+  if (companyId) {
+    try {
+      const companyDoc = await getDoc(doc(db, 'companies', companyId));
+      if (companyDoc.exists()) {
+        const companyData = companyDoc.data();
+        companyTaxSettings = companyData.payrollTaxSettings;
+      }
+    } catch (error) {
+      console.warn('Could not load company tax settings, using defaults:', error);
+    }
+  }
+  
+  return grossUpAmount(targetNetAmount, basicPayPortion, transportAllowance, otherDeductions, taxConfig, companyTaxSettings);
 }
 
 // Legacy function - use submitPayrollForApproval instead
@@ -87,6 +120,7 @@ export async function approvePayroll(
   });
   
   await logAuditAction({
+    companyId,
     userId,
     entityType: 'payroll',
     entityId: payrollId,
@@ -112,6 +146,7 @@ export async function rejectPayroll(
   });
   
   await logAuditAction({
+    companyId,
     userId,
     entityType: 'payroll',
     entityId: payrollId,
@@ -139,6 +174,7 @@ export async function processPayroll(
   });
   
   await logAuditAction({
+    companyId,
     userId,
     entityType: 'payroll',
     entityId: payrollId,
@@ -267,7 +303,8 @@ export function grossUpAmount(
   basicPayPortion: number,
   transportAllowance: number,
   otherDeductions: number,
-  taxConfig: TaxConfiguration
+  taxConfig: TaxConfiguration,
+  companyTaxSettings?: PayrollTaxSettings
 ): { grossAmount: number; calculations: PayrollCalculation } {
   let lowerBound = targetNetAmount;
   let upperBound = targetNetAmount * 2.5; // Account for max 30% PAYE rate
@@ -282,7 +319,8 @@ export function grossUpAmount(
       basicPayPortion,
       transportAllowance,
       otherDeductions,
-      taxConfig
+      taxConfig,
+      companyTaxSettings
     );
     
     if (calculation.finalNetPay > targetNetAmount) {
@@ -300,7 +338,8 @@ export function grossUpAmount(
     basicPayPortion,
     transportAllowance,
     otherDeductions,
-    taxConfig
+    taxConfig,
+    companyTaxSettings
   );
   
   return {
@@ -315,32 +354,58 @@ export function calculatePayrollForAmount(
   basicPay: number,
   transportAllowance: number,
   otherDeductions: number,
-  taxConfig: TaxConfiguration
+  taxConfig: TaxConfiguration,
+  companyTaxSettings?: PayrollTaxSettings
 ): PayrollCalculation {
+  // Default tax settings (all enabled) if not provided
+  const taxSettings = companyTaxSettings || {
+    paye: true,
+    pension: true,
+    maternity: true,
+    cbhi: true,
+    rama: true
+  };
+  
   // Calculate other allowances
   const otherAllowances = grossPay - basicPay - transportAllowance;
   
-  // 1. Calculate PAYE on total gross pay
-  const payeBeforeReliefs = calculatePAYE(grossPay, taxConfig.payeBrackets);
+  // 1. Calculate PAYE on total gross pay (only if enabled)
+  const payeBeforeReliefs = taxSettings.paye 
+    ? calculatePAYE(grossPay, taxConfig.payeBrackets)
+    : 0;
   
-  // 2. Calculate Pension contributions (on total gross pay)
-  const pensionEmployee = Math.round(grossPay * (taxConfig.pensionRates.employee / 100));
-  const pensionEmployer = Math.round(grossPay * (taxConfig.pensionRates.employer / 100));
+  // 2. Calculate Pension contributions (on total gross pay, only if enabled)
+  const pensionEmployee = taxSettings.pension 
+    ? Math.round(grossPay * (taxConfig.pensionRates.employee / 100))
+    : 0;
+  const pensionEmployer = taxSettings.pension 
+    ? Math.round(grossPay * (taxConfig.pensionRates.employer / 100))
+    : 0;
   
-  // 3. Calculate Maternity contributions (on gross pay excluding transport)
+  // 3. Calculate Maternity contributions (on gross pay excluding transport, only if enabled)
   const maternityBase = grossPay - transportAllowance;
-  const maternityEmployee = Math.round(maternityBase * (taxConfig.maternityRates.employee / 100));
-  const maternityEmployer = Math.round(maternityBase * (taxConfig.maternityRates.employer / 100));
+  const maternityEmployee = taxSettings.maternity 
+    ? Math.round(maternityBase * (taxConfig.maternityRates.employee / 100))
+    : 0;
+  const maternityEmployer = taxSettings.maternity 
+    ? Math.round(maternityBase * (taxConfig.maternityRates.employer / 100))
+    : 0;
   
-  // 4. Calculate RAMA contributions (on basic pay only)
-  const ramaEmployee = Math.round(basicPay * (taxConfig.ramaRates.employee / 100));
-  const ramaEmployer = Math.round(basicPay * (taxConfig.ramaRates.employer / 100));
+  // 4. Calculate RAMA contributions (on basic pay only, only if enabled)
+  const ramaEmployee = taxSettings.rama 
+    ? Math.round(basicPay * (taxConfig.ramaRates.employee / 100))
+    : 0;
+  const ramaEmployer = taxSettings.rama 
+    ? Math.round(basicPay * (taxConfig.ramaRates.employer / 100))
+    : 0;
   
   // 5. Calculate net salary before CBHI
   const netBeforeCBHI = grossPay - payeBeforeReliefs - pensionEmployee - maternityEmployee - ramaEmployee;
   
-  // 6. Calculate CBHI (on net salary before CBHI)
-  const cbhiEmployee = Math.round(Math.max(0, netBeforeCBHI) * (taxConfig.cbhiRates.employee / 100));
+  // 6. Calculate CBHI (on net salary before CBHI, only if enabled)
+  const cbhiEmployee = taxSettings.cbhi 
+    ? Math.round(Math.max(0, netBeforeCBHI) * (taxConfig.cbhiRates.employee / 100))
+    : 0;
   
   // 7. Calculate final net pay
   const finalNetPay = netBeforeCBHI - cbhiEmployee - otherDeductions;
@@ -394,6 +459,7 @@ export async function calculatePayroll({
     transport || 0,
     otherDeductions || 0,
     taxConfig
+    // Note: Legacy function doesn't have company context, so no tax exemptions
   );
   
   return {
@@ -451,6 +517,7 @@ export async function createPayroll(companyId: string, data: Omit<Payroll, 'id'>
   
   // Log audit action
   await logAuditAction({
+    companyId,
     userId: data.createdBy,
     entityType: 'payroll',
     entityId: res.id,
@@ -470,6 +537,18 @@ export async function createComprehensivePayroll(
 ): Promise<string> {
   // Load tax configuration from database if not provided
   const config = taxConfig || await getTaxConfiguration();
+  
+  // Load company tax settings
+  let companyTaxSettings: PayrollTaxSettings | undefined;
+  try {
+    const companyDoc = await getDoc(doc(db, 'companies', companyId));
+    if (companyDoc.exists()) {
+      const companyData = companyDoc.data();
+      companyTaxSettings = companyData.payrollTaxSettings;
+    }
+  } catch (error) {
+    console.warn('Could not load company tax settings, using defaults:', error);
+  }
   
   // Get all active staff
   const staffData = await getStaff(companyId);
@@ -547,7 +626,8 @@ export async function createComprehensivePayroll(
         basicPay,
         transportAllowance,
         totalDeductions,
-        config
+        config,
+        companyTaxSettings
       );
       
       // Create staff payroll record
@@ -638,6 +718,7 @@ export async function submitPayrollForApproval(
   });
   
   await logAuditAction({
+    companyId,
     userId,
     entityType: 'payroll',
     entityId: payrollId,

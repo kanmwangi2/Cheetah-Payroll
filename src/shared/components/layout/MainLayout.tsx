@@ -463,18 +463,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
           bottom: 0,
           background: 'var(--color-bg-overlay)',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
+          padding: '80px 20px 20px 20px',
+          overflow: 'auto',
           zIndex: 1000
         }}>
           <div style={{
             background: 'var(--color-card-bg)',
             borderRadius: '8px',
             maxWidth: '800px',
-            width: '90%',
-            maxHeight: '90%',
-            overflow: 'auto',
-            position: 'relative'
+            width: '100%',
+            minHeight: 'fit-content',
+            position: 'relative',
+            margin: '0 auto'
           }}>
             <button
               onClick={() => setShowUserProfile(false)}
@@ -497,18 +499,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
           bottom: 0,
           background: 'var(--color-bg-overlay)',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
+          padding: '80px 20px 20px 20px',
+          overflow: 'auto',
           zIndex: 1000
         }}>
           <div style={{
             background: 'var(--color-card-bg)',
             borderRadius: '8px',
             maxWidth: '1000px',
-            width: '90%',
-            maxHeight: '90%',
-            overflow: 'auto',
-            position: 'relative'
+            width: '100%',
+            minHeight: 'fit-content',
+            position: 'relative',
+            margin: '0 auto'
           }}>
             <button
               onClick={() => setShowCompanySettings(false)}

@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../../core/config/firebase.config';
 import { Payment, PaymentType } from '../../../shared/types';
+import { logAuditAction } from '../../../shared/services/audit.service';
 
 // Export utility functions
 export const PAYMENT_TYPE_LABELS: Record<PaymentType, string> = {
@@ -85,26 +86,73 @@ export async function getPaymentsByType(companyId: string, type: PaymentType): P
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payment));
 }
 
-export async function createPayment(companyId: string, data: Omit<Payment, 'id'>) {
+export async function createPayment(companyId: string, data: Omit<Payment, 'id'>, userId?: string) {
   const paymentData = {
     ...data,
     companyId,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  return addDoc(collection(db, 'companies', companyId, 'payments'), paymentData);
+  const docRef = await addDoc(collection(db, 'companies', companyId, 'payments'), paymentData);
+  
+  // Log audit action
+  if (userId) {
+    await logAuditAction({
+      companyId,
+      userId,
+      entityType: 'payment',
+      entityId: docRef.id,
+      action: 'create',
+      details: { type: data.type, amount: data.amount, staffId: data.staffId },
+    });
+  }
+  
+  return docRef;
 }
 
-export async function updatePayment(companyId: string, paymentId: string, data: Partial<Payment>) {
+export async function updatePayment(companyId: string, paymentId: string, data: Partial<Payment>, userId?: string) {
   const updateData = {
     ...data,
     updatedAt: new Date().toISOString(),
   };
-  return updateDoc(doc(db, 'companies', companyId, 'payments', paymentId), updateData);
+  
+  const result = await updateDoc(doc(db, 'companies', companyId, 'payments', paymentId), updateData);
+  
+  // Log audit action
+  if (userId) {
+    await logAuditAction({
+      companyId,
+      userId,
+      entityType: 'payment',
+      entityId: paymentId,
+      action: 'update',
+      details: { changes: Object.keys(data) },
+    });
+  }
+  
+  return result;
 }
 
-export async function deletePayment(companyId: string, paymentId: string) {
-  return deleteDoc(doc(db, 'companies', companyId, 'payments', paymentId));
+export async function deletePayment(companyId: string, paymentId: string, userId?: string) {
+  // Get payment info before deletion for audit
+  const paymentDoc = await getDoc(doc(db, 'companies', companyId, 'payments', paymentId));
+  const paymentData = paymentDoc.exists() ? paymentDoc.data() : null;
+  
+  const result = await deleteDoc(doc(db, 'companies', companyId, 'payments', paymentId));
+  
+  // Log audit action
+  if (userId) {
+    await logAuditAction({
+      companyId,
+      userId,
+      entityType: 'payment',
+      entityId: paymentId,
+      action: 'delete',
+      details: { type: paymentData?.type, amount: paymentData?.amount },
+    });
+  }
+  
+  return result;
 }
 
 export async function getPayment(companyId: string, paymentId: string): Promise<Payment | null> {

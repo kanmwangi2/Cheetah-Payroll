@@ -62,11 +62,6 @@ const AdminPanel: React.FC = () => {
   return (
     <ThemeBoundary>
       <div style={containerStyles}>
-        {/* Theme Switcher */}
-        <div style={themeSwitcherStyles}>
-          <ThemeSwitcher variant="toggle" size="sm" showLabels={true} />
-        </div>
-
         {/* Header */}
         <div style={headerStyles}>
           <div style={headerContentStyles}>
@@ -102,12 +97,18 @@ const AdminPanel: React.FC = () => {
                 Application Administration
               </h1>
             </div>
-            <button
-              onClick={() => navigate('/company-select')}
-              style={backButtonStyles}
-            >
-              ← Back to Company Selection
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--spacing-sm)' }}>
+              <button
+                onClick={() => navigate('/company-select')}
+                style={backButtonStyles}
+              >
+                ← Back to Company Selection
+              </button>
+              {/* Theme Switcher */}
+              <div style={themeSwitcherStyles}>
+                <ThemeSwitcher variant="toggle" size="sm" showLabels={true} />
+              </div>
+            </div>
           </div>
           
           <div style={tabsContainerStyles}>
@@ -143,10 +144,7 @@ const containerStyles: React.CSSProperties = {
 };
 
 const themeSwitcherStyles: React.CSSProperties = {
-  position: 'fixed',
-  top: '24px',
-  left: '24px', // Move to left side to avoid overlap
-  zIndex: 1000,
+  marginTop: 'var(--spacing-md)',
 };
 
 const headerStyles: React.CSSProperties = {

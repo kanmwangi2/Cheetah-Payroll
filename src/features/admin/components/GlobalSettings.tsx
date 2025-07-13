@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '../../../core/config/firebase.config';
+import Button from '../../../shared/components/ui/Button';
 
 interface GlobalSettingsData {
   application: {
@@ -209,21 +210,15 @@ const GlobalSettings: React.FC = () => {
         marginBottom: 'var(--spacing-2xl)'
       }}>
         <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>Global Application Settings</h2>
-        <button
+        <Button
+          variant="primary"
+          size="md"
           onClick={saveGlobalSettings}
           disabled={saving}
-          style={{
-            padding: 'var(--spacing-md) var(--spacing-xl)',
-            borderRadius: 'var(--border-radius-md)',
-            border: 'none',
-            background: saving ? 'var(--color-button-secondary)' : 'var(--color-button-primary)',
-            color: 'var(--color-text-inverse)',
-            cursor: saving ? 'not-allowed' : 'pointer',
-            fontWeight: 'var(--font-weight-medium)'
-          }}
+          loading={saving}
         >
-          {saving ? 'Saving...' : 'Save Settings'}
-        </button>
+          Save Settings
+        </Button>
       </div>
 
       {message && (

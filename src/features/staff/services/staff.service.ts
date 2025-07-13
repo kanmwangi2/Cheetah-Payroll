@@ -15,6 +15,7 @@ import {
 import { db } from '../../../core/config/firebase.config';
 import { withErrorHandling, createServiceFunction, validators, ServiceResult } from '../../../shared/utils/service-wrapper';
 import { logger } from '../../../shared/utils/logger';
+import { logAuditAction } from '../../../shared/services/audit.service';
 
 // Types
 export interface Staff {
@@ -84,7 +85,7 @@ export const getStaff = createServiceFunction(
 );
 
 export const createStaff = createServiceFunction(
-  async ({ companyId, data }: { companyId: string; data: StaffInput }): Promise<{ id: string }> => {
+  async ({ companyId, data, userId }: { companyId: string; data: StaffInput; userId?: string }): Promise<{ id: string }> => {
     // Add default status and timestamp
     const staffData = {
       ...data,
@@ -94,6 +95,19 @@ export const createStaff = createServiceFunction(
     };
 
     const docRef = await addDoc(collection(db, 'companies', companyId, 'staff'), staffData);
+    
+    // Log audit action
+    if (userId) {
+      await logAuditAction({
+        companyId,
+        userId,
+        entityType: 'staff',
+        entityId: docRef.id,
+        action: 'create',
+        details: { name: data.name, staffNumber: data.staffNumber, position: data.position },
+      });
+    }
+    
     return { id: docRef.id };
   },
   {
@@ -108,7 +122,7 @@ export const createStaff = createServiceFunction(
 );
 
 export const updateStaff = createServiceFunction(
-  async ({ companyId, staffId, data }: { companyId: string; staffId: string; data: Partial<StaffInput> }): Promise<void> => {
+  async ({ companyId, staffId, data, userId }: { companyId: string; staffId: string; data: Partial<StaffInput>; userId?: string }): Promise<void> => {
     // Add timestamp
     const updateData = {
       ...data,
@@ -116,6 +130,18 @@ export const updateStaff = createServiceFunction(
     };
 
     await updateDoc(doc(db, 'companies', companyId, 'staff', staffId), updateData);
+    
+    // Log audit action
+    if (userId) {
+      await logAuditAction({
+        companyId,
+        userId,
+        entityType: 'staff',
+        entityId: staffId,
+        action: 'update',
+        details: { changes: Object.keys(data) },
+      });
+    }
   },
   {
     logOperation: 'Update staff member',
@@ -138,8 +164,24 @@ export const updateStaff = createServiceFunction(
 );
 
 export const deleteStaff = createServiceFunction(
-  async ({ companyId, staffId }: { companyId: string; staffId: string }): Promise<void> => {
+  async ({ companyId, staffId, userId }: { companyId: string; staffId: string; userId?: string }): Promise<void> => {
+    // Get staff info before deletion for audit
+    const staffDoc = await getDoc(doc(db, 'companies', companyId, 'staff', staffId));
+    const staffData = staffDoc.exists() ? staffDoc.data() : null;
+    
     await deleteDoc(doc(db, 'companies', companyId, 'staff', staffId));
+    
+    // Log audit action
+    if (userId) {
+      await logAuditAction({
+        companyId,
+        userId,
+        entityType: 'staff',
+        entityId: staffId,
+        action: 'delete',
+        details: { name: staffData?.name, staffNumber: staffData?.staffNumber },
+      });
+    }
   },
   {
     logOperation: 'Delete staff member',
@@ -177,23 +219,23 @@ export async function getStaffLegacy(companyId: string): Promise<any[]> {
   return result.data || [];
 }
 
-export async function createStaffLegacy(companyId: string, data: any): Promise<any> {
-  const result = await createStaff({ companyId, data });
+export async function createStaffLegacy(companyId: string, data: any, userId?: string): Promise<any> {
+  const result = await createStaff({ companyId, data, userId });
   if (!result.success) {
     throw new Error(result.error || 'Failed to create staff');
   }
   return result.data;
 }
 
-export async function updateStaffLegacy(companyId: string, staffId: string, data: any): Promise<void> {
-  const result = await updateStaff({ companyId, staffId, data });
+export async function updateStaffLegacy(companyId: string, staffId: string, data: any, userId?: string): Promise<void> {
+  const result = await updateStaff({ companyId, staffId, data, userId });
   if (!result.success) {
     throw new Error(result.error || 'Failed to update staff');
   }
 }
 
-export async function deleteStaffLegacy(companyId: string, staffId: string): Promise<void> {
-  const result = await deleteStaff({ companyId, staffId });
+export async function deleteStaffLegacy(companyId: string, staffId: string, userId?: string): Promise<void> {
+  const result = await deleteStaff({ companyId, staffId, userId });
   if (!result.success) {
     throw new Error(result.error || 'Failed to delete staff');
   }

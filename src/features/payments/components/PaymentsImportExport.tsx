@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { createPayment } from '../services/payments.service';
 import { normalizeDate } from '../../../shared/utils/date.utils';
+import Button from '../../../shared/components/ui/Button';
 
 const paymentTemplate = [
   'type,amount,staff_id,is_gross,is_recurring,effective_date,end_date,description,status',
@@ -214,19 +215,25 @@ const PaymentsImportExport: React.FC<{
           onChange={handleImport}
           disabled={importing}
         />
-        <button
-          className="payments-import-btn"
+        <Button
+          variant="primary"
+          size="sm"
           onClick={handleExport}
           disabled={exporting || payments.length === 0}
+          loading={exporting}
         >
           Export CSV
-        </button>
-        <button className="payments-import-btn" onClick={handleTemplate}>
+        </Button>
+        <Button variant="secondary" size="sm" onClick={handleTemplate}>
           Download Template
-        </button>
-        <button className="payments-import-btn" onClick={() => setShowHistory(h => !h)}>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowHistory(h => !h)}
+        >
           Import History
-        </button>
+        </Button>
       </div>
       {importing && (
         <div className="payments-import-progress">

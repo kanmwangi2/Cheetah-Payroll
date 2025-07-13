@@ -10,7 +10,7 @@ type PasswordPolicy = {
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../core/config/firebase.config';
-import { Company } from '../../../shared/types';
+import { Company, PayrollTaxSettings } from '../../../shared/types';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
 
 interface CompanySettingsProps {
@@ -46,6 +46,18 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
     address: '',
     taxId: '',
     sector: '',
+    structure: {
+      departments: [] as string[],
+      paymentTypes: [] as string[],
+      deductionTypes: [] as string[]
+    },
+    payrollTaxSettings: {
+      paye: true,
+      pension: true,
+      maternity: true,
+      cbhi: true,
+      rama: true
+    },
     settings: {
       timezone: 'Africa/Kigali',
       currency: 'RWF',
@@ -73,6 +85,7 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
 
   const tabs = [
     { id: 'general', label: 'General Information', icon: '🏢' },
+    { id: 'structure', label: 'Structure', icon: '🏗️' },
     { id: 'payroll', label: 'Payroll Settings', icon: '💰' },
     { id: 'security', label: 'Security & Access', icon: '🔒' },
     { id: 'backup', label: 'Backup & Audit', icon: '💾' }
@@ -121,6 +134,18 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
           address: companyData.address || '',
           taxId: companyData.taxId || '',
           sector: companyData.sector || '',
+          structure: {
+            departments: companyData.structure?.departments || ['HR', 'Finance', 'IT', 'Operations'],
+            paymentTypes: companyData.structure?.paymentTypes || ['Basic Salary', 'Transport Allowance', 'Housing Allowance', 'Bonus', 'Commission'],
+            deductionTypes: companyData.structure?.deductionTypes || ['Loan', 'Salary Advance', 'Equipment Purchase', 'Uniform Cost', 'Training Fee', 'Union Dues', 'Insurance Premium']
+          },
+          payrollTaxSettings: {
+            paye: companyData.payrollTaxSettings?.paye ?? true,
+            pension: companyData.payrollTaxSettings?.pension ?? true,
+            maternity: companyData.payrollTaxSettings?.maternity ?? true,
+            cbhi: companyData.payrollTaxSettings?.cbhi ?? true,
+            rama: companyData.payrollTaxSettings?.rama ?? true
+          },
           settings: {
             ...defaultSettings,
             ...currentSettings
@@ -181,6 +206,37 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
         }
       }
     }));
+  };
+
+  const handleStructureChange = (type: 'departments' | 'paymentTypes' | 'deductionTypes', items: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      structure: {
+        ...prev.structure,
+        [type]: items
+      }
+    }));
+  };
+
+  const handlePayrollTaxChange = (taxType: keyof PayrollTaxSettings, enabled: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      payrollTaxSettings: {
+        ...prev.payrollTaxSettings,
+        [taxType]: enabled
+      }
+    }));
+  };
+
+  const addStructureItem = (type: 'departments' | 'paymentTypes' | 'deductionTypes', item: string) => {
+    if (item.trim() && !formData.structure[type].includes(item.trim())) {
+      handleStructureChange(type, [...formData.structure[type], item.trim()]);
+    }
+  };
+
+  const removeStructureItem = (type: 'departments' | 'paymentTypes' | 'deductionTypes', index: number) => {
+    const newItems = formData.structure[type].filter((_, i) => i !== index);
+    handleStructureChange(type, newItems);
   };
 
   if (loading) {
@@ -349,6 +405,256 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
           </div>
         )}
 
+        {/* Structure Tab */}
+        {activeTab === 'structure' && (
+          <div style={{ display: 'grid', gap: '32px' }}>
+            {/* Departments */}
+            <div>
+              <h4 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                Departments
+              </h4>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                <input
+                  type="text"
+                  placeholder="Add new department..."
+                  id="new-department"
+                  style={{ ...getInputStyle(), flex: 1, marginBottom: 0 }}
+                  disabled={!isAdmin}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      const target = e.target as HTMLInputElement;
+                      addStructureItem('departments', target.value);
+                      target.value = '';
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const input = document.getElementById('new-department') as HTMLInputElement;
+                    addStructureItem('departments', input.value);
+                    input.value = '';
+                  }}
+                  disabled={!isAdmin}
+                  style={{
+                    padding: '12px 16px',
+                    background: 'var(--color-primary-500)',
+                    color: 'var(--color-text-inverse)',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: isAdmin ? 'pointer' : 'not-allowed',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  Add
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {formData.structure.departments.map((dept, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    background: 'var(--color-bg-tertiary)',
+                    border: '1px solid var(--color-border-primary)',
+                    borderRadius: '6px'
+                  }}>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{dept}</span>
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => removeStructureItem('departments', index)}
+                        style={{
+                          background: 'var(--color-error-500)',
+                          color: 'var(--color-text-inverse)',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '20px',
+                          height: '20px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Payment Types */}
+            <div>
+              <h4 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                Payment Types
+              </h4>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                <input
+                  type="text"
+                  placeholder="Add new payment type..."
+                  id="new-payment-type"
+                  style={{ ...getInputStyle(), flex: 1, marginBottom: 0 }}
+                  disabled={!isAdmin}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      const target = e.target as HTMLInputElement;
+                      addStructureItem('paymentTypes', target.value);
+                      target.value = '';
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const input = document.getElementById('new-payment-type') as HTMLInputElement;
+                    addStructureItem('paymentTypes', input.value);
+                    input.value = '';
+                  }}
+                  disabled={!isAdmin}
+                  style={{
+                    padding: '12px 16px',
+                    background: 'var(--color-primary-500)',
+                    color: 'var(--color-text-inverse)',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: isAdmin ? 'pointer' : 'not-allowed',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  Add
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {formData.structure.paymentTypes.map((type, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    background: 'var(--color-bg-tertiary)',
+                    border: '1px solid var(--color-border-primary)',
+                    borderRadius: '6px'
+                  }}>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{type}</span>
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => removeStructureItem('paymentTypes', index)}
+                        style={{
+                          background: 'var(--color-error-500)',
+                          color: 'var(--color-text-inverse)',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '20px',
+                          height: '20px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Deduction Types */}
+            <div>
+              <h4 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                Other Deduction Types
+              </h4>
+              <p style={{ 
+                margin: '0 0 16px 0', 
+                color: 'var(--color-text-secondary)', 
+                fontSize: '0.85rem',
+                fontStyle: 'italic'
+              }}>
+                Note: Taxes (PAYE, Pension, Maternity, CBHI, RAMA) are managed globally through Tax Configuration and should not be added here.
+              </p>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                <input
+                  type="text"
+                  placeholder="Add new deduction type..."
+                  id="new-deduction-type"
+                  style={{ ...getInputStyle(), flex: 1, marginBottom: 0 }}
+                  disabled={!isAdmin}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      const target = e.target as HTMLInputElement;
+                      addStructureItem('deductionTypes', target.value);
+                      target.value = '';
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const input = document.getElementById('new-deduction-type') as HTMLInputElement;
+                    addStructureItem('deductionTypes', input.value);
+                    input.value = '';
+                  }}
+                  disabled={!isAdmin}
+                  style={{
+                    padding: '12px 16px',
+                    background: 'var(--color-primary-500)',
+                    color: 'var(--color-text-inverse)',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: isAdmin ? 'pointer' : 'not-allowed',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  Add
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {formData.structure.deductionTypes.map((type, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 12px',
+                    background: 'var(--color-bg-tertiary)',
+                    border: '1px solid var(--color-border-primary)',
+                    borderRadius: '6px'
+                  }}>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{type}</span>
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => removeStructureItem('deductionTypes', index)}
+                        style={{
+                          background: 'var(--color-error-500)',
+                          color: 'var(--color-text-inverse)',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '20px',
+                          height: '20px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Payroll Settings Tab */}
         {activeTab === 'payroll' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
@@ -447,6 +753,111 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                   />
                 </div>
               )}
+            </div>
+
+            {/* Tax Settings Section */}
+            <div style={{ gridColumn: '1 / -1', marginTop: '32px' }}>
+              <h3 style={{ 
+                margin: '0 0 16px 0', 
+                fontSize: '1.2rem', 
+                fontWeight: 600, 
+                color: 'var(--color-text-primary)',
+                borderBottom: '2px solid var(--color-primary-500)',
+                paddingBottom: '8px'
+              }}>
+                Tax Exemptions
+              </h3>
+              <p style={{ 
+                color: 'var(--color-text-secondary)', 
+                fontSize: '0.9rem', 
+                marginBottom: '20px',
+                lineHeight: '1.5'
+              }}>
+                Configure which taxes apply to this company. Global tax rates are managed in Tax Configuration, 
+                but companies may be exempted from certain taxes. Disabled taxes will not be calculated during payroll processing.
+              </p>
+              
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+                gap: '16px',
+                background: 'var(--color-bg-secondary)',
+                border: '1px solid var(--color-border-primary)',
+                borderRadius: '8px',
+                padding: '20px'
+              }}>
+                {Object.entries({
+                  paye: 'PAYE (Pay As You Earn)',
+                  pension: 'Pension Contribution',
+                  maternity: 'Maternity Insurance',
+                  cbhi: 'Community Health Insurance (CBHI)',
+                  rama: 'Rwanda Medical Insurance (RAMA)'
+                }).map(([key, label]) => (
+                  <div key={key} style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '12px',
+                    padding: '12px',
+                    background: formData.payrollTaxSettings[key as keyof PayrollTaxSettings] 
+                      ? 'var(--color-success-bg)' 
+                      : 'var(--color-warning-bg)',
+                    border: `1px solid ${formData.payrollTaxSettings[key as keyof PayrollTaxSettings] 
+                      ? 'var(--color-success-border)' 
+                      : 'var(--color-warning-border)'}`,
+                    borderRadius: '6px',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <input
+                      type="checkbox"
+                      id={`tax-${key}`}
+                      checked={formData.payrollTaxSettings[key as keyof PayrollTaxSettings]}
+                      onChange={(e) => handlePayrollTaxChange(key as keyof PayrollTaxSettings, e.target.checked)}
+                      disabled={!isAdmin}
+                      style={{ 
+                        width: '18px', 
+                        height: '18px',
+                        cursor: isAdmin ? 'pointer' : 'not-allowed'
+                      }}
+                    />
+                    <label 
+                      htmlFor={`tax-${key}`}
+                      style={{
+                        fontWeight: 500,
+                        color: formData.payrollTaxSettings[key as keyof PayrollTaxSettings] 
+                          ? 'var(--color-success-text)' 
+                          : 'var(--color-warning-text)',
+                        cursor: isAdmin ? 'pointer' : 'not-allowed',
+                        fontSize: '0.9rem',
+                        flex: 1
+                      }}
+                    >
+                      {label}
+                    </label>
+                    <div style={{
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      color: formData.payrollTaxSettings[key as keyof PayrollTaxSettings] 
+                        ? 'var(--color-success-text)' 
+                        : 'var(--color-warning-text)'
+                    }}>
+                      {formData.payrollTaxSettings[key as keyof PayrollTaxSettings] ? 'ENABLED' : 'DISABLED'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div style={{
+                marginTop: '16px',
+                padding: '12px',
+                background: 'var(--color-info-bg)',
+                border: '1px solid var(--color-info-border)',
+                borderRadius: '6px',
+                fontSize: '0.85rem',
+                color: 'var(--color-info-text)'
+              }}>
+                <strong>📋 Important:</strong> Tax exemptions require proper documentation and regulatory approval. 
+                Ensure your company has the legal authority to disable specific taxes before making changes.
+              </div>
             </div>
           </div>
         )}

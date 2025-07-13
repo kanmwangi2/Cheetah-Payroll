@@ -1,21 +1,26 @@
-import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
-
-const db = getFirestore();
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../core/config/firebase.config';
 
 export async function logAuditAction({
+  companyId,
   userId,
   entityType,
   entityId,
   action,
   details = {},
 }: {
+  companyId: string;
   userId: string;
   entityType: string;
   entityId: string;
   action: string;
   details?: any;
 }) {
-  await addDoc(collection(db, 'audit_logs'), {
+  if (!companyId) {
+    throw new Error('Company ID is required for audit logging');
+  }
+  
+  await addDoc(collection(db, 'companies', companyId, 'audit_logs'), {
     userId,
     entityType,
     entityId,

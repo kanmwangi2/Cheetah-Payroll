@@ -2,23 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { fetchAuditLogs } from '../services/fetchAuditLogs';
 
 export default function AuditTrail({
+  companyId,
   entityId,
   entityType,
 }: {
-  entityId: string;
-  entityType: string;
+  companyId: string;
+  entityId?: string;
+  entityType?: string;
 }) {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!companyId) {
+      setError('Company ID is required');
+      return;
+    }
+    
     setLoading(true);
-    fetchAuditLogs(entityType, entityId)
+    fetchAuditLogs(companyId, entityType, entityId)
       .then(setLogs)
       .catch(e => setError(e.message || 'Failed to load audit logs'))
       .finally(() => setLoading(false));
-  }, [entityId, entityType]);
+  }, [companyId, entityId, entityType]);
 
   return (
     <div className="audit-trail">

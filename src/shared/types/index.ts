@@ -18,8 +18,17 @@ export interface User {
   department?: string;
   uid?: string;
   status?: string;
+  photoURL?: string;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface PayrollTaxSettings {
+  paye: boolean;
+  pension: boolean;
+  maternity: boolean;
+  cbhi: boolean;
+  rama: boolean;
 }
 
 export interface Company {
@@ -27,6 +36,12 @@ export interface Company {
   name: string;
   settings?: any;
   taxConfig?: any;
+  payrollTaxSettings?: PayrollTaxSettings;
+  structure?: {
+    departments: string[];
+    paymentTypes: string[];
+    deductionTypes: string[];
+  };
   email?: string;
   phone?: string;
   address?: string;
@@ -181,6 +196,7 @@ export interface StatutoryReport {
 // Audit Trail Types
 export interface AuditLog {
   id: string;
+  companyId: string;
   entityType: 'staff' | 'payment' | 'deduction' | 'payroll' | 'company';
   entityId: string;
   action: 'create' | 'update' | 'delete' | 'approve' | 'process';

@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { createStaff } from '../services/staff.service';
 import { normalizeDate } from '../../../shared/utils/date.utils';
+import Button from '../../../shared/components/ui/Button';
 
 const staffTemplate = [
   'firstName,lastName,idNumber,rssbNumber,dateOfBirth,gender,maritalStatus,phone,email,address,emergencyContact,staffNumber,startDate,endDate,position,employmentType,department,bankName,accountNumber',
@@ -215,24 +216,25 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
           disabled={importing}
           aria-busy={importing}
         />
-        <button
-          className="staff-import-btn"
+        <Button
+          variant="primary"
+          size="sm"
           onClick={handleExport}
           disabled={exporting || staff.length === 0}
-          aria-disabled={exporting || staff.length === 0}
+          loading={exporting}
         >
-          {exporting ? 'Exporting...' : 'Export CSV'}
-        </button>
-        <button className="staff-import-btn" onClick={handleTemplate}>
+          Export CSV
+        </Button>
+        <Button variant="secondary" size="sm" onClick={handleTemplate}>
           Download Template
-        </button>
-        <button
-          className="staff-import-btn"
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setShowHistory(h => !h)}
-          aria-pressed={showHistory}
         >
           Import History
-        </button>
+        </Button>
       </div>
       {importing && (
         <div className="staff-import-progress" aria-live="polite">

@@ -4,6 +4,7 @@ import { getStaff } from '../../staff/services/staff.service';
 import { Deduction, Staff } from '../../../shared/types';
 import DeductionsForm from './DeductionsForm';
 import DeductionsImportExport from './DeductionsImportExport';
+import Button from '../../../shared/components/ui/Button';
 
 const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [deductions, setDeductions] = useState<Deduction[]>([]);
@@ -154,21 +155,13 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
           >
             📤 Import/Export
           </button>
-          <button
+          <Button
+            variant="primary"
+            size="md"
             onClick={() => setShowForm(true)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 6,
-              border: 'none',
-              background: 'var(--color-button-primary)',
-              color: 'var(--color-text-inverse)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px'
-            }}
           >
             + Add Deduction
-          </button>
+          </Button>
         </div>
       </div>
 

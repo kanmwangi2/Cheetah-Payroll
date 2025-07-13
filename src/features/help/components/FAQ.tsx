@@ -364,7 +364,11 @@ const FAQ: React.FC = () => {
         </p>
       </div>
       
-      <Accordion items={accordionItems} allowMultiple={true} />
+      <Accordion 
+        items={accordionItems} 
+        allowMultiple={true} 
+        showExpandCollapseAll={true}
+      />
     </div>
   );
 };

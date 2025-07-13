@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { createDeduction } from '../services/deductions.service';
+import Button from '../../../shared/components/ui/Button';
 
 const deductionTemplate = [
   'type,originalAmount,staffId,remainingBalance,monthlyInstallment,description',
@@ -172,19 +173,25 @@ const DeductionsImportExport: React.FC<{
           onChange={handleImport}
           disabled={importing}
         />
-        <button
-          className="deductions-import-btn"
+        <Button
+          variant="primary"
+          size="sm"
           onClick={handleExport}
           disabled={exporting || deductions.length === 0}
+          loading={exporting}
         >
           Export CSV
-        </button>
-        <button className="deductions-import-btn" onClick={handleTemplate}>
+        </Button>
+        <Button variant="secondary" size="sm" onClick={handleTemplate}>
           Download Template
-        </button>
-        <button className="deductions-import-btn" onClick={() => setShowHistory(h => !h)}>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowHistory(h => !h)}
+        >
           Import History
-        </button>
+        </Button>
       </div>
       {importing && (
         <div className="deductions-import-progress">

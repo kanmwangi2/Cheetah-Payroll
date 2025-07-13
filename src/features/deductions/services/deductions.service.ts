@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../../core/config/firebase.config';
 import { Deduction, DeductionType } from '../../../shared/types';
+import { logAuditAction } from '../../../shared/services/audit.service';
 
 // Deduction type labels
 export const DEDUCTION_TYPE_LABELS: Record<DeductionType, string> = {
@@ -69,7 +70,7 @@ export async function getLoansByStaff(companyId: string, staffId: string): Promi
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deduction));
 }
 
-export async function createDeduction(companyId: string, data: Omit<Deduction, 'id'>) {
+export async function createDeduction(companyId: string, data: Omit<Deduction, 'id'>, userId?: string) {
   const deductionData = {
     ...data,
     companyId,
@@ -85,27 +86,74 @@ export async function createDeduction(companyId: string, data: Omit<Deduction, '
     deductionData.remainingInstallments = data.numberOfInstallments;
   }
   
-  return addDoc(collection(db, 'companies', companyId, 'deductions'), deductionData);
+  const docRef = await addDoc(collection(db, 'companies', companyId, 'deductions'), deductionData);
+  
+  // Log audit action
+  if (userId) {
+    await logAuditAction({
+      companyId,
+      userId,
+      entityType: 'deduction',
+      entityId: docRef.id,
+      action: 'create',
+      details: { type: data.type, amount: data.originalAmount, staffId: data.staffId },
+    });
+  }
+  
+  return docRef;
 }
 
-export async function updateDeduction(companyId: string, deductionId: string, data: Partial<Deduction>) {
+export async function updateDeduction(companyId: string, deductionId: string, data: Partial<Deduction>, userId?: string) {
   const updateData = {
     ...data,
     updatedAt: new Date().toISOString(),
   };
-  return updateDoc(doc(db, 'companies', companyId, 'deductions', deductionId), updateData);
+  
+  const result = await updateDoc(doc(db, 'companies', companyId, 'deductions', deductionId), updateData);
+  
+  // Log audit action
+  if (userId) {
+    await logAuditAction({
+      companyId,
+      userId,
+      entityType: 'deduction',
+      entityId: deductionId,
+      action: 'update',
+      details: { changes: Object.keys(data) },
+    });
+  }
+  
+  return result;
 }
 
-export async function deleteDeduction(companyId: string, deductionId: string) {
+export async function deleteDeduction(companyId: string, deductionId: string, userId?: string) {
   // Soft delete by setting status to cancelled
   return updateDeduction(companyId, deductionId, { 
     status: 'cancelled',
     updatedAt: new Date().toISOString()
-  });
+  }, userId);
 }
 
-export async function hardDeleteDeduction(companyId: string, deductionId: string) {
-  return deleteDoc(doc(db, 'companies', companyId, 'deductions', deductionId));
+export async function hardDeleteDeduction(companyId: string, deductionId: string, userId?: string) {
+  // Get deduction info before deletion for audit
+  const deductionDoc = await getDoc(doc(db, 'companies', companyId, 'deductions', deductionId));
+  const deductionData = deductionDoc.exists() ? deductionDoc.data() : null;
+  
+  const result = await deleteDoc(doc(db, 'companies', companyId, 'deductions', deductionId));
+  
+  // Log audit action
+  if (userId) {
+    await logAuditAction({
+      companyId,
+      userId,
+      entityType: 'deduction',
+      entityId: deductionId,
+      action: 'delete',
+      details: { type: deductionData?.type, amount: deductionData?.originalAmount },
+    });
+  }
+  
+  return result;
 }
 
 export async function getDeduction(companyId: string, deductionId: string): Promise<Deduction | null> {

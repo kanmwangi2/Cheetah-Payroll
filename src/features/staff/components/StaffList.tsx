@@ -4,6 +4,7 @@ import { db } from '../../../core/config/firebase.config';
 import StaffForm from './StaffForm';
 import StaffProfile from './StaffProfile';
 import StaffImportExport from './StaffImportExport';
+import Button from '../../../shared/components/ui/Button';
 
 interface StaffMember {
   id: string;
@@ -173,20 +174,13 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
           >
             📤 Import/Export
           </button>
-          <button
+          <Button
+            variant="primary"
+            size="md"
             onClick={() => setShowForm(true)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 6,
-              border: 'none',
-              background: 'var(--color-button-primary)',
-              color: 'var(--color-text-inverse)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px'
-            }}>
+          >
             + Add Staff
-          </button>
+          </Button>
         </div>
       </div>
 

@@ -63,7 +63,7 @@ const AppContent: React.FC = () => {
           <Route path="/deductions" element={<DeductionsList companyId={company.id} />} />
           <Route path="/payroll" element={<PayrollList companyId={company.id} />} />
           <Route path="/reports" element={<Reports companyId={company.id} />} />
-          <Route path="/utilities" element={<Utilities />} />
+          <Route path="/utilities" element={<Utilities companyId={company.id} companyName={company.name} />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

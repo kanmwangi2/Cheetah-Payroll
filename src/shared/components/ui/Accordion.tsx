@@ -16,6 +16,9 @@ interface AccordionProps {
   items: AccordionItemProps[];
   allowMultiple?: boolean;
   className?: string;
+  showExpandCollapseAll?: boolean;
+  onExpandAll?: () => void;
+  onCollapseAll?: () => void;
 }
 
 export const AccordionItem: React.FC<AccordionItemProps & { 
@@ -51,7 +54,10 @@ export const AccordionItem: React.FC<AccordionItemProps & {
 export const Accordion: React.FC<AccordionProps> = ({ 
   items, 
   allowMultiple = false, 
-  className = '' 
+  className = '',
+  showExpandCollapseAll = false,
+  onExpandAll,
+  onCollapseAll
 }) => {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(
     new Set(items.filter(item => item.defaultExpanded).map(item => item.id))
@@ -74,8 +80,60 @@ export const Accordion: React.FC<AccordionProps> = ({
     });
   };
 
+  const expandAll = () => {
+    setExpandedItems(new Set(items.map(item => item.id)));
+    onExpandAll?.();
+  };
+
+  const collapseAll = () => {
+    setExpandedItems(new Set());
+    onCollapseAll?.();
+  };
+
+  const allExpanded = expandedItems.size === items.length;
+  const allCollapsed = expandedItems.size === 0;
+
   return (
     <div className={`accordion-container ${className}`}>
+      {showExpandCollapseAll && (
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          marginBottom: '16px',
+          justifyContent: 'flex-end'
+        }}>
+          <button
+            onClick={expandAll}
+            disabled={allExpanded}
+            style={{
+              padding: '8px 16px',
+              background: allExpanded ? 'var(--color-bg-tertiary)' : 'var(--color-primary-500)',
+              color: allExpanded ? 'var(--color-text-secondary)' : 'var(--color-text-inverse)',
+              border: '1px solid var(--color-border-primary)',
+              borderRadius: '6px',
+              cursor: allExpanded ? 'not-allowed' : 'pointer',
+              fontSize: '0.9rem'
+            }}
+          >
+            Expand All
+          </button>
+          <button
+            onClick={collapseAll}
+            disabled={allCollapsed}
+            style={{
+              padding: '8px 16px',
+              background: allCollapsed ? 'var(--color-bg-tertiary)' : 'var(--color-secondary-500)',
+              color: allCollapsed ? 'var(--color-text-secondary)' : 'var(--color-text-inverse)',
+              border: '1px solid var(--color-border-primary)',
+              borderRadius: '6px',
+              cursor: allCollapsed ? 'not-allowed' : 'pointer',
+              fontSize: '0.9rem'
+            }}
+          >
+            Collapse All
+          </button>
+        </div>
+      )}
       {items.map(item => (
         <AccordionItem
           key={item.id}

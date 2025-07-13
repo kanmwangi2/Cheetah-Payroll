@@ -143,7 +143,6 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
           {/* Header with logo and logout */}
           <div style={headerStyles}>
             <div style={logoContainerStyles}>
-              <div style={logoStyles}>🐆</div>
               <h1 style={titleStyles}>
                 Company Selection
               </h1>
@@ -347,12 +346,9 @@ const logoContainerStyles: React.CSSProperties = {
   flexDirection: 'column',
   alignItems: 'center',
   flex: 1,
+  justifyContent: 'center',
 };
 
-const logoStyles: React.CSSProperties = {
-  fontSize: '2rem',
-  marginBottom: 'var(--spacing-sm)',
-};
 
 const titleStyles: React.CSSProperties = {
   fontSize: 'var(--font-size-2xl)',

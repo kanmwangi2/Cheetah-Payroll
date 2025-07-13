@@ -4,6 +4,7 @@ import { getStaff } from '../../staff/services/staff.service';
 import { Payment, Staff } from '../../../shared/types';
 import PaymentsForm from './PaymentsForm';
 import PaymentsImportExport from './PaymentsImportExport';
+import Button from '../../../shared/components/ui/Button';
 
 const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -133,21 +134,13 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
           >
             📤 Import/Export
           </button>
-          <button
+          <Button
+            variant="primary"
+            size="md"
             onClick={() => setShowForm(true)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 6,
-              border: 'none',
-              background: 'var(--color-button-primary)',
-              color: 'var(--color-text-inverse)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px'
-            }}
           >
             + Add Payment
-          </button>
+          </Button>
         </div>
       </div>
 

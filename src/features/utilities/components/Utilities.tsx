@@ -5,8 +5,13 @@ import FAQ from '../../help/components/FAQ';
 import Documentation from '../../help/components/Documentation';
 
 
-const Utilities: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'faq' | 'docs' | 'advanced' | 'audit'>('faq');
+interface UtilitiesProps {
+  companyId: string;
+  companyName: string;
+}
+
+const Utilities: React.FC<UtilitiesProps> = ({ companyId, companyName }) => {
+  const [activeTab, setActiveTab] = useState<'faq' | 'docs' | 'backup' | 'audit'>('faq');
 
 
   const renderTabContent = () => {
@@ -17,14 +22,14 @@ const Utilities: React.FC = () => {
       case 'docs':
         return <Documentation />;
 
-      case 'advanced':
+      case 'backup':
         return (
-          <div className="advanced-utilities-content">
-            <h3 style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-lg)' }}>Advanced Tools</h3>
+          <div className="backup-utilities-content">
+            <h3 style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-lg)' }}>Backup & Restore</h3>
             <p style={{ marginBottom: 'var(--spacing-xl)', color: 'var(--color-text-secondary)' }}>
-              Advanced system utilities for data management, system maintenance, and administrative tasks.
+              Backup and restore all company data, including staff, payments, deductions, and payroll records.
             </p>
-            <AdvancedUtilities />
+            <AdvancedUtilities companyId={companyId} companyName={companyName} />
           </div>
         );
 
@@ -35,7 +40,7 @@ const Utilities: React.FC = () => {
             <p style={{ marginBottom: 'var(--spacing-xl)', color: 'var(--color-text-secondary)' }}>
               Complete audit log of all system activities, user actions, and data changes.
             </p>
-            <AuditTrail entityId="system" entityType="utilities" />
+            <AuditTrail companyId={companyId} entityId="system" entityType="utilities" />
           </div>
         );
 
@@ -63,7 +68,7 @@ const Utilities: React.FC = () => {
         {[
           { key: 'faq', label: 'FAQ', icon: '❓' },
           { key: 'docs', label: 'Documentation', icon: '📄' },
-          { key: 'advanced', label: 'Advanced', icon: '⚙️' },
+          { key: 'backup', label: 'Backup', icon: '💾' },
           { key: 'audit', label: 'Audit Trail', icon: '📊' }
         ].map(tab => (
           <button
