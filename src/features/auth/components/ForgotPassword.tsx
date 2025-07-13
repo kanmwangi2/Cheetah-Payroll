@@ -13,6 +13,7 @@ import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
 import LoadingSpinner from '../../../shared/components/ui/LoadingSpinner';
 import Logo from '../../../shared/components/ui/Logo';
 import ThemeBoundary from '../../../shared/components/ui/ThemeBoundary';
+import Button from '../../../shared/components/ui/Button';
 import { logger } from '../../../shared/utils/logger';
 import { getFirebaseErrorMessage, isCredentialError, isRetryableError } from '../../../shared/utils/firebase-errors';
 
@@ -173,13 +174,16 @@ const ForgotPassword: React.FC = () => {
           )}
 
           {/* Submit Button */}
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            style={submitButtonStyles}
+            variant="primary"
+            size="lg"
+            fullWidth
+            loading={loading}
           >
-            {loading ? 'Sending Email...' : 'Send Reset Email'}
-          </button>
+            Send Reset Email
+          </Button>
         </form>
 
         {/* Footer Links */}
@@ -355,18 +359,6 @@ const errorHintStyles: React.CSSProperties = {
   lineHeight: 1.4,
 };
 
-const submitButtonStyles: React.CSSProperties = {
-  padding: 'var(--spacing-md) var(--spacing-lg)',
-  backgroundColor: 'var(--color-primary-500)',
-  color: 'var(--color-text-inverse)',
-  border: 'none',
-  borderRadius: 'var(--border-radius-md)',
-  fontSize: 'var(--font-size-base)',
-  fontWeight: 'var(--font-weight-medium)',
-  cursor: 'pointer',
-  transition: 'all var(--transition-normal)',
-  marginTop: 'var(--spacing-sm)',
-};
 
 const footerStyles: React.CSSProperties = {
   marginTop: 'var(--spacing-4xl)',

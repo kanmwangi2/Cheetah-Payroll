@@ -13,38 +13,10 @@ import {
   getDoc,
 } from 'firebase/firestore';
 import { db } from '../../../core/config/firebase.config';
-import { withErrorHandling, createServiceFunction, validators, ServiceResult } from '../../../shared/utils/service-wrapper';
+import { createServiceFunction, validators } from '../../../shared/utils/service-wrapper';
 import { logger } from '../../../shared/utils/logger';
 import { logAuditAction } from '../../../shared/services/audit.service';
-
-// Types
-export interface Staff {
-  id?: string;
-  staffNumber: string;
-  name: string;
-  email: string;
-  phone?: string;
-  position: string;
-  department?: string;
-  salary: number;
-  startDate: string;
-  endDate?: string;
-  status: 'active' | 'inactive';
-  [key: string]: any;
-}
-
-export interface StaffInput {
-  staffNumber: string;
-  name: string;
-  email: string;
-  phone?: string;
-  position: string;
-  department?: string;
-  salary: number;
-  startDate: string;
-  endDate?: string;
-  status?: 'active' | 'inactive';
-}
+import { Staff, StaffInput } from '../../../shared/types';
 
 // Validation functions
 const validateStaffInput = (data: StaffInput): string | null => {
@@ -59,6 +31,30 @@ const validateStaffInput = (data: StaffInput): string | null => {
     () => validators.positive(data.salary, 'Salary'),
     () => validators.required(data.startDate, 'Start Date')
   );
+};
+
+// Check for duplicate staff numbers or emails
+const checkStaffUniqueness = async (companyId: string, staffNumber: string, email: string, excludeId?: string): Promise<string | null> => {
+  try {
+    const staffCollection = collection(db, 'companies', companyId, 'staff');
+    const snapshot = await getDocs(staffCollection);
+    
+    for (const doc of snapshot.docs) {
+      if (excludeId && doc.id === excludeId) {continue;}
+      
+      const data = doc.data();
+      if (data.staffNumber === staffNumber) {
+        return `Staff number ${staffNumber} already exists`;
+      }
+      if (data.email === email) {
+        return `Email ${email} already exists`;
+      }
+    }
+    return null;
+  } catch (error) {
+    logger.error('Error checking staff uniqueness', error as Error);
+    return 'Unable to validate uniqueness';
+  }
 };
 
 const validateCompanyAndStaffIds = (companyId: string, staffId?: string): string | null => {
@@ -86,6 +82,12 @@ export const getStaff = createServiceFunction(
 
 export const createStaff = createServiceFunction(
   async ({ companyId, data, userId }: { companyId: string; data: StaffInput; userId?: string }): Promise<{ id: string }> => {
+    // Check for uniqueness first
+    const uniquenessError = await checkStaffUniqueness(companyId, data.staffNumber, data.email);
+    if (uniquenessError) {
+      throw new Error(uniquenessError);
+    }
+
     // Add default status and timestamp
     const staffData = {
       ...data,

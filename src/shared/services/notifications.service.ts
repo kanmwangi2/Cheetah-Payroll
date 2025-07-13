@@ -21,9 +21,15 @@ export function useNotifications(userId: string) {
       where('userId', '==', userId),
       orderBy('createdAt', 'desc')
     );
-    const unsub = onSnapshot(q, snap => {
-      setNotifications(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    });
+    const unsub = onSnapshot(q, 
+      snap => {
+        setNotifications(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      },
+      error => {
+        console.error('Error fetching notifications:', error);
+        // Optionally show error message to user
+      }
+    );
     return () => unsub();
   }, [userId]);
   return notifications;

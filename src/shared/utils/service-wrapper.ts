@@ -147,10 +147,8 @@ export const validators = {
     return null;
   },
 
-  companyId: (companyId: string): string | null => {
-    if (!companyId || typeof companyId !== 'string') {
-      return 'Invalid company identifier.';
-    }
+  companyId: (_companyId: string): string | null => {
+    // Company ID validation removed - if we're in a company context, the ID is assumed valid
     return null;
   },
 

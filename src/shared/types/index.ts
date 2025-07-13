@@ -52,14 +52,69 @@ export interface Company {
   updatedAt?: Date | string;
 }
 
+export interface PersonalDetails {
+  firstName: string;
+  lastName: string;
+  idNumber: string;
+  rssbNumber?: string;
+  dateOfBirth: string;
+  gender: 'Male' | 'Female' | 'Other';
+  maritalStatus: 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Other';
+  nationality: string;
+  phone: string;
+  email: string;
+  address: string;
+  employeeId?: string; // For backward compatibility
+}
+
+export interface EmergencyContact {
+  name: string;
+  phone: string;
+  relationship: string;
+}
+
+export interface EmploymentDetails {
+  staffNumber: string;
+  position: string;
+  department?: string;
+  employmentType: 'Full-time' | 'Part-time' | 'Contract' | 'Temporary';
+  startDate: string;
+  endDate?: string;
+  salary: number;
+  status: 'active' | 'inactive';
+}
+
+export interface BankDetails {
+  bankName: string;
+  accountNumber: string;
+  accountName?: string;
+  bankCode?: string; // For backward compatibility
+}
+
 export interface Staff {
-  id: string;
+  id?: string;
   companyId: string;
-  personalDetails: any;
-  employmentDetails: any;
-  bankDetails: any;
+  personalDetails: PersonalDetails;
+  employmentDetails: EmploymentDetails;
+  bankDetails: BankDetails;
+  emergencyContact?: EmergencyContact;
   createdAt: string;
   updatedAt: string;
+}
+
+// Legacy interface for backward compatibility
+export interface StaffInput {
+  staffNumber: string;
+  name: string;
+  email: string;
+  phone?: string;
+  position: string;
+  department?: string;
+  salary: number;
+  startDate: string;
+  endDate?: string;
+  status?: 'active' | 'inactive';
+  [key: string]: any;
 }
 
 // Payment Types
@@ -108,6 +163,7 @@ export interface Deduction {
   status: 'active' | 'completed' | 'cancelled';
   createdAt: string;
   updatedAt: string;
+  amount?: number; // For backward compatibility
 }
 
 // Tax Configuration Types

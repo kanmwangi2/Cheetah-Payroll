@@ -49,6 +49,16 @@ const faqData = [
         <h4>How do I update employee information?</h4>
         <p>Click on any employee in the Staff list to view and edit their details. The staff form now includes staff numbers for unique identification and department dropdowns populated from your company's existing departments. Changes are automatically saved and reflected in future payroll calculations.</p>
         
+        <h4>Can I upload and manage profile pictures?</h4>
+        <p>Yes! The system now includes an advanced profile picture management system with:</p>
+        <ul>
+          <li>Interactive image cropping with real-time preview</li>
+          <li>Support for multiple image formats (JPG, PNG, GIF)</li>
+          <li>Automatic image optimization and lazy loading</li>
+          <li>File size validation (up to 10MB)</li>
+          <li>Drag-and-drop functionality for easy uploads</li>
+        </ul>
+        
         <h4>What happens when an employee leaves?</h4>
         <p>You can deactivate employees rather than deleting them to maintain historical payroll records. Set their end date in the employment details.</p>
       </div>
@@ -170,6 +180,35 @@ const faqData = [
     )
   },
   {
+    id: 'email-communication',
+    title: 'Email Communication',
+    content: (
+      <div>
+        <h4>Can I email payslips directly to employees?</h4>
+        <p>Yes! The system now includes comprehensive email functionality:</p>
+        <ul>
+          <li>Send individual payslips to specific employees</li>
+          <li>Bulk email all approved payslips at once</li>
+          <li>Automated email templates with company branding</li>
+          <li>Delivery confirmation and error tracking</li>
+          <li>Email history and audit trail</li>
+        </ul>
+        
+        <h4>How do I send deduction or payment reports via email?</h4>
+        <p>In the Deductions or Payments sections, use the "📧 Email Report" button to send comprehensive reports to administrators. The system will generate a summary report including total records, amounts, and detailed breakdowns.</p>
+        
+        <h4>What happens if an email fails to send?</h4>
+        <p>The system provides real-time feedback on email delivery status. Failed emails are clearly indicated with error messages, and you can retry sending individual or bulk emails as needed.</p>
+        
+        <h4>Can I customize email templates?</h4>
+        <p>Email templates automatically include your company branding and relevant payroll information. The system supports different templates for payslips, reports, and notifications.</p>
+        
+        <h4>Is there a limit on how many emails I can send?</h4>
+        <p>The bulk email feature allows you to send payslips to all employees simultaneously. The system handles large email batches efficiently and provides progress tracking for bulk operations.</p>
+      </div>
+    )
+  },
+  {
     id: 'troubleshooting',
     title: 'Troubleshooting',
     content: (
@@ -246,7 +285,7 @@ const FAQ: React.FC = () => {
     pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, currentY);
     currentY += 20;
     
-    faqData.forEach((section, index) => {
+    faqData.forEach((section) => {
       // Check if we need a new page
       if (currentY > pageHeight - 30) {
         pdf.addPage();

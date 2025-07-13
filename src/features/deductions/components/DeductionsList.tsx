@@ -4,6 +4,9 @@ import { getStaff } from '../../staff/services/staff.service';
 import { Deduction, Staff } from '../../../shared/types';
 import DeductionsForm from './DeductionsForm';
 import DeductionsImportExport from './DeductionsImportExport';
+import EmailSender from '../../../shared/components/ui/EmailSender';
+import { ReportEmailData } from '../../../shared/services/email.service';
+import Button from '../../../shared/components/ui/Button';
 
 const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [deductions, setDeductions] = useState<Deduction[]>([]);
@@ -18,6 +21,8 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
+  const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -102,6 +107,36 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
     }
   };
 
+  // Email handling functions
+  const handleEmailSuccess = (message?: string) => {
+    setEmailSuccess(message || 'Email sent successfully!');
+    setEmailError(null);
+    setTimeout(() => setEmailSuccess(null), 5000);
+  };
+
+  const handleEmailError = (error: string) => {
+    setEmailError(error);
+    setEmailSuccess(null);
+    setTimeout(() => setEmailError(null), 8000);
+  };
+
+  const createDeductionReportData = (): ReportEmailData => {
+    const currentDate = new Date();
+    const reportPeriod = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    return {
+      recipientEmail: 'admin@company.com', // This should be configurable
+      recipientName: 'Payroll Administrator',
+      reportType: 'deductions',
+      reportPeriod,
+      summary: {
+        totalRecords: deductions.length,
+        totalAmount: deductions.reduce((sum, d) => sum + (d.amount || d.originalAmount || 0), 0),
+        generatedAt: currentDate.toISOString()
+      }
+    };
+  };
+
   const filtered = deductions.filter(d => {
     const staffName = getStaffName(d.staffId);
     const matchesSearch =
@@ -138,41 +173,63 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
         }}>
           Deductions Management
         </h1>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Button
             onClick={() => setShowImportExport(true)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 6,
-              border: 'none',
-              background: 'var(--color-primary-600)',
-              color: 'var(--color-text-inverse)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px',
-              transition: 'all var(--transition-normal)'
-            }}
+            variant="primary"
+            leftIcon="📤"
           >
-            📤 Import/Export
-          </button>
-          <button
+            Import/Export
+          </Button>
+          
+          {/* Email Deductions Report */}
+          {deductions.length > 0 && (
+            <EmailSender
+              type="deduction_report"
+              data={createDeductionReportData()}
+              buttonText="📧 Email Report"
+              buttonVariant="secondary"
+              onSuccess={() => handleEmailSuccess('Deductions report sent successfully!')}
+              onError={handleEmailError}
+            />
+          )}
+          
+          <Button
             onClick={() => setShowForm(true)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 6,
-              border: 'none',
-              background: 'var(--color-primary-600)',
-              color: 'var(--color-text-inverse)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px',
-              transition: 'all var(--transition-normal)'
-            }}
+            variant="primary"
+            leftIcon="+"
           >
-            + Add Deduction
-          </button>
+            Add Deduction
+          </Button>
         </div>
       </div>
+
+      {/* Email Success/Error Messages */}
+      {emailSuccess && (
+        <div style={{
+          background: 'var(--color-success-bg)',
+          color: 'var(--color-success-text)',
+          padding: 'var(--spacing-md)',
+          borderRadius: 'var(--border-radius-md)',
+          border: '1px solid var(--color-success-border)',
+          marginBottom: 'var(--spacing-lg)'
+        }}>
+          ✅ {emailSuccess}
+        </div>
+      )}
+      
+      {emailError && (
+        <div style={{
+          background: 'var(--color-error-bg)',
+          color: 'var(--color-error-text)',
+          padding: 'var(--spacing-md)',
+          borderRadius: 'var(--border-radius-md)',
+          border: '1px solid var(--color-error-border)',
+          marginBottom: 'var(--spacing-lg)'
+        }}>
+          ❌ {emailError}
+        </div>
+      )}
 
       {/* Search and Filters */}
       <div style={{

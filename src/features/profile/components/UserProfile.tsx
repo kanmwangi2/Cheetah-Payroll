@@ -3,6 +3,8 @@ import { updatePassword, updateProfile, updateEmail, reauthenticateWithCredentia
 import { doc, updateDoc, getFirestore } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
+import ProfilePicture from '../../../shared/components/ui/ProfilePicture';
+import Button from '../../../shared/components/ui/Button';
 
 const db = getFirestore();
 const storage = getStorage();
@@ -189,7 +191,7 @@ const UserProfile: React.FC = () => {
           cropData.height
         );
         
-        canvas.toBlob((blob) => {
+        canvas.toBlob((blob: Blob | null) => {
           resolve(blob!);
         }, 'image/jpeg', 0.9);
       };

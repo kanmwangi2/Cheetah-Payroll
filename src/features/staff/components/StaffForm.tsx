@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../core/config/firebase.config';
 import { createStaff } from '../services/staff.service';
+import Button from '../../../shared/components/ui/Button';
 
 const initialState = {
   personalDetails: {
@@ -312,9 +313,9 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
           onChange={e => handleChange('bankDetails', 'accountNumber', e.target.value)}
         />
       </div>
-      <button className="staff-form-btn" type="submit" disabled={loading}>
-        {loading ? 'Adding...' : 'Add Staff'}
-      </button>
+      <Button type="submit" disabled={loading} variant="primary" loading={loading}>
+        Add Staff
+      </Button>
       {error && (
         <div className="staff-form-error" role="alert" aria-live="assertive">
           {error}

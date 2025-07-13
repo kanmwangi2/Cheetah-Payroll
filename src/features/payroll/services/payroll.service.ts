@@ -556,14 +556,14 @@ export async function createComprehensivePayroll(
       // Get staff payments
       const { total: totalPayments, breakdown: payments } = await calculateStaffPayments(
         companyId,
-        staffMember.id,
+        staffMember.id!,
         period
       );
       
       // Get staff deductions
       const { total: totalDeductions } = await calculateStaffDeductions(
         companyId,
-        staffMember.id
+        staffMember.id!
       );
       
       // Calculate basic pay (assume 60% of total payments if not specified)
@@ -583,7 +583,7 @@ export async function createComprehensivePayroll(
       // Create staff payroll record
       const staffPayrollData: Omit<StaffPayroll, 'id'> = {
         payrollId,
-        staffId: staffMember.id,
+        staffId: staffMember.id!,
         staffName: `${staffMember.personalDetails?.firstName || ''} ${staffMember.personalDetails?.lastName || ''}`.trim(),
         calculations: calculation,
         status: 'draft',

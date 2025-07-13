@@ -3,6 +3,9 @@ import { getPayrolls, createComprehensivePayroll, deletePayroll } from '../servi
 import { useAuthContext } from '../../../core/providers/AuthProvider';
 import { isPayrollPreparerOrHigher, isCompanyAdminOrHigher } from '../../../shared/constants/app.constants';
 import PayrollImportExport from './PayrollImportExport';
+import EmailSender, { BulkEmailSender } from '../../../shared/components/ui/EmailSender';
+import { PayslipEmailData } from '../../../shared/services/email.service';
+import Button from '../../../shared/components/ui/Button';
 
 const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const { user } = useAuthContext();
@@ -20,6 +23,8 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
   });
   const [creating, setCreating] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
+  const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   useEffect(() => {
     getPayrolls(companyId)
@@ -86,6 +91,45 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
     return false;
   };
 
+  // Email handling functions
+  const handleEmailSuccess = (message?: string) => {
+    setEmailSuccess(message || 'Email sent successfully!');
+    setEmailError(null);
+    setTimeout(() => setEmailSuccess(null), 5000);
+  };
+
+  const handleEmailError = (error: string) => {
+    setEmailError(error);
+    setEmailSuccess(null);
+    setTimeout(() => setEmailError(null), 8000);
+  };
+
+  const createPayslipEmailData = (payroll: any): PayslipEmailData[] => {
+    if (!payroll.details || !Array.isArray(payroll.details)) {
+      return [];
+    }
+
+    return payroll.details
+      .filter((detail: any) => detail.staffEmail) // Only include staff with email
+      .map((detail: any) => ({
+        staffId: detail.staffId,
+        staffName: detail.staffName,
+        staffEmail: detail.staffEmail,
+        payrollPeriod: payroll.period,
+        payslipData: {
+          basicSalary: detail.basicSalary || 0,
+          allowances: detail.allowances || {},
+          deductions: detail.deductions || {},
+          netSalary: detail.netSalary || 0,
+          grossSalary: detail.grossSalary || 0
+        }
+      }));
+  };
+
+  const canSendEmails = (payroll: any) => {
+    return payroll.status === 'approved' || payroll.status === 'processed';
+  };
+
   if (loading) {return <div className="payroll-loading" aria-live="polite" style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading payrolls...</div>;}
   if (error)
     {return (
@@ -118,42 +162,65 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
         }}>
           Payroll Management
         </h1>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Button
             onClick={() => setShowImportExport(true)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 6,
-              border: 'none',
-              background: 'var(--color-primary-600)',
-              color: 'var(--color-text-inverse)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px',
-              transition: 'all var(--transition-normal)'
-            }}
+            variant="primary"
+            leftIcon="📤"
           >
-            📤 Import/Export
-          </button>
-          <button
+            Import/Export
+          </Button>
+          
+          {/* Bulk Email Button for Approved Payrolls */}
+          {payrolls.filter(p => canSendEmails(p)).length > 0 && (
+            <BulkEmailSender
+              payslips={payrolls
+                .filter(p => canSendEmails(p))
+                .flatMap(p => createPayslipEmailData(p))
+                .filter(data => data.staffEmail)}
+              onSuccess={(result) => handleEmailSuccess(`Successfully sent ${result.sent} emails. ${result.failed > 0 ? `${result.failed} failed.` : ''}`)}
+              onError={handleEmailError}
+              disabled={payrolls.filter(p => canSendEmails(p)).length === 0}
+            />
+          )}
+          
+          <Button
             onClick={() => setShowPayrollForm(true)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 6,
-              border: 'none',
-              background: 'var(--color-primary-600)',
-              color: 'var(--color-text-inverse)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px',
-              transition: 'all var(--transition-normal)'
-            }}
+            variant="primary"
+            leftIcon="+"
           >
-            + Create New Payroll
-          </button>
+            Create New Payroll
+          </Button>
         </div>
       </div>
 
+
+      {/* Email Success/Error Messages */}
+      {emailSuccess && (
+        <div style={{
+          background: 'var(--color-success-bg)',
+          color: 'var(--color-success-text)',
+          padding: 'var(--spacing-md)',
+          borderRadius: 'var(--border-radius-md)',
+          border: '1px solid var(--color-success-border)',
+          marginBottom: 'var(--spacing-lg)'
+        }}>
+          ✅ {emailSuccess}
+        </div>
+      )}
+      
+      {emailError && (
+        <div style={{
+          background: 'var(--color-error-bg)',
+          color: 'var(--color-error-text)',
+          padding: 'var(--spacing-md)',
+          borderRadius: 'var(--border-radius-md)',
+          border: '1px solid var(--color-error-border)',
+          marginBottom: 'var(--spacing-lg)'
+        }}>
+          ❌ {emailError}
+        </div>
+      )}
 
       {/* Search and Filters */}
       <div style={{
@@ -318,7 +385,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     color: 'var(--color-text-primary)',
                     fontSize: '14px'
                   }}>
-                    Actions
+                    Actions & Email
                   </th>
                 </tr>
               </thead>
@@ -391,6 +458,14 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                             >
                               Edit
                             </button>
+                          )}
+                          {canSendEmails(p) && createPayslipEmailData(p).length > 0 && (
+                            <BulkEmailSender
+                              payslips={createPayslipEmailData(p)}
+                              onSuccess={(result) => handleEmailSuccess(`Sent ${result.sent} payslips for ${p.period}. ${result.failed > 0 ? `${result.failed} failed.` : ''}`)}
+                              onError={handleEmailError}
+                              disabled={createPayslipEmailData(p).length === 0}
+                            />
                           )}
                           {canDeletePayroll(p) && (
                             <button

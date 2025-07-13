@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createPayment } from '../services/payments.service';
 import { getStaff } from '../../staff/services/staff.service';
-import { PaymentType, Payment, Staff } from '../../../shared/types';
+import { PaymentType, Staff } from '../../../shared/types';
+import Button from '../../../shared/components/ui/Button';
 
 const PAYMENT_TYPES: { value: PaymentType; label: string }[] = [
   { value: 'basic_salary', label: 'Basic Salary' },
@@ -84,7 +85,7 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const handleChange = (field: string, value: string | boolean) => {
     setForm((prev: any) => ({ ...prev, [field]: value }));
     setFieldErrors(prev => {
-      const { [field]: omit, ...rest } = prev;
+      const { [field]: _removed, ...rest } = prev;
       return rest;
     });
   };
@@ -261,9 +262,9 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
         </label>
       </div>
       <div className="form-row">
-        <button type="submit" className="primary-btn" disabled={loading} aria-busy={loading}>
-          {loading ? 'Adding...' : 'Add Payment'}
-        </button>
+        <Button type="submit" disabled={loading} variant="primary" loading={loading}>
+          Add Payment
+        </Button>
       </div>
       {error && (
         <div className="form-error" role="alert">

@@ -556,6 +556,130 @@ const documentationData = [
         </ul>
       </div>
     )
+  },
+  {
+    id: 'email-communication',
+    title: 'Email Communication System',
+    content: (
+      <div>
+        <h4>Email Overview</h4>
+        <p>The email communication system provides comprehensive email functionality for payroll operations, including automated payslip distribution and report sharing.</p>
+        
+        <h4>Payslip Email Distribution</h4>
+        <p>Send payslips directly to employees via email:</p>
+        <ul>
+          <li><strong>Individual Payslips:</strong> Send payslips to specific employees from the payroll details</li>
+          <li><strong>Bulk Distribution:</strong> Email all approved payslips simultaneously with progress tracking</li>
+          <li><strong>Automated Templates:</strong> Professional email templates with company branding</li>
+          <li><strong>Delivery Confirmation:</strong> Real-time status updates and error notifications</li>
+          <li><strong>Retry Functionality:</strong> Re-send failed emails individually or in bulk</li>
+        </ul>
+        
+        <h4>Report Email Features</h4>
+        <p>Share management reports via email:</p>
+        <ul>
+          <li><strong>Deduction Reports:</strong> Email comprehensive deduction summaries to administrators</li>
+          <li><strong>Payment Reports:</strong> Share payment analysis and breakdowns</li>
+          <li><strong>Custom Recipients:</strong> Configure recipient lists for different report types</li>
+          <li><strong>Report Summaries:</strong> Automatic generation of report metadata and totals</li>
+        </ul>
+        
+        <h4>Email Templates</h4>
+        <p>The system includes professional email templates for:</p>
+        <ul>
+          <li>Individual payslip notifications</li>
+          <li>Deduction report communications</li>
+          <li>Payment report summaries</li>
+          <li>General payroll notifications</li>
+          <li>System alerts and confirmations</li>
+        </ul>
+        
+        <h4>Email Management</h4>
+        <p>Comprehensive email tracking and management:</p>
+        <ul>
+          <li><strong>Delivery Status:</strong> Track sent, failed, and bounced emails</li>
+          <li><strong>Error Handling:</strong> Detailed error messages for troubleshooting</li>
+          <li><strong>Batch Processing:</strong> Efficient handling of large email volumes</li>
+          <li><strong>Success Notifications:</strong> Clear feedback on email operations</li>
+          <li><strong>Email History:</strong> Complete audit trail of all email communications</li>
+        </ul>
+        
+        <h4>Using Email Features</h4>
+        <ol>
+          <li><strong>Payslip Emails:</strong> Navigate to Payroll → Select approved payroll → Use email buttons for individual or bulk sending</li>
+          <li><strong>Report Emails:</strong> Go to Deductions or Payments → Click "📧 Email Report" → Confirm recipient details</li>
+          <li><strong>Bulk Operations:</strong> Use the "📧 Email All Payslips" button to send to all employees at once</li>
+          <li><strong>Error Resolution:</strong> Check error messages and retry failed emails as needed</li>
+          <li><strong>Status Monitoring:</strong> Watch for success/error notifications in the interface</li>
+        </ol>
+        
+        <h4>Best Practices</h4>
+        <ul>
+          <li>Verify employee email addresses before sending payslips</li>
+          <li>Use bulk email for efficiency when sending to multiple recipients</li>
+          <li>Monitor delivery status and retry failed emails promptly</li>
+          <li>Keep email templates professional and informative</li>
+          <li>Maintain email audit trails for compliance purposes</li>
+        </ul>
+      </div>
+    )
+  },
+  {
+    id: 'profile-management',
+    title: 'Profile Picture Management',
+    content: (
+      <div>
+        <h4>Profile Picture Overview</h4>
+        <p>The system includes an advanced profile picture management system with interactive cropping and optimization features.</p>
+        
+        <h4>Upload Features</h4>
+        <ul>
+          <li><strong>Interactive Cropping:</strong> Drag-and-resize cropping interface with real-time preview</li>
+          <li><strong>Format Support:</strong> JPG, PNG, GIF, and other common image formats</li>
+          <li><strong>File Validation:</strong> Automatic size limits (up to 10MB) and format checking</li>
+          <li><strong>Lazy Loading:</strong> Optimized loading for improved performance</li>
+          <li><strong>Responsive Design:</strong> Works seamlessly on desktop and mobile devices</li>
+        </ul>
+        
+        <h4>Cropping Interface</h4>
+        <p>The interactive cropping tool provides:</p>
+        <ul>
+          <li>Drag-to-position crop area selection</li>
+          <li>Resize handles for precise crop sizing</li>
+          <li>Real-time preview of final cropped image</li>
+          <li>Aspect ratio controls for consistent sizing</li>
+          <li>Cancel and retry options for easy adjustments</li>
+        </ul>
+        
+        <h4>Performance Optimization</h4>
+        <ul>
+          <li><strong>Lazy Loading:</strong> Images load only when needed</li>
+          <li><strong>Automatic Compression:</strong> Images are optimized for web delivery</li>
+          <li><strong>Error Handling:</strong> Graceful fallbacks for loading failures</li>
+          <li><strong>Progress Indicators:</strong> Clear upload and processing status</li>
+          <li><strong>Caching:</strong> Efficient image caching for repeat views</li>
+        </ul>
+        
+        <h4>Using Profile Pictures</h4>
+        <ol>
+          <li>Navigate to your user profile or staff management section</li>
+          <li>Click on the profile picture area or camera icon</li>
+          <li>Select an image file from your device</li>
+          <li>Use the cropping interface to adjust the image</li>
+          <li>Click "Apply Crop" to save the changes</li>
+          <li>The new profile picture will be immediately visible</li>
+        </ol>
+        
+        <h4>Technical Specifications</h4>
+        <ul>
+          <li><strong>Maximum File Size:</strong> 10MB per image</li>
+          <li><strong>Supported Formats:</strong> JPG, JPEG, PNG, GIF, WebP</li>
+          <li><strong>Output Format:</strong> Optimized JPEG for web delivery</li>
+          <li><strong>Crop Resolution:</strong> 200x200 pixels (square format)</li>
+          <li><strong>Quality:</strong> 90% JPEG compression for optimal balance</li>
+        </ul>
+      </div>
+    )
   }
 ];
 

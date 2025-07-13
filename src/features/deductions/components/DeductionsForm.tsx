@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createDeduction } from '../services/deductions.service';
 import { getStaff } from '../../staff/services/staff.service';
 import { DeductionType, Deduction, Staff } from '../../../shared/types';
+import Button from '../../../shared/components/ui/Button';
 
 const DEDUCTION_TYPES: { value: DeductionType; label: string }[] = [
   { value: 'advance', label: 'Advance' },
@@ -93,7 +94,7 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     setFieldErrors(prev => {
-      const { [field]: _, ...rest } = prev;
+      const { [field]: _removed, ...rest } = prev;
       return rest;
     });
     
@@ -277,9 +278,9 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
         </label>
       </div>
       <div className="form-row">
-        <button type="submit" className="primary-btn" disabled={loading} aria-busy={loading}>
-          {loading ? 'Adding...' : 'Add Deduction'}
-        </button>
+        <Button type="submit" disabled={loading} variant="primary" loading={loading}>
+          Add Deduction
+        </Button>
       </div>
       {error && (
         <div className="form-error" role="alert">

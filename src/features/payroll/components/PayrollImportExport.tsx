@@ -106,7 +106,7 @@ const PayrollImportExport: React.FC<{
               totalNetPay: parseFloat(row.totalNetPay),
               totalEmployeeTax: row.totalEmployeeTax ? parseFloat(row.totalEmployeeTax) : 0,
               totalEmployerContributions: row.totalEmployerContributions ? parseFloat(row.totalEmployerContributions) : 0,
-              staffCount: parseInt(row.staffCount),
+              staffCount: parseInt(row.staffCount, 10),
               createdBy: row.createdBy,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
