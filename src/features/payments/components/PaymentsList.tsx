@@ -16,6 +16,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [filterStatus, setFilterStatus] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showImportExport, setShowImportExport] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -118,79 +119,19 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
         </h1>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
-            onClick={() => {
-              const input = document.createElement('input');
-              input.type = 'file';
-              input.accept = '.csv';
-              input.onchange = (e) => {
-                const file = (e.target as HTMLInputElement).files?.[0];
-                if (file) {
-                  console.log('Import CSV:', file);
-                }
-              };
-              input.click();
-            }}
+            onClick={() => setShowImportExport(true)}
             style={{
               padding: '10px 16px',
               borderRadius: 6,
-              border: '1px solid var(--color-success-500)',
-              background: 'var(--color-bg-primary)',
-              color: 'var(--color-success-500)',
+              border: '1px solid var(--color-success-border)',
+              background: 'var(--color-card-bg)',
+              color: 'var(--color-success-text)',
               cursor: 'pointer',
               fontWeight: 500,
               fontSize: '14px'
             }}
           >
-            📤 Import CSV
-          </button>
-          <button
-            onClick={() => {
-              const csvContent = 'type,amount,staffId,description\n' + 
-                payments.map(p => `${p.type},${p.amount},${p.staffId},${p.description || ''}`).join('\n');
-              const blob = new Blob([csvContent], { type: 'text/csv' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'payments_export.csv';
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 6,
-              border: '1px solid var(--color-info-500)',
-              background: 'var(--color-bg-primary)',
-              color: 'var(--color-info-500)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px'
-            }}
-          >
-            📥 Export CSV
-          </button>
-          <button
-            onClick={() => {
-              const template = 'type,amount,staffId,description,isGross,isRecurring,effectiveDate\nsalary,500000,STAFF_ID,Monthly salary,true,true,2023-01-01';
-              const blob = new Blob([template], { type: 'text/csv' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'payments_import_template.csv';
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 6,
-              border: '1px solid var(--color-gray-500)',
-              background: 'var(--color-bg-primary)',
-              color: 'var(--color-gray-500)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px'
-            }}
-          >
-            📋 Template
+            📤 Import/Export
           </button>
           <button
             onClick={() => setShowForm(true)}
@@ -579,6 +520,48 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               companyId={companyId} 
               onAdded={() => {
                 setShowForm(false);
+                setRefresh(r => r + 1);
+              }} 
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Import/Export Modal */}
+      {showImportExport && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'var(--color-bg-primary)',
+            borderRadius: '8px',
+            padding: '24px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowImportExport(false)}
+              className="modal-close-btn"
+            >
+              ×
+            </button>
+            <PaymentsImportExport 
+              companyId={companyId} 
+              payments={payments}
+              onImported={() => {
+                setShowImportExport(false);
                 setRefresh(r => r + 1);
               }} 
             />

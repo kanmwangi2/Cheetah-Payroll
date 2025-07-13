@@ -4,7 +4,6 @@
  */
 
 import {
-  getFirestore,
   collection,
   doc,
   getDocs,
@@ -13,10 +12,9 @@ import {
   deleteDoc,
   getDoc,
 } from 'firebase/firestore';
+import { db } from '../../../core/config/firebase.config';
 import { withErrorHandling, createServiceFunction, validators, ServiceResult } from '../../../shared/utils/service-wrapper';
 import { logger } from '../../../shared/utils/logger';
-
-const db = getFirestore();
 
 // Types
 export interface Staff {

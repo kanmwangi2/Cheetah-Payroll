@@ -93,7 +93,7 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
         case 'pension': {
           const { data, totalEmployee, totalEmployer, grandTotal } = await generatePensionReport(companyId, selectedPeriod);
           if (format === 'pdf') {
-            blob = pdfGenerator.generatePensionReport(data, totalEmployee, totalEmployer, grandTotal, selectedPeriod);
+            blob = await pdfGenerator.generatePensionReport(data, totalEmployee, totalEmployer, grandTotal, selectedPeriod);
             filename = `Pension_Report_${selectedPeriod}.pdf`;
           } else {
             const csv = Papa.unparse(data);
@@ -153,7 +153,7 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
       
       if (type === 'individual' && staffPayrolls.length > 0) {
         // Generate for first employee as example - in real app, user would select specific employee
-        const blob = pdfGenerator.generatePayslip(staffPayrolls[0], company, period);
+        const blob = await pdfGenerator.generatePayslip(staffPayrolls[0], company, period);
         PDFReportGenerator.downloadBlob(blob, `Payslip_${staffPayrolls[0].staffName}_${period}.pdf`);
       } else if (type === 'bulk') {
         const blob = pdfGenerator.generateBulkPayslips(staffPayrolls, company, period);

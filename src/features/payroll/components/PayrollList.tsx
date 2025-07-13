@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getPayrolls, createComprehensivePayroll, deletePayroll } from '../services/payroll.service';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
+import PayrollImportExport from './PayrollImportExport';
 
 const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const { user } = useAuthContext();
@@ -17,6 +18,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
     return `${year}-${month}`;
   });
   const [creating, setCreating] = useState(false);
+  const [showImportExport, setShowImportExport] = useState(false);
 
   useEffect(() => {
     getPayrolls(companyId)
@@ -117,6 +119,21 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
           Payroll Management
         </h1>
         <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={() => setShowImportExport(true)}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 6,
+              border: '1px solid var(--color-success-border)',
+              background: 'var(--color-card-bg)',
+              color: 'var(--color-success-text)',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontSize: '14px'
+            }}
+          >
+            📤 Import/Export
+          </button>
           <button
             onClick={() => setShowPayrollForm(true)}
             style={{
@@ -586,6 +603,48 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import/Export Modal */}
+      {showImportExport && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'var(--color-bg-primary)',
+            borderRadius: '8px',
+            padding: '24px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowImportExport(false)}
+              className="modal-close-btn"
+            >
+              ×
+            </button>
+            <PayrollImportExport 
+              companyId={companyId} 
+              payrolls={payrolls}
+              onImported={() => {
+                setShowImportExport(false);
+                setRefresh(r => r + 1);
+              }} 
+            />
           </div>
         </div>
       )}

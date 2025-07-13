@@ -136,10 +136,12 @@ const documentationData = [
         <h4>Bulk Import</h4>
         <p>For adding multiple employees:</p>
         <ol>
-          <li>Download the CSV template from Import/Export section</li>
+          <li>Click the "Import/Export" button to open the unified modal</li>
+          <li>Download the CSV template with complete field specifications</li>
           <li>Fill in employee data following the template format</li>
-          <li>Upload the completed file</li>
-          <li>Review and confirm the import</li>
+          <li>Upload the completed file and monitor real-time progress</li>
+          <li>Review detailed validation results and error messages</li>
+          <li>Check import history for audit trail</li>
         </ol>
         
         <h4>Employee Status Management</h4>
@@ -160,56 +162,72 @@ const documentationData = [
         <h4>Payroll Calculation Process</h4>
         <p>The payroll system automatically calculates all required deductions and taxes based on Rwanda's current regulations:</p>
         
+        <h4>Dynamic Tax Configuration</h4>
+        <p>All tax calculations use configurable rates that administrators can modify in real-time through the Admin panel:</p>
+        
         <h4>Tax Calculations</h4>
         <p><strong>PAYE (Pay As You Earn):</strong></p>
         <ul>
-          <li>Calculated using Rwanda's progressive tax brackets</li>
-          <li>Current brackets: 0% (0-60,000), 10% (60,001-100,000), 20% (100,001-200,000), 30% (200,001+)</li>
+          <li>Calculated using configurable progressive tax brackets</li>
+          <li>Default brackets: 0% (0-60,000), 10% (60,001-100,000), 20% (100,001-200,000), 30% (200,001+)</li>
+          <li>Administrators can add, remove, or modify brackets as needed</li>
           <li>Applied to taxable income after pension deductions</li>
         </ul>
         
         <h4>Social Security Contributions</h4>
         <p><strong>Pension (RSSB):</strong></p>
         <ul>
-          <li>Employee contribution: 6% of gross salary</li>
-          <li>Employer contribution: 8% of gross salary</li>
+          <li>Employee contribution: Configurable rate (default: 6% of gross salary)</li>
+          <li>Employer contribution: Configurable rate (default: 8% of gross salary)</li>
           <li>Deducted from taxable income</li>
         </ul>
         
         <p><strong>Maternity Leave Insurance:</strong></p>
         <ul>
-          <li>Employee contribution: 0.3% of gross salary</li>
-          <li>Employer contribution: 0.3% of gross salary</li>
+          <li>Employee contribution: Configurable rate (default: 0.3% of gross salary)</li>
+          <li>Employer contribution: Configurable rate (default: 0.3% of gross salary)</li>
         </ul>
         
         <p><strong>CBHI (Community Based Health Insurance):</strong></p>
         <ul>
-          <li>Employee contribution: 0.5% of gross salary</li>
-          <li>No employer contribution required</li>
+          <li>Employee contribution: Configurable rate (default: 0.5% of net salary before CBHI)</li>
+          <li>Employer contribution: Configurable rate (default: 0%)</li>
         </ul>
         
         <p><strong>RAMA (Rwanda Medical Association):</strong></p>
         <ul>
-          <li>Employee contribution: 7.5% of gross salary</li>
-          <li>Employer contribution: 7.5% of gross salary</li>
-          <li>Only for medical professionals</li>
+          <li>Employee contribution: Configurable rate (default: 7.5% of basic pay only)</li>
+          <li>Employer contribution: Configurable rate (default: 7.5% of basic pay only)</li>
+          <li>Calculated on basic pay only (excludes allowances)</li>
+        </ul>
+        
+        <p><strong>Administrative Control:</strong></p>
+        <ul>
+          <li>All tax rates and brackets are configurable via Admin → Tax Configuration</li>
+          <li>Changes take effect immediately for all new payroll calculations</li>
+          <li>Configuration is stored securely in the database</li>
+          <li>Fallback to default values ensures system reliability</li>
         </ul>
         
         <h4>Running Payroll</h4>
         <ol>
           <li>Go to the Payroll section</li>
-          <li>Click "Create Payroll"</li>
-          <li>Enter payroll details:
-            <ul>
-              <li>Gross pay amount</li>
-              <li>Basic pay (for tax calculations)</li>
-              <li>Transport allowance (if applicable)</li>
-              <li>Other deductions</li>
-            </ul>
-          </li>
-          <li>Click "Calculate" to see tax breakdown</li>
-          <li>Review calculations and click "Save Payroll"</li>
+          <li>Click "Create New Payroll"</li>
+          <li>Select payroll period using the date picker</li>
+          <li>System automatically includes all active staff with their payments and deductions</li>
+          <li>Review calculated tax breakdowns for each employee</li>
+          <li>Submit for approval (if workflow enabled) or save directly</li>
         </ol>
+        
+        <h4>Payroll Import/Export</h4>
+        <p>Use the unified Import/Export modal for payroll data management:</p>
+        <ul>
+          <li>Access through single "Import/Export" button</li>
+          <li>Download CSV template for payroll metadata</li>
+          <li>Real-time validation and progress tracking</li>
+          <li>Complete import history and error reporting</li>
+          <li>Export payroll summaries and detailed breakdowns</li>
+        </ul>
         
         <h4>Payroll Approval Workflow</h4>
         <p>If approval workflow is enabled:</p>
@@ -266,13 +284,14 @@ const documentationData = [
         </ul>
         
         <h4>Payment Import/Export</h4>
-        <p>Bulk payment operations:</p>
+        <p>Use the unified Import/Export modal for bulk operations:</p>
         <ul>
-          <li>Download CSV template with required columns</li>
-          <li>Fill in payment data for multiple employees</li>
-          <li>Upload and validate the data</li>
-          <li>Review and confirm bulk import</li>
-          <li>Export payment reports for accounting</li>
+          <li>Access through single "Import/Export" button</li>
+          <li>Download CSV template with complete field specifications</li>
+          <li>Real-time progress tracking during upload</li>
+          <li>Detailed validation with line-by-line error reporting</li>
+          <li>Complete import history and audit trail</li>
+          <li>Export payment reports in multiple formats</li>
         </ul>
         
         <h4>Tax Implications</h4>
@@ -347,6 +366,17 @@ const documentationData = [
           <li>Enter the payment amount</li>
           <li>System updates remaining balance automatically</li>
         </ol>
+        
+        <h4>Bulk Deduction Operations</h4>
+        <p>Use the unified Import/Export modal for efficient bulk operations:</p>
+        <ul>
+          <li>Access through single "Import/Export" button</li>
+          <li>Download CSV template with all required fields</li>
+          <li>Real-time progress tracking and validation</li>
+          <li>Row-by-row error reporting with specific guidance</li>
+          <li>Complete import history tracking</li>
+          <li>Export deduction data for external analysis</li>
+        </ul>
         
         <h4>Deduction Reports</h4>
         <ul>
@@ -578,9 +608,9 @@ const Documentation: React.FC = () => {
   };
   
   const extractTextFromReactElement = (element: React.ReactNode): string => {
-    if (typeof element === 'string') return element;
-    if (typeof element === 'number') return element.toString();
-    if (!element) return '';
+    if (typeof element === 'string') {return element;}
+    if (typeof element === 'number') {return element.toString();}
+    if (!element) {return '';}
     
     if (React.isValidElement(element)) {
       const props = element.props as any;

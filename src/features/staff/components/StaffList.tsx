@@ -602,7 +602,8 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
             </button>
             <StaffImportExport 
               companyId={companyId} 
-              onImportComplete={() => {
+              staff={staff}
+              onImported={() => {
                 setShowImportExport(false);
                 loadStaff();
               }} 

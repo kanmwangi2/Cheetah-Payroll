@@ -49,11 +49,16 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   useEffect(() => {
     const loadThemeCSS = async () => {
       try {
-        // Import the theme CSS file
-        await import('../../assets/styles/themes.css');
-        logger.debug('Theme CSS loaded successfully');
+        // Only import CSS in browser environment, not during tests
+        if (typeof window !== 'undefined' && !process.env.NODE_ENV?.includes('test')) {
+          await import('../../assets/styles/themes.css');
+          logger.debug('Theme CSS loaded successfully');
+        }
       } catch (error) {
-        logger.error('Failed to load theme CSS', error as Error);
+        // Don't log CSS import errors in test environment
+        if (!process.env.NODE_ENV?.includes('test')) {
+          logger.error('Failed to load theme CSS', error as Error);
+        }
       }
     };
 

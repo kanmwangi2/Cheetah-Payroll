@@ -93,7 +93,7 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     setFieldErrors(prev => {
-      const { [field]: omit, ...rest } = prev;
+      const { [field]: _, ...rest } = prev;
       return rest;
     });
     

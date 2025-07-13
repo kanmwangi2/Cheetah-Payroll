@@ -1,6 +1,5 @@
 // Deductions management logic (CRUD, import/export)
 import {
-  getFirestore,
   collection,
   doc,
   getDocs,
@@ -13,9 +12,8 @@ import {
   orderBy,
   writeBatch,
 } from 'firebase/firestore';
+import { db } from '../../../core/config/firebase.config';
 import { Deduction, DeductionType } from '../../../shared/types';
-
-const db = getFirestore();
 
 // Deduction type labels
 export const DEDUCTION_TYPE_LABELS: Record<DeductionType, string> = {

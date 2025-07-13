@@ -30,25 +30,25 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children, fallback }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#f9fafb',
-          padding: '20px',
+          backgroundColor: 'var(--color-bg-secondary)',
+          padding: 'var(--spacing-lg)',
         }}
       >
         <div
           style={{
             maxWidth: '500px',
-            padding: '40px',
+            padding: 'var(--spacing-2xl)',
             textAlign: 'center',
-            backgroundColor: '#ffffff',
-            border: '1px solid #e5e7eb',
-            borderRadius: '12px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+            backgroundColor: 'var(--color-bg-primary)',
+            border: '1px solid var(--color-border-primary)',
+            borderRadius: 'var(--border-radius-xl)',
+            boxShadow: 'var(--shadow-lg)',
           }}
         >
-          <h2 style={{ color: '#1f2937', marginBottom: '16px' }}>
+          <h2 style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-md)' }}>
             {isConfigError ? 'Firebase Configuration Required' : 'Authentication Error'}
           </h2>
-          <p style={{ color: '#6b7280', marginBottom: '24px', lineHeight: '1.5' }}>
+          <p style={{ color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-xl)', lineHeight: '1.5' }}>
             {isConfigError 
               ? 'To use Cheetah Payroll, please configure your Firebase project. Copy .env.example to .env and add your Firebase configuration.'
               : error

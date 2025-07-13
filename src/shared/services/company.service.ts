@@ -9,12 +9,11 @@ import {
   updateDoc,
   deleteDoc,
   getDoc,
-  setDoc,
   query,
   where,
 } from 'firebase/firestore';
 import { db } from '../../core/config/firebase.config';
-import { Company, User } from '../types';
+// Note: Company and User types are used in JSDoc comments
 
 export async function getCompaniesForUser(userId: string) {
   const q = query(collection(db, 'companies'), where('userIds', 'array-contains', userId));

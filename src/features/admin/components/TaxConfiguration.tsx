@@ -13,7 +13,7 @@ interface TaxRates {
   employer: number;
 }
 
-interface TaxConfiguration {
+interface TaxConfigurationData {
   paye_brackets: TaxBracket[];
   pension_rates: TaxRates;
   maternity_rates: TaxRates;
@@ -23,7 +23,7 @@ interface TaxConfiguration {
 }
 
 const TaxConfiguration: React.FC = () => {
-  const [config, setConfig] = useState<TaxConfiguration>({
+  const [config, setConfig] = useState<TaxConfigurationData>({
     paye_brackets: [
       { min: 0, max: 60000, rate: 0 },
       { min: 60001, max: 100000, rate: 10 },
@@ -51,7 +51,7 @@ const TaxConfiguration: React.FC = () => {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        const data = docSnap.data() as TaxConfiguration;
+        const data = docSnap.data() as TaxConfigurationData;
         setConfig(data);
       } else {
         // Initialize with default configuration if document doesn't exist
@@ -126,7 +126,7 @@ const TaxConfiguration: React.FC = () => {
     setConfig({ ...config, paye_brackets: newBrackets });
   };
 
-  const updateTaxRate = (type: keyof Omit<TaxConfiguration, 'paye_brackets' | 'updatedAt'>, field: keyof TaxRates, value: number) => {
+  const updateTaxRate = (type: keyof Omit<TaxConfigurationData, 'paye_brackets' | 'updatedAt'>, field: keyof TaxRates, value: number) => {
     setConfig({
       ...config,
       [type]: { ...config[type], [field]: value }

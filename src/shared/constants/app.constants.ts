@@ -99,20 +99,8 @@ export const APP_CONSTANTS = {
     DECIMAL_PLACES: 2,
   },
 
-  // Tax rates (Rwanda specific)
-  TAX_RATES: {
-    PAYE: {
-      BRACKETS: [
-        { min: 0, max: 360000, rate: 0 },
-        { min: 360001, max: 1200000, rate: 0.2 },
-        { min: 1200001, max: Infinity, rate: 0.3 },
-      ],
-    },
-    PENSION: 0.03, // 3%
-    MATERNITY: 0.003, // 0.3%
-    CBHI: 0.01, // 1%
-    RAMA: 0.01, // 1%
-  },
+  // Note: Tax rates are now managed dynamically via tax configuration service
+  // See src/shared/services/tax-config.service.ts for current tax settings
 
   // Local storage keys
   STORAGE_KEYS: {

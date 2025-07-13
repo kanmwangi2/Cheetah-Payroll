@@ -29,7 +29,7 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [globalLogoUrl, setGlobalLogoUrl] = useState<string>('');
 
-  const { isDark, resolvedTheme } = useThemeContext();
+  const { } = useThemeContext(); // Theme context used by parent components
 
   // Load global logo settings
   useEffect(() => {

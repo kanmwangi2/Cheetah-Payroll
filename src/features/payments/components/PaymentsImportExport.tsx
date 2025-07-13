@@ -119,6 +119,7 @@ const PaymentsImportExport: React.FC<{
           try {
             // Transform row data to match Payment interface
             const paymentData = {
+              companyId,
               type: row.type,
               amount: parseFloat(row.amount),
               staffId: row.staff_id,
@@ -127,7 +128,9 @@ const PaymentsImportExport: React.FC<{
               effectiveDate: row.effective_date,
               endDate: row.end_date && row.end_date.trim() ? row.end_date : undefined,
               description: row.description && row.description.trim() ? row.description : undefined,
-              status: row.status || 'active'
+              status: row.status || 'active',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
             };
             await createPayment(companyId, paymentData);
             success++;

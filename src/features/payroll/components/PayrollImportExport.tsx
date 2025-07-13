@@ -3,12 +3,12 @@ import Papa from 'papaparse';
 import { createPayroll } from '../services/payroll.service';
 
 const payrollTemplate = [
-  'gross,basic,transport,otherDeductions',
-  '500000,300000,50000,20000',
-  '400000,250000,40000,10000',
+  'period,status,totalGrossPay,totalNetPay,totalEmployeeTax,staffCount,createdBy',
+  '2023-01,draft,5000000,4000000,500000,10,admin@company.com',
+  '2023-02,approved,5200000,4100000,520000,10,admin@company.com',
 ].join('\n');
 
-const REQUIRED_FIELDS = ['gross', 'basic', 'transport', 'otherDeductions'];
+const REQUIRED_FIELDS = ['period', 'status', 'totalGrossPay', 'totalNetPay', 'staffCount', 'createdBy'];
 
 interface ImportHistoryEntry {
   date: string;
@@ -36,31 +36,34 @@ const PayrollImportExport: React.FC<{
   const [showHistory, setShowHistory] = useState(false);
   const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>([]);
 
-  function validateRow(row: any, idx: number, grossSet: Set<string>): string | null {
+  function validateRow(row: any, idx: number, periodSet: Set<string>): string | null {
     for (const field of REQUIRED_FIELDS) {
       if (!row[field] || String(row[field]).trim() === '') {
         return `Missing required field "${field}"`;
       }
     }
+    // Status validation
+    if (!['draft', 'pending_approval', 'approved', 'processed'].includes(row.status)) {
+      return `Invalid status (must be: draft, pending_approval, approved, or processed)`;
+    }
     // Numeric checks
-    if (isNaN(Number(row.gross)) || Number(row.gross) <= 0) {
-      return `Invalid gross (must be positive number)`;
+    if (isNaN(Number(row.totalGrossPay)) || Number(row.totalGrossPay) <= 0) {
+      return `Invalid totalGrossPay (must be positive number)`;
     }
-    if (isNaN(Number(row.basic)) || Number(row.basic) < 0) {
-      return `Invalid basic (must be non-negative number)`;
+    if (isNaN(Number(row.totalNetPay)) || Number(row.totalNetPay) < 0) {
+      return `Invalid totalNetPay (must be non-negative number)`;
     }
-    if (isNaN(Number(row.transport)) || Number(row.transport) < 0) {
-      return `Invalid transport (must be non-negative number)`;
+    if (row.totalEmployeeTax && (isNaN(Number(row.totalEmployeeTax)) || Number(row.totalEmployeeTax) < 0)) {
+      return `Invalid totalEmployeeTax (must be non-negative number)`;
     }
-    if (isNaN(Number(row.otherDeductions)) || Number(row.otherDeductions) < 0) {
-      return `Invalid otherDeductions (must be non-negative number)`;
+    if (isNaN(Number(row.staffCount)) || Number(row.staffCount) <= 0) {
+      return `Invalid staffCount (must be positive number)`;
     }
-    // Duplicate gross+basic+transport+otherDeductions in file
-    const key = `${row.gross}-${row.basic}-${row.transport}-${row.otherDeductions}`;
-    if (grossSet.has(key)) {
-      return `Duplicate payroll row in file`;
+    // Duplicate period in file
+    if (periodSet.has(row.period)) {
+      return `Duplicate period ${row.period} in file`;
     }
-    grossSet.add(key);
+    periodSet.add(row.period);
     return null;
   }
 
@@ -78,13 +81,13 @@ const PayrollImportExport: React.FC<{
       skipEmptyLines: true,
       complete: async results => {
         const rows = results.data as any[];
-        const grossSet = new Set<string>();
+        const periodSet = new Set<string>();
         const errors: { row: number; error: string }[] = [];
         setImportProgress({ processed: 0, total: rows.length });
         let success = 0;
         for (let i = 0; i < rows.length; i++) {
           const row = rows[i];
-          const validationError = validateRow(row, i, grossSet);
+          const validationError = validateRow(row, i, periodSet);
           if (validationError) {
             errors.push({ row: i + 2, error: validationError });
             setRowErrors([...errors]);
@@ -92,7 +95,21 @@ const PayrollImportExport: React.FC<{
             continue;
           }
           try {
-            await createPayroll(companyId, row);
+            // Transform row data to match Payroll interface
+            const payrollData = {
+              companyId,
+              period: row.period,
+              status: row.status as 'draft' | 'pending_approval' | 'approved' | 'processed',
+              totalGrossPay: parseFloat(row.totalGrossPay),
+              totalNetPay: parseFloat(row.totalNetPay),
+              totalEmployeeTax: row.totalEmployeeTax ? parseFloat(row.totalEmployeeTax) : 0,
+              totalEmployerContributions: row.totalEmployerContributions ? parseFloat(row.totalEmployerContributions) : 0,
+              staffCount: parseInt(row.staffCount),
+              createdBy: row.createdBy,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            await createPayroll(companyId, payrollData);
             success++;
           } catch (err: any) {
             errors.push({ row: i + 2, error: err.message || 'Import failed' });

@@ -157,38 +157,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, company, onSwitchComp
 
           {/* Right Side - Utilities, Theme Toggle and User Menu */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {/* Utilities Quick Access */}
-            <button
-              onClick={() => navigate('/utilities')}
-              title="Utilities"
-              style={{
-                padding: '8px 12px',
-                borderRadius: '6px',
-                border: '1px solid var(--color-border-primary)',
-                background: isActive('/utilities') ? 'var(--color-primary-100)' : 'var(--color-bg-secondary)',
-                color: isActive('/utilities') ? 'var(--color-primary-600)' : 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive('/utilities')) {
-                  (e.target as HTMLButtonElement).style.background = 'var(--color-table-row-hover)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive('/utilities')) {
-                  (e.target as HTMLButtonElement).style.background = 'var(--color-bg-secondary)';
-                }
-              }}
-            >
-              <span style={{ fontSize: '16px' }}>🔧</span>
-              <span>Utilities</span>
-            </button>
 
             <ThemeSwitcher variant="toggle" size="sm" showLabels={false} />
             

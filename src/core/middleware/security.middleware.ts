@@ -10,6 +10,7 @@ import {
   defaultRateLimiter,
 } from '../../shared/utils/security';
 import { logger } from '../../shared/utils/logger';
+import { APP_CONSTANTS } from '../../shared/constants/app.constants';
 
 interface SecurityOptions {
   enableRateLimiting?: boolean;
@@ -139,10 +140,10 @@ export const getCSPHeaders = () => {
 export const validateFileUpload = (file: File): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 
-  // Size limits (10MB max)
-  const maxSize = 10 * 1024 * 1024;
+  // Size limits
+  const maxSize = APP_CONSTANTS.FILE_UPLOAD.MAX_SIZE;
   if (file.size > maxSize) {
-    errors.push('File size exceeds maximum limit of 10MB');
+    errors.push(APP_CONSTANTS.ERROR_MESSAGES.FILE_SIZE);
   }
 
   // Allowed file types

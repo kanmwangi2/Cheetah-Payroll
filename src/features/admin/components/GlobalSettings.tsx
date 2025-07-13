@@ -3,7 +3,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '../../../core/config/firebase.config';
 
-interface GlobalSettings {
+interface GlobalSettingsData {
   application: {
     name: string;
     version: string;
@@ -46,7 +46,7 @@ interface GlobalSettings {
 }
 
 const GlobalSettings: React.FC = () => {
-  const [settings, setSettings] = useState<GlobalSettings>({
+  const [settings, setSettings] = useState<GlobalSettingsData>({
     application: {
       name: 'Cheetah Payroll',
       version: '1.0.0',
@@ -102,7 +102,7 @@ const GlobalSettings: React.FC = () => {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        const data = docSnap.data() as GlobalSettings;
+        const data = docSnap.data() as GlobalSettingsData;
         setSettings(data);
       } else {
         // Initialize with default configuration if document doesn't exist
@@ -140,7 +140,7 @@ const GlobalSettings: React.FC = () => {
     }
   };
 
-  const updateSetting = (section: keyof Omit<GlobalSettings, 'updatedAt'>, field: string, value: unknown) => {
+  const updateSetting = (section: keyof Omit<GlobalSettingsData, 'updatedAt'>, field: string, value: unknown) => {
     setSettings({
       ...settings,
       [section]: { ...settings[section], [field]: value }

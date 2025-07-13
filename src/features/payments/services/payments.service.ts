@@ -1,6 +1,5 @@
 // Payments management logic (CRUD, import/export)
 import {
-  getFirestore,
   collection,
   doc,
   getDocs,
@@ -13,9 +12,8 @@ import {
   orderBy,
   writeBatch,
 } from 'firebase/firestore';
+import { db } from '../../../core/config/firebase.config';
 import { Payment, PaymentType } from '../../../shared/types';
-
-const db = getFirestore();
 
 // Export utility functions
 export const PAYMENT_TYPE_LABELS: Record<PaymentType, string> = {
@@ -116,7 +114,7 @@ export async function getPayment(companyId: string, paymentId: string): Promise<
 
 // Bulk operations
 export async function bulkCreatePayments(companyId: string, payments: Omit<Payment, 'id'>[]): Promise<void> {
-  const batch = writeBatch(getFirestore());
+  const batch = writeBatch(db);
   
   payments.forEach(payment => {
     const docRef = doc(collection(db, 'companies', companyId, 'payments'));
@@ -133,7 +131,7 @@ export async function bulkCreatePayments(companyId: string, payments: Omit<Payme
 }
 
 export async function bulkUpdatePaymentStatus(companyId: string, paymentIds: string[], status: 'active' | 'inactive'): Promise<void> {
-  const batch = writeBatch(getFirestore());
+  const batch = writeBatch(db);
   
   paymentIds.forEach(paymentId => {
     const docRef = doc(db, 'companies', companyId, 'payments', paymentId);

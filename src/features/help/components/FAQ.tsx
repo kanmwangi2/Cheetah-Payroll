@@ -44,7 +44,7 @@ const faqData = [
         <p>Navigate to the Staff section and click "Add Staff". Fill in the required information including personal details, employment information (including staff number and department), and bank details. You can also specify an optional end date for employment tracking.</p>
         
         <h4>Can I import employee data from CSV/Excel?</h4>
-        <p>Yes! Use the Import/Export feature in the Staff section to upload employee data via CSV files. The system supports both DD/MM/YYYY and YYYY-MM-DD date formats. Download the template to see all available fields including staff numbers, departments, and employment dates.</p>
+        <p>Yes! Use the unified Import/Export modal in the Staff section. The system provides real-time progress tracking, row-by-row validation with detailed error messages, and complete import history. Download the CSV template to see all available fields including staff numbers, departments, and employment dates.</p>
         
         <h4>How do I update employee information?</h4>
         <p>Click on any employee in the Staff list to view and edit their details. The staff form now includes staff numbers for unique identification and department dropdowns populated from your company's existing departments. Changes are automatically saved and reflected in future payroll calculations.</p>
@@ -71,14 +71,15 @@ const faqData = [
         </ul>
         
         <h4>How are Rwanda taxes calculated?</h4>
-        <p>The system automatically calculates:</p>
+        <p>The system automatically calculates taxes using configurable rates set by administrators:</p>
         <ul>
-          <li>PAYE (Pay As You Earn) tax using current Rwanda tax brackets</li>
-          <li>Pension contributions (6% employee, 8% employer)</li>
-          <li>Maternity leave insurance (0.3% each for employee and employer)</li>
-          <li>CBHI (Community Based Health Insurance) - 0.5% employee contribution</li>
-          <li>RAMA (Rwanda Medical Association) - 7.5% each for employee and employer</li>
+          <li>PAYE (Pay As You Earn) tax using progressive brackets configured in Admin settings</li>
+          <li>Pension contributions using rates set in tax configuration (default: 6% employee, 8% employer)</li>
+          <li>Maternity leave insurance using configured rates (default: 0.3% each for employee and employer)</li>
+          <li>CBHI (Community Based Health Insurance) using configured rate (default: 0.5% employee contribution)</li>
+          <li>RAMA (Rwanda Medical Association) using configured rates (default: 7.5% each for employee and employer)</li>
         </ul>
+        <p><strong>Note:</strong> All tax rates are configurable by administrators and stored dynamically in the system.</p>
         
         <h4>How does deduction balance tracking work?</h4>
         <p>The system automatically tracks loan and deduction balances. When payroll is processed, deduction balances decrease by the monthly amount. If a processed payroll is deleted, balances are restored. You can also manually record payments against loans in the deductions section.</p>
@@ -109,7 +110,7 @@ const faqData = [
         <p>In the Payments section, you can configure allowances to be automatically included in every payroll run for specific employees or departments. Mark payments as recurring and set effective/end dates as needed.</p>
         
         <h4>Can I import payment data?</h4>
-        <p>Yes! The enhanced import/export feature now includes all form details: type, amount, staff ID, gross/net flag, recurring status, effective/end dates, description, and status. The system supports both DD/MM/YYYY and YYYY-MM-DD date formats with comprehensive validation.</p>
+        <p>Yes! Use the unified Import/Export feature accessible through a single modal interface. The system includes progress tracking, validation engine with detailed error messages, and import history. All CSV templates support both DD/MM/YYYY and YYYY-MM-DD date formats with comprehensive validation.</p>
         
         <h4>Can I backdate payments?</h4>
         <p>Yes, you can specify effective dates for payments and allowances to handle backdated salary adjustments or corrections. Use the end date field for temporary allowances or bonuses.</p>
@@ -174,27 +175,30 @@ const faqData = [
     content: (
       <div>
         <h4>What if my tax calculations seem incorrect?</h4>
-        <p>First, verify your tax settings in the Admin panel. Ensure that:</p>
+        <p>First, verify your tax settings in the Admin panel under Tax Configuration. Ensure that:</p>
         <ul>
-          <li>Tax brackets are current for the payroll period</li>
+          <li>PAYE tax brackets and rates are current for the payroll period</li>
+          <li>Pension, maternity, CBHI, and RAMA contribution rates are correctly configured</li>
           <li>Employee personal details are accurate (including dependents)</li>
-          <li>Pension and other contribution rates are correct</li>
+          <li>Tax configuration changes are saved and active</li>
         </ul>
+        <p><strong>Admin Access Required:</strong> Only users with admin privileges can modify tax configuration settings.</p>
         
         <h4>How do I fix data import errors?</h4>
-        <p>Common import issues:</p>
+        <p>The unified import system provides detailed error reporting with line numbers and specific guidance. Common import issues:</p>
         <ul>
           <li>Check that all required fields are included</li>
-          <li>Verify date formats (YYYY-MM-DD)</li>
+          <li>Verify date formats (DD/MM/YYYY or YYYY-MM-DD)</li>
           <li>Ensure numeric fields don't contain text</li>
           <li>Remove any special characters from names and addresses</li>
+          <li>Review the import history for previous successful imports</li>
         </ul>
         
         <h4>What if I can't access my account?</h4>
         <p>Use the "Forgot Password" link on the login page to reset your password. If you're still unable to access your account, contact your system administrator or support team.</p>
         
         <h4>How do I back up my data?</h4>
-        <p>Use the Utilities section to export all your data regularly. This creates backup files that can be imported if needed for data recovery.</p>
+        <p>Use the unified Import/Export modals in each section (Staff, Payments, Deductions, Payroll) to export your data regularly. The Utilities section provides additional tools for advanced system operations and data management.</p>
       </div>
     )
   },
@@ -277,9 +281,9 @@ const FAQ: React.FC = () => {
   };
   
   const extractTextFromReactElement = (element: React.ReactNode): string => {
-    if (typeof element === 'string') return element;
-    if (typeof element === 'number') return element.toString();
-    if (!element) return '';
+    if (typeof element === 'string') {return element;}
+    if (typeof element === 'number') {return element.toString();}
+    if (!element) {return '';}
     
     if (React.isValidElement(element)) {
       const props = element.props as any;

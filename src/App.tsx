@@ -9,6 +9,7 @@ import CompanySelector from './features/auth/components/CompanySelector';
 import { Company } from './shared/types';
 import LoadingSpinner from './shared/components/ui/LoadingSpinner';
 import MainLayout from './shared/components/layout/MainLayout';
+import { APP_CONSTANTS } from './shared/constants/app.constants';
 
 // Lazy load feature modules with webpack chunk names for better splitting
 const Dashboard = lazy(() => 
@@ -53,7 +54,7 @@ const AppContent: React.FC = () => {
       company={company} 
       onSwitchCompany={() => setCompany(null)}
     >
-      <Suspense fallback={<LoadingSpinner message="Loading..." />}>
+      <Suspense fallback={<LoadingSpinner message={APP_CONSTANTS.LOADING_MESSAGES.GENERIC} />}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard companyId={company.id} />} />

@@ -125,7 +125,7 @@ export const secureInput = (
   let sanitized = input;
 
   // Check for null/undefined
-  if (input == null) {
+  if (input === null || input === undefined) {
     errors.push('Input cannot be null or undefined');
     return { isValid: false, sanitized: '', errors };
   }

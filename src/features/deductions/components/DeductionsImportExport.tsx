@@ -3,12 +3,12 @@ import Papa from 'papaparse';
 import { createDeduction } from '../services/deductions.service';
 
 const deductionTemplate = [
-  'type,amount,staff_id,balance,monthlyAmount',
-  'Loan,100000,EMP001,50000,10000',
-  'Tax,20000,EMP002,0,5000',
+  'type,originalAmount,staffId,remainingBalance,monthlyInstallment,description',
+  'loan,100000,EMP001,50000,10000,Employee loan',
+  'advance,20000,EMP002,15000,5000,Salary advance',
 ].join('\n');
 
-const REQUIRED_FIELDS = ['type', 'amount', 'staff_id', 'balance', 'monthlyAmount'];
+const REQUIRED_FIELDS = ['type', 'originalAmount', 'staffId', 'remainingBalance'];
 
 interface ImportHistoryEntry {
   date: string;
@@ -42,20 +42,20 @@ const DeductionsImportExport: React.FC<{
         return `Missing required field "${field}"`;
       }
     }
-    // Amount, balance, and monthlyAmount must be numbers
-    if (isNaN(Number(row.amount)) || Number(row.amount) < 0) {
-      return `Invalid amount (must be a non-negative number)`;
+    // Amounts must be numbers
+    if (isNaN(Number(row.originalAmount)) || Number(row.originalAmount) < 0) {
+      return `Invalid originalAmount (must be a non-negative number)`;
     }
-    if (isNaN(Number(row.balance)) || Number(row.balance) < 0) {
-      return `Invalid balance (must be a non-negative number)`;
+    if (isNaN(Number(row.remainingBalance)) || Number(row.remainingBalance) < 0) {
+      return `Invalid remainingBalance (must be a non-negative number)`;
     }
-    if (isNaN(Number(row.monthlyAmount)) || Number(row.monthlyAmount) <= 0) {
-      return `Invalid monthlyAmount (must be a positive number)`;
+    if (row.monthlyInstallment && (isNaN(Number(row.monthlyInstallment)) || Number(row.monthlyInstallment) <= 0)) {
+      return `Invalid monthlyInstallment (must be a positive number)`;
     }
-    // Duplicate deduction for staff_id and type in file
-    const key = row.staff_id + '-' + row.type;
+    // Duplicate deduction for staffId and type in file
+    const key = row.staffId + '-' + row.type;
     if (staffTypeSet.has(key)) {
-      return `Duplicate deduction for staff_id ${row.staff_id} and type ${row.type}`;
+      return `Duplicate deduction for staffId ${row.staffId} and type ${row.type}`;
     }
     staffTypeSet.add(key);
     return null;
@@ -89,7 +89,20 @@ const DeductionsImportExport: React.FC<{
             continue;
           }
           try {
-            await createDeduction(companyId, row);
+            // Transform row data to match Deduction interface
+            const deductionData = {
+              companyId,
+              type: row.type,
+              originalAmount: parseFloat(row.originalAmount),
+              staffId: row.staffId,
+              remainingBalance: parseFloat(row.remainingBalance),
+              monthlyInstallment: row.monthlyInstallment ? parseFloat(row.monthlyInstallment) : undefined,
+              description: row.description && row.description.trim() ? row.description : undefined,
+              status: 'active' as const,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            await createDeduction(companyId, deductionData);
             success++;
           } catch (err: any) {
             errors.push({ row: i + 2, error: err.message || 'Import failed' });

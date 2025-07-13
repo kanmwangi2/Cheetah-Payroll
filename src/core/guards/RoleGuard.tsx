@@ -29,9 +29,9 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
           style={{
             padding: '20px',
             textAlign: 'center',
-            color: '#d32f2f',
-            backgroundColor: '#ffebee',
-            border: '1px solid #f8bbd9',
+            color: 'var(--color-error-text)',
+            backgroundColor: 'var(--color-error-bg)',
+            border: '1px solid var(--color-error-border)',
             borderRadius: '4px',
             margin: '20px',
           }}
@@ -54,9 +54,9 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
           style={{
             padding: '20px',
             textAlign: 'center',
-            color: '#d32f2f',
-            backgroundColor: '#ffebee',
-            border: '1px solid #f8bbd9',
+            color: 'var(--color-error-text)',
+            backgroundColor: 'var(--color-error-bg)',
+            border: '1px solid var(--color-error-border)',
             borderRadius: '4px',
             margin: '20px',
           }}

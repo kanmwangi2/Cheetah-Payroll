@@ -4,7 +4,6 @@ import { signOut } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../../core/config/firebase.config';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
-import { useThemeContext } from '../../../core/providers/ThemeProvider';
 import ThemeSwitcher from '../../../shared/components/ui/ThemeSwitcher';
 import LoadingSpinner from '../../../shared/components/ui/LoadingSpinner';
 import ThemeBoundary from '../../../shared/components/ui/ThemeBoundary';
@@ -92,7 +91,9 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
   };
 
   const handleProceedToCompany = () => {
-    if (!selectedCompany) return;
+    if (!selectedCompany) {
+      return;
+    }
     onSelect(selectedCompany);
   };
 
@@ -423,18 +424,6 @@ const inputStyles: React.CSSProperties = {
   transition: 'all var(--transition-normal)',
 };
 
-const selectStyles: React.CSSProperties = {
-  width: '100%',
-  padding: 'var(--spacing-md) var(--spacing-lg)',
-  borderRadius: 'var(--border-radius-md)',
-  border: '1px solid var(--color-border-secondary)',
-  backgroundColor: 'var(--color-bg-primary)',
-  color: 'var(--color-text-primary)',
-  fontSize: 'var(--font-size-base)',
-  cursor: 'pointer',
-  outline: 'none',
-  transition: 'all var(--transition-normal)',
-};
 
 const getProceedButtonStyles = (enabled: boolean): React.CSSProperties => ({
   width: '100%',

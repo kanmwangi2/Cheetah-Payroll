@@ -24,7 +24,7 @@ const ForgotPassword: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [globalLogoUrl, setGlobalLogoUrl] = useState<string>('');
 
-  const { isDark, resolvedTheme } = useThemeContext();
+  const { } = useThemeContext(); // Theme context is used by parent components
 
   // Load global logo settings
   useEffect(() => {

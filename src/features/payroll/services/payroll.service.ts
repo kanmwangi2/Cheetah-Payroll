@@ -1,7 +1,6 @@
 // Payroll processing with tax calculations and approval workflow
 import {
   serverTimestamp,
-  getFirestore,
   collection,
   doc,
   getDocs,
@@ -14,7 +13,9 @@ import {
   orderBy,
   writeBatch,
 } from 'firebase/firestore';
+import { db } from '../../../core/config/firebase.config';
 import { logAuditAction } from '../../../shared/services/audit.service';
+import { getTaxConfiguration } from '../../../shared/services/tax-config.service';
 import { getActivePayments, calculateStaffPayments } from '../../payments/services/payments.service';
 import { calculateStaffDeductions, processLoanPayment, reverseLoanPayment, getDeductions, canProcessDeduction, validateDeductionPayment } from '../../deductions/services/deductions.service';
 import { getStaff } from '../../staff/services/staff.service';
@@ -27,22 +28,43 @@ import {
   Staff 
 } from '../../../shared/types';
 
-const db = getFirestore();
+// Note: Tax configuration is now loaded dynamically from database
+// See tax-config.service.ts for configuration management
 
-// Default Rwanda tax configuration
-const DEFAULT_TAX_CONFIG: TaxConfiguration = {
-  payeBrackets: [
-    { min: 0, max: 60000, rate: 0 },
-    { min: 60001, max: 100000, rate: 10 },
-    { min: 100001, max: 200000, rate: 20 },
-    { min: 200001, max: null, rate: 30 },
-  ],
-  pensionRates: { employee: 6, employer: 8 },
-  maternityRates: { employee: 0.3, employer: 0.3 },
-  cbhiRates: { employee: 0.5, employer: 0 },
-  ramaRates: { employee: 7.5, employer: 7.5 },
-  effectiveDate: new Date().toISOString(),
-};
+/**
+ * Calculate payroll with dynamic tax configuration
+ * This is the preferred method for all new payroll calculations
+ */
+export async function calculatePayrollWithCurrentConfig(
+  grossPay: number,
+  basicPay: number,
+  transportAllowance: number,
+  otherDeductions: number
+): Promise<PayrollCalculation> {
+  const taxConfig = await getTaxConfiguration();
+  return calculatePayrollForAmount(grossPay, basicPay, transportAllowance, otherDeductions, taxConfig);
+}
+
+/**
+ * Calculate PAYE with dynamic tax configuration
+ */
+export async function calculatePAYEWithCurrentConfig(grossPay: number): Promise<number> {
+  const taxConfig = await getTaxConfiguration();
+  return calculatePAYE(grossPay, taxConfig.payeBrackets);
+}
+
+/**
+ * Gross-up calculation with dynamic tax configuration
+ */
+export async function grossUpAmountWithCurrentConfig(
+  targetNetAmount: number,
+  basicPayPortion: number,
+  transportAllowance: number,
+  otherDeductions: number
+): Promise<{ grossAmount: number; calculations: PayrollCalculation }> {
+  const taxConfig = await getTaxConfiguration();
+  return grossUpAmount(targetNetAmount, basicPayPortion, transportAllowance, otherDeductions, taxConfig);
+}
 
 // Legacy function - use submitPayrollForApproval instead
 export async function submitPayroll(companyId: string, payrollId: string, userId: string) {
@@ -180,7 +202,7 @@ async function updateDeductionBalancesForPayroll(
     }
   } catch (error) {
     console.error(`Error updating deduction balances for payroll ${payrollId}:`, error);
-    throw new Error(`Failed to update deduction balances: ${error.message}`);
+    throw new Error(`Failed to update deduction balances: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
@@ -342,8 +364,8 @@ export function calculatePayrollForAmount(
   };
 }
 
-// Legacy function for backward compatibility
-export function calculatePayroll({
+// Legacy function for backward compatibility - now uses dynamic tax config
+export async function calculatePayroll({
   gross,
   basic,
   transport,
@@ -354,12 +376,15 @@ export function calculatePayroll({
   ramaRates,
   otherDeductions,
 }: any) {
+  // Load current tax configuration from database
+  const currentConfig = await getTaxConfiguration();
+  
   const taxConfig: TaxConfiguration = {
-    payeBrackets: brackets || DEFAULT_TAX_CONFIG.payeBrackets,
-    pensionRates: pensionRates || DEFAULT_TAX_CONFIG.pensionRates,
-    maternityRates: maternityRates || DEFAULT_TAX_CONFIG.maternityRates,
-    cbhiRates: cbhiRates || DEFAULT_TAX_CONFIG.cbhiRates,
-    ramaRates: ramaRates || DEFAULT_TAX_CONFIG.ramaRates,
+    payeBrackets: brackets || currentConfig.payeBrackets,
+    pensionRates: pensionRates || currentConfig.pensionRates,
+    maternityRates: maternityRates || currentConfig.maternityRates,
+    cbhiRates: cbhiRates || currentConfig.cbhiRates,
+    ramaRates: ramaRates || currentConfig.ramaRates,
     effectiveDate: new Date().toISOString(),
   };
   
@@ -443,7 +468,8 @@ export async function createComprehensivePayroll(
   createdBy: string,
   taxConfig?: TaxConfiguration
 ): Promise<string> {
-  const config = taxConfig || DEFAULT_TAX_CONFIG;
+  // Load tax configuration from database if not provided
+  const config = taxConfig || await getTaxConfiguration();
   
   // Get all active staff
   const staffData = await getStaff(companyId);

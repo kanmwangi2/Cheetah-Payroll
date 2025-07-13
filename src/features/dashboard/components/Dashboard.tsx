@@ -1,6 +1,7 @@
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { getFirestore, collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 
 interface DashboardProps {
   companyId: string;
@@ -225,7 +226,7 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
             <h3 className="dashboard-metric-title">Active Payments</h3>
           </div>
           <div className="dashboard-metric-value">
-            {new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF' }).format(metrics.totalPayments)}
+            {new Intl.NumberFormat('en-RW', { style: 'currency', currency: APP_CONSTANTS.CURRENCY.CODE }).format(metrics.totalPayments)}
           </div>
           <div className="dashboard-metric-change">
             Total monthly amount
@@ -238,7 +239,7 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
             <h3 className="dashboard-metric-title">This Month's Payroll</h3>
           </div>
           <div className="dashboard-metric-value">
-            {new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF' }).format(metrics.thisMonthPayroll)}
+            {new Intl.NumberFormat('en-RW', { style: 'currency', currency: APP_CONSTANTS.CURRENCY.CODE }).format(metrics.thisMonthPayroll)}
           </div>
           <div className="dashboard-metric-change">
             Net pay distributed

@@ -3,6 +3,7 @@
  * Helper functions for working with themes and CSS variables
  */
 
+import React from 'react';
 import { Theme, ResolvedTheme } from '../hooks/useTheme';
 
 /**
