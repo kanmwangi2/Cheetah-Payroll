@@ -27,9 +27,6 @@ const validateStaffInput = (data: StaffInput): string | null => {
     () => validators.required(data.email, 'Email'),
     () => validators.email(data.email),
     () => validators.required(data.position, 'Position'),
-    () => validators.required(data.salary, 'Salary'),
-    () => validators.numeric(data.salary, 'Salary'),
-    () => validators.positive(data.salary, 'Salary'),
     () => validators.required(data.startDate, 'Start Date')
   );
 };
@@ -158,10 +155,6 @@ export const updateStaff = createServiceFunction(
       // Validate only provided fields
       if (data.email && validators.email(data.email)) {
         return validators.email(data.email);
-      }
-      if (data.salary !== undefined) {
-        const salaryError = validators.numeric(data.salary, 'Salary') || validators.positive(data.salary, 'Salary');
-        if (salaryError) {return salaryError;}
       }
       return null;
     },

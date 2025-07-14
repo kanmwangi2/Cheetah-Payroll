@@ -156,7 +156,7 @@ export interface PaymentValidationSchema {
 
 export function validatePaymentRecord(data: Record<string, unknown>): ValidationResult<PaymentValidationSchema> {
   const requiredFields: (keyof PaymentValidationSchema)[] = [
-    'type', 'amount', 'staffId', 'status'
+    'type', 'amount', 'staffId', 'isGross', 'isRecurring', 'effectiveDate', 'status'
   ];
 
   const result = validateRequiredFields<PaymentValidationSchema>(data, requiredFields, 'Payment');
@@ -283,7 +283,7 @@ export interface PayrollValidationSchema {
 
 export function validatePayrollRecord(data: Record<string, unknown>): ValidationResult<PayrollValidationSchema> {
   const requiredFields: (keyof PayrollValidationSchema)[] = [
-    'period', 'status', 'staffCount', 'totalGrossPay', 'totalNetPay'
+    'period', 'status', 'staffCount', 'totalGrossPay', 'totalNetPay', 'totalEmployeeTax', 'totalEmployerContributions', 'createdBy'
   ];
 
   const result = validateRequiredFields<PayrollValidationSchema>(data, requiredFields, 'Payroll');

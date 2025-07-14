@@ -80,7 +80,6 @@ export interface EmploymentDetails {
   employmentType: 'Full-time' | 'Part-time' | 'Contract' | 'Temporary';
   startDate: string;
   endDate?: string;
-  salary: number;
   status: 'active' | 'inactive';
 }
 
@@ -110,7 +109,6 @@ export interface StaffInput {
   phone?: string;
   position: string;
   department?: string;
-  salary: number;
   startDate: string;
   endDate?: string;
   status?: 'active' | 'inactive';
