@@ -96,7 +96,65 @@ export function createServiceFunction<TInput, TOutput>(
   options: ServiceOptions<TInput> = {}
 ) {
   return async (input: TInput): Promise<ServiceResult<TOutput>> => {
-    return withErrorHandling(() => operation(input), options as ServiceOptions<unknown>);
+    const {
+      retries = 2,
+      retryDelay = 1000,
+      logOperation = 'Firebase operation',
+      validateInput,
+    } = options;
+
+    let lastError: Error = new Error('Unknown error');
+    
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        // Validate input if validator provided
+        if (validateInput) {
+          const validationError = validateInput(input);
+          if (validationError) {
+            return {
+              error: validationError,
+              loading: false,
+              success: false,
+            };
+          }
+        }
+
+        logger.info(`Attempting ${logOperation}`, { attempt: attempt + 1 });
+        
+        const data = await operation(input);
+        
+        logger.info(`${logOperation} completed successfully`);
+        
+        return {
+          data,
+          loading: false,
+          success: true,
+        };
+      } catch (error: unknown) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        
+        if (attempt < retries) {
+          logger.warn(`${logOperation} failed, retrying...`, {
+            attempt: attempt + 1,
+            error: lastError.message,
+            retryDelay
+          });
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          continue;
+        }
+        
+        logger.error(`${logOperation} failed after ${retries + 1} attempts`, lastError);
+      }
+    }
+
+    // All attempts failed
+    const userFriendlyError = getFirebaseErrorMessage(lastError);
+    
+    return {
+      error: userFriendlyError,
+      loading: false,
+      success: false,
+    };
   };
 }
 
