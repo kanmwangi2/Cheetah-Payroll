@@ -17,6 +17,7 @@ import { createServiceFunction, validators } from '../../../shared/utils/service
 import { logger } from '../../../shared/utils/logger';
 import { logAuditAction } from '../../../shared/services/audit.service';
 import { Staff, StaffInput } from '../../../shared/types';
+import { validateStaffRecord, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
 
 // Validation functions
 const validateStaffInput = (data: StaffInput): string | null => {
@@ -59,7 +60,7 @@ const checkStaffUniqueness = async (companyId: string, staffNumber: string, emai
 
 const validateCompanyAndStaffIds = (companyId: string, staffId?: string): string | null => {
   return validators.combine(
-    () => validators.companyId(companyId),
+    () => validators.companyId(),
     () => staffId ? validators.required(staffId, 'Staff ID') : null
   );
 };
@@ -68,14 +69,17 @@ const validateCompanyAndStaffIds = (companyId: string, staffId?: string): string
 export const getStaff = createServiceFunction(
   async (companyId: string): Promise<Staff[]> => {
     const snapshot = await getDocs(collection(db, 'companies', companyId, 'staff'));
-    return snapshot.docs.map(doc => ({ 
+    const rawData = snapshot.docs.map(doc => ({ 
       id: doc.id, 
-      ...doc.data() 
-    } as Staff));
+      ...sanitizeFirestoreData(doc.data())
+    }));
+    
+    // Apply strict validation and filter out invalid records
+    return validateAndFilterRecords<Staff>(rawData, validateStaffRecord, 'Staff');
   },
   {
     logOperation: 'Get staff list',
-    validateInput: (args) => validators.companyId(args[0]),
+    validateInput: () => validators.companyId(),
     retries: 2,
   }
 );
@@ -115,7 +119,7 @@ export const createStaff = createServiceFunction(
   {
     logOperation: 'Create staff member',
     validateInput: ({ companyId, data }) => {
-      const companyError = validators.companyId(companyId);
+      const companyError = validators.companyId();
       if (companyError) {return companyError;}
       return validateStaffInput(data);
     },

@@ -51,8 +51,8 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
       setPayrollPeriod('');
       setShowPayrollForm(false);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to create comprehensive payroll');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to create comprehensive payroll');
     } finally {
       setCreating(false);
     }
@@ -66,8 +66,8 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
     try {
       await deletePayroll(companyId, payrollId);
       setRefresh(r => r + 1);
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete payroll');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to delete payroll');
     }
   };
 
@@ -138,12 +138,12 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
       </div>
     );}
 
-  const filtered = payrolls.filter(p => {
+  const filtered = payrolls.filter(p => p !== null).filter(p => {
     return !search || 
-           (p.period && p.period.toLowerCase().includes(search.toLowerCase())) ||
-           String(p.totalGrossPay || 0).includes(search) || 
-           String(p.totalNetPay || 0).includes(search) ||
-           (p.status && p.status.toLowerCase().includes(search.toLowerCase()));
+           (p?.period && p.period.toLowerCase().includes(search.toLowerCase())) ||
+           String(p?.totalGrossPay || 0).includes(search) || 
+           String(p?.totalNetPay || 0).includes(search) ||
+           (p?.status && p.status.toLowerCase().includes(search.toLowerCase()));
   });
 
   return (
@@ -391,14 +391,14 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
               </thead>
               <tbody>
                 {filtered.map(p => {
-                  const statusColor = p.status === 'completed' ? 'var(--color-success-600)' : 
-                                     p.status === 'pending' ? 'var(--color-warning-600)' : 
-                                     p.status === 'draft' ? 'var(--color-info-600)' : 'var(--color-text-secondary)';
+                  const statusColor = p?.status === 'completed' ? 'var(--color-success-600)' : 
+                                     p?.status === 'pending' ? 'var(--color-warning-600)' : 
+                                     p?.status === 'draft' ? 'var(--color-info-600)' : 'var(--color-text-secondary)';
                   
                   return (
-                    <tr key={p.id} style={{ borderBottom: '1px solid var(--color-border-primary)' }}>
+                    <tr key={p?.id || `payroll-${Math.random()}`} style={{ borderBottom: '1px solid var(--color-border-primary)' }}>
                       <td style={{ padding: '16px', textAlign: 'left', fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                        {p.period || 'N/A'}
+                        {p?.period || 'N/A'}
                       </td>
                       <td style={{ padding: '16px', textAlign: 'center' }}>
                         <span style={{ 
@@ -410,20 +410,20 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                           fontWeight: 500,
                           textTransform: 'capitalize'
                         }}>
-                          {p.status || 'draft'}
+                          {p?.status || 'draft'}
                         </span>
                       </td>
                       <td style={{ padding: '16px', textAlign: 'center', color: 'var(--color-text-primary)' }}>
-                        {p.staffCount || 0}
+                        {p?.staffCount || 0}
                       </td>
                       <td style={{ padding: '16px', textAlign: 'right', fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                        RWF {p.totalGrossPay?.toLocaleString() || '0'}
+                        RWF {p?.totalGrossPay?.toLocaleString() || '0'}
                       </td>
                       <td style={{ padding: '16px', textAlign: 'right', fontWeight: 500, color: 'var(--color-success-600)' }}>
-                        RWF {p.totalNetPay?.toLocaleString() || '0'}
+                        RWF {p?.totalNetPay?.toLocaleString() || '0'}
                       </td>
                       <td style={{ padding: '16px', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '13px' }}>
-                        {p.createdAt ? new Date(p.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                        {p?.createdAt ? new Date(p.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
                       </td>
                       <td style={{ padding: '16px', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>

@@ -94,7 +94,7 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     setFieldErrors(prev => {
-      const { [field]: _removed, ...rest } = prev;
+      const { [field]: _, ...rest } = prev;
       return rest;
     });
     
@@ -135,8 +135,8 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
       await createDeduction(companyId, deductionData as Deduction);
       setForm(initialState);
       onAdded();
-    } catch (err: any) {
-      setError(err.message || 'Failed to add deduction');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to add deduction');
     } finally {
       setLoading(false);
     }
@@ -203,9 +203,9 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
             <option value="">
               {loadingStaff ? 'Loading employees...' : 'Select employee...'}
             </option>
-            {staff.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.personalDetails?.firstName} {s.personalDetails?.lastName} ({s.personalDetails?.employeeId || s.id})
+            {staff.filter(s => s !== null).map(s => (
+              <option key={s?.id} value={s?.id}>
+                {s?.personalDetails?.firstName} {s?.personalDetails?.lastName} ({s?.personalDetails?.employeeId || s?.id})
               </option>
             ))}
           </select>

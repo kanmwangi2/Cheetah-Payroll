@@ -16,7 +16,15 @@ import {
 } from 'recharts';
 
 // Example expects data: { payrolls: Array<{ month: string, total: number }>, staff: Array<{ month: string, count: number }> }
-export default function AdvancedCharts({ data }: { data: any }) {
+interface ChartData {
+  payrolls?: Array<{ month: string; total: number }>;
+  staff?: Array<{ month: string; count: number }>;
+  approvedCount?: number;
+  pendingCount?: number;
+  rejectedCount?: number;
+}
+
+export default function AdvancedCharts({ data }: { data: ChartData }) {
   const payrolls = data?.payrolls || [];
   const staff = data?.staff || [];
   const pieData = [

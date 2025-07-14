@@ -33,7 +33,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [globalLogoUrl, setGlobalLogoUrl] = useState<string>('');
 
-  const { } = useThemeContext(); // Theme context used by parent components
+  useThemeContext(); // Theme context used by parent components
 
   // Load global logo settings
   useEffect(() => {
@@ -97,8 +97,8 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
       await signUpUser(email, password, name.trim());
       logger.info('Registration successful');
       // Auth state change will handle the redirect
-    } catch (err: any) {
-      logger.error('Registration failed', err);
+    } catch (err: unknown) {
+      logger.error('Registration failed', err as Error);
       const userFriendlyMessage = getFirebaseErrorMessage(err);
       setError(userFriendlyMessage);
       

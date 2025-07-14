@@ -88,8 +88,8 @@ const UserProfile: React.FC = () => {
       }
 
       setSuccess('Profile updated successfully');
-    } catch (err: any) {
-      setError(err.message || 'Failed to update profile');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -127,7 +127,7 @@ const UserProfile: React.FC = () => {
       setProfileForm({ ...profileForm, email: emailChangeForm.newEmail });
       setEmailChangeForm({ newEmail: '', currentPassword: '' });
       setShowEmailChange(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err.code === 'auth/wrong-password') {
         setError('Current password is incorrect');
       } else if (err.code === 'auth/email-already-in-use') {
@@ -135,7 +135,7 @@ const UserProfile: React.FC = () => {
       } else if (err.code === 'auth/invalid-email') {
         setError('Invalid email address');
       } else {
-        setError(err.message || 'Failed to update email');
+        setError((err as Error).message || 'Failed to update email');
       }
     } finally {
       setLoading(false);
@@ -238,8 +238,8 @@ const UserProfile: React.FC = () => {
       setPreviewUrl(null);
       setSuccess('Profile picture updated successfully');
       
-    } catch (err: any) {
-      setError(err.message || 'Failed to upload profile picture');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to upload profile picture');
     } finally {
       setUploading(false);
     }
@@ -268,8 +268,8 @@ const UserProfile: React.FC = () => {
       setPreviewUrl(null);
       setSuccess('Profile picture removed successfully');
       
-    } catch (err: any) {
-      setError(err.message || 'Failed to remove profile picture');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to remove profile picture');
     } finally {
       setUploading(false);
     }
@@ -297,8 +297,8 @@ const UserProfile: React.FC = () => {
       await updatePassword(user as any, passwordForm.newPassword);
       setSuccess('Password changed successfully');
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (err: any) {
-      setError(err.message || 'Failed to change password');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to change password');
     } finally {
       setLoading(false);
     }

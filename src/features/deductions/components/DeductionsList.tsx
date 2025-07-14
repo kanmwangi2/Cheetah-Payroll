@@ -55,8 +55,8 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               updatedAt: s.updatedAt
             }));
         setStaff(sharedStaff);
-      } catch (e: any) {
-        setError(e.message || 'Failed to load data');
+      } catch (e: unknown) {
+        setError((e as Error).message || 'Failed to load data');
       } finally {
         setLoading(false);
       }
@@ -92,8 +92,8 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
       setPaymentModalOpen(null);
       setPaymentAmount('');
       setRefresh(r => r + 1);
-    } catch (e: any) {
-      setError(e.message || 'Failed to process payment');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to process payment');
     }
   };
 
@@ -102,8 +102,8 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
     try {
       await deleteDeduction(companyId, deductionId);
       setRefresh(r => r + 1);
-    } catch (e: any) {
-      setError(e.message || 'Failed to delete deduction');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to delete deduction');
     }
   };
 
@@ -137,20 +137,20 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
     };
   };
 
-  const filtered = deductions.filter(d => {
-    const staffName = getStaffName(d.staffId);
+  const filtered = deductions.filter(d => d !== null).filter(d => {
+    const staffName = getStaffName(d?.staffId);
     const matchesSearch =
       !search ||
-      d.type?.toLowerCase().includes(search.toLowerCase()) ||
+      d?.type?.toLowerCase().includes(search.toLowerCase()) ||
       staffName.toLowerCase().includes(search.toLowerCase()) ||
-      d.description?.toLowerCase().includes(search.toLowerCase());
-    const matchesType = !filterType || d.type === filterType;
-    const matchesStatus = !filterStatus || d.status === filterStatus;
+      d?.description?.toLowerCase().includes(search.toLowerCase());
+    const matchesType = !filterType || d?.type === filterType;
+    const matchesStatus = !filterStatus || d?.status === filterStatus;
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  const uniqueTypes = Array.from(new Set(deductions.map(d => d.type))).filter(Boolean);
-  const uniqueStatuses = Array.from(new Set(deductions.map(d => d.status))).filter(Boolean);
+  const uniqueTypes = Array.from(new Set(deductions.filter(d => d?.type).map(d => d.type))).filter(Boolean);
+  const uniqueStatuses = Array.from(new Set(deductions.filter(d => d?.status).map(d => d.status))).filter(Boolean);
 
   const getProgressPercentage = (deduction: Deduction) => {
     if (deduction.originalAmount === 0) {return 100;}
@@ -495,33 +495,33 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               </thead>
               <tbody>
                 {filtered.map(d => (
-                  <tr key={d.id} style={{ borderBottom: '1px solid var(--color-table-border)' }}>
+                  <tr key={d?.id || `deduction-${Math.random()}`} style={{ borderBottom: '1px solid var(--color-table-border)' }}>
                     <td style={{ padding: '16px' }}>
                       <div style={{ fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px' }}>
-                        {DEDUCTION_TYPE_LABELS[d.type] || d.type}
+                        {DEDUCTION_TYPE_LABELS[d?.type] || d?.type || 'Unknown Type'}
                       </div>
-                      {d.description && (
+                      {d?.description && (
                         <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
                           {d.description}
                         </div>
                       )}
                     </td>
                     <td style={{ padding: '16px', color: 'var(--color-text-primary)' }}>
-                      {getStaffName(d.staffId)}
+                      {getStaffName(d?.staffId)}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'right', fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                      RWF {d.originalAmount.toLocaleString()}
+                      RWF {(d?.originalAmount || 0).toLocaleString()}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'right', fontWeight: 500, color: 'var(--color-primary-600)' }}>
-                      {d.monthlyInstallment ? `RWF ${d.monthlyInstallment.toLocaleString()}` : 'N/A'}
+                      {d?.monthlyInstallment ? `RWF ${d.monthlyInstallment.toLocaleString()}` : 'N/A'}
                     </td>
                     <td style={{ 
                       padding: '16px', 
                       textAlign: 'right', 
                       fontWeight: 500, 
-                      color: d.remainingBalance > 0 ? 'var(--color-error-600)' : 'var(--color-success-600)' 
+                      color: (d?.remainingBalance || 0) > 0 ? 'var(--color-error-600)' : 'var(--color-success-600)' 
                     }}>
-                      RWF {d.remainingBalance.toLocaleString()}
+                      RWF {(d?.remainingBalance || 0).toLocaleString()}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <div style={{ width: '100px', margin: '0 auto' }}>

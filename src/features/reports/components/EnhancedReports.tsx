@@ -58,8 +58,8 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
       if (periods.length > 0) {
         setSelectedPeriod(periods[0]);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load payroll data');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to load payroll data');
     }
   };
 
@@ -128,8 +128,8 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
       }
 
       PDFReportGenerator.downloadBlob(blob, filename);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate report');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to generate report');
     } finally {
       setLoading(false);
     }
@@ -159,8 +159,8 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
         const blob = pdfGenerator.generateBulkPayslips(staffPayrolls, company, period);
         PDFReportGenerator.downloadBlob(blob, `Bulk_Payslips_${period}.pdf`);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate payslips');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to generate payslips');
     } finally {
       setLoading(false);
     }
@@ -181,8 +181,8 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
       const selectedPayrollData = payrolls.find(p => p.id === selectedPayroll);
       const filename = `Bank_Payment_File_${selectedPayrollData?.period || 'Unknown'}.${format}`;
       PDFReportGenerator.downloadBlob(blob, filename);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate bank file');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to generate bank file');
     } finally {
       setLoading(false);
     }

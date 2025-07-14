@@ -173,8 +173,8 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
               throw new Error(result.error || 'Failed to create staff');
             }
             success++;
-          } catch (err: any) {
-            errors.push({ row: i + 2, error: err.message || 'Import failed' });
+          } catch (err: unknown) {
+            errors.push({ row: i + 2, error: (err as Error).message || 'Import failed' });
             setRowErrors([...errors]);
           }
           setImportProgress(p => ({ ...p, processed: i + 1 }));
@@ -199,7 +199,7 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
         }
       },
       error: err => {
-        setError(err.message || 'CSV parse error');
+        setError((err as Error).message || 'CSV parse error');
         setImporting(false);
       },
     });

@@ -30,7 +30,8 @@
       "Bash(firebase deploy:*)",
       "Bash(npm test:*)",
       "Bash(rg:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(true)"
     ],
     "deny": []
   }

@@ -71,10 +71,25 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
         orderBy('createdAt', 'desc')
       );
       const staffSnapshot = await getDocs(staffQuery);
-      const staffData = staffSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as StaffMember[];
+      const staffData = staffSnapshot.docs.map(doc => {
+        const data = doc.data();
+        const staff = {
+          id: doc.id,
+          ...data
+        } as StaffMember;
+        
+        // Log records without staffNumber for debugging
+        if (!staff.staffNumber) {
+          console.warn('Staff record missing staffNumber:', {
+            id: doc.id,
+            name: `${staff.firstName || ''} ${staff.lastName || ''}`.trim(),
+            email: staff.email,
+            data: data
+          });
+        }
+        
+        return staff;
+      });
       
       setStaff(staffData);
       
@@ -89,7 +104,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
   };
 
   const filterStaff = () => {
-    let filtered = staff;
+    let filtered = staff.filter(s => s !== null);
 
     if (searchTerm) {
       filtered = filtered.filter(s =>
@@ -434,7 +449,20 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                       </div>
                     </td>
                     <td style={{ padding: '16px', color: 'var(--color-text-primary)', fontWeight: 500 }}>
-                      {member.staffNumber || 'N/A'}
+                      {member.staffNumber ? (
+                        member.staffNumber
+                      ) : (
+                        <span style={{ 
+                          color: 'var(--color-error-text)', 
+                          fontWeight: 'bold',
+                          backgroundColor: 'var(--color-error-bg)',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          fontSize: '12px'
+                        }}>
+                          MISSING STAFF#
+                        </span>
+                      )}
                     </td>
                     <td style={{ padding: '16px' }}>
                       <div style={{ fontSize: '14px', color: 'var(--color-text-primary)' }}>

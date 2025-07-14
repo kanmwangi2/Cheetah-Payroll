@@ -73,7 +73,7 @@ function VirtualizedListInner<T>(
             right: 0,
           }}
         >
-          {visibleItems.map((item, index) => (
+          {visibleItems.filter(item => item !== null).map((item, index) => (
             <div
               key={startIndex + index}
               style={{

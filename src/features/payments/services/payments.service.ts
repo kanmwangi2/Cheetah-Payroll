@@ -15,6 +15,7 @@ import {
 import { db } from '../../../core/config/firebase.config';
 import { Payment, PaymentType } from '../../../shared/types';
 import { logAuditAction } from '../../../shared/services/audit.service';
+import { validatePaymentRecord, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
 
 // Export utility functions
 export const PAYMENT_TYPE_LABELS: Record<PaymentType, string> = {
@@ -51,7 +52,13 @@ export async function getPayments(companyId: string): Promise<Payment[]> {
     orderBy('createdAt', 'desc')
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payment));
+  const rawData = snapshot.docs.map(doc => ({ 
+    id: doc.id, 
+    ...sanitizeFirestoreData(doc.data()) 
+  }));
+  
+  // Apply strict validation and filter out invalid records
+  return validateAndFilterRecords<Payment>(rawData, validatePaymentRecord, 'Payment');
 }
 
 export async function getActivePayments(companyId: string): Promise<Payment[]> {
@@ -72,7 +79,12 @@ export async function getPaymentsByStaff(companyId: string, staffId: string): Pr
     orderBy('createdAt', 'desc')
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payment));
+  const rawData = snapshot.docs.map(doc => ({ 
+    id: doc.id, 
+    ...sanitizeFirestoreData(doc.data()) 
+  }));
+  
+  return validateAndFilterRecords<Payment>(rawData, validatePaymentRecord, 'Payment');
 }
 
 export async function getPaymentsByType(companyId: string, type: PaymentType): Promise<Payment[]> {

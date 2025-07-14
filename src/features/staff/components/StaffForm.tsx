@@ -134,8 +134,8 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
       await createStaff({ companyId, data: flatData });
       setForm(initialState);
       onAdded();
-    } catch (err: any) {
-      setError(err.message || 'Failed to add staff');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to add staff');
     } finally {
       setLoading(false);
     }

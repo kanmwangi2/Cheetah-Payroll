@@ -24,7 +24,43 @@ service cloud.firestore {
       allow write: if request.auth != null && isCompanyAdminOrHigher(companyId);
       allow create: if request.auth != null; // Allow creating companies
 
-      // Company subcollections
+      // Staff collection with data validation
+      match /staff/{staffId} {
+        allow read: if request.auth != null && isCompanyUser(companyId);
+        allow create, update: if request.auth != null && 
+                                 isPayrollPreparerOrHigher(companyId) &&
+                                 validateStaffData(request.resource.data);
+        allow delete: if request.auth != null && isCompanyAdminOrHigher(companyId);
+      }
+      
+      // Payments collection with data validation
+      match /payments/{paymentId} {
+        allow read: if request.auth != null && isCompanyUser(companyId);
+        allow create, update: if request.auth != null && 
+                                 isPayrollPreparerOrHigher(companyId) &&
+                                 validatePaymentData(request.resource.data);
+        allow delete: if request.auth != null && isCompanyAdminOrHigher(companyId);
+      }
+      
+      // Deductions collection with data validation
+      match /deductions/{deductionId} {
+        allow read: if request.auth != null && isCompanyUser(companyId);
+        allow create, update: if request.auth != null && 
+                                 isPayrollPreparerOrHigher(companyId) &&
+                                 validateDeductionData(request.resource.data);
+        allow delete: if request.auth != null && isCompanyAdminOrHigher(companyId);
+      }
+      
+      // Payroll collection with data validation
+      match /payrolls/{payrollId} {
+        allow read: if request.auth != null && isCompanyUser(companyId);
+        allow create, update: if request.auth != null && 
+                                 isPayrollPreparerOrHigher(companyId) &&
+                                 validatePayrollData(request.resource.data);
+        allow delete: if request.auth != null && isCompanyAdminOrHigher(companyId);
+      }
+      
+      // Other company subcollections (fallback)
       match /{collection}/{docId} {
         allow read, write: if request.auth != null && isCompanyUser(companyId);
       }
@@ -54,6 +90,48 @@ service cloud.firestore {
     function isCompanyUser(companyId) {
       let user = getUserData();
       return user.role in ['primary_admin', 'app_admin'] || companyId in user.companyIds;
+    }
+    
+    // Data validation functions
+    function validateStaffData(data) {
+      return data.keys().hasAll(['firstName', 'lastName', 'idNumber', 'rssbNumber', 'staffNumber', 
+                                'email', 'phone', 'dateOfBirth', 'gender', 'maritalStatus', 
+                                'address', 'department', 'position', 'startDate', 'employmentType', 'status']) &&
+             data.staffNumber is string && data.staffNumber.size() > 0 &&
+             data.email is string && data.email.matches('.*@.*\\..*') &&
+             data.gender in ['male', 'female'] &&
+             data.maritalStatus in ['single', 'married', 'divorced', 'widowed'] &&
+             data.employmentType in ['full-time', 'part-time', 'contract', 'intern'] &&
+             data.status in ['active', 'inactive', 'terminated'] &&
+             data.emergencyContact is map &&
+             data.bankDetails is map;
+    }
+    
+    function validatePaymentData(data) {
+      return data.keys().hasAll(['type', 'amount', 'staffId', 'status']) &&
+             data.amount is number && data.amount > 0 &&
+             data.staffId is string && data.staffId.size() > 0 &&
+             data.status in ['active', 'inactive'] &&
+             ((!('isGross' in data)) || data.isGross is bool) &&
+             ((!('isRecurring' in data)) || data.isRecurring is bool);
+    }
+    
+    function validateDeductionData(data) {
+      return data.keys().hasAll(['type', 'originalAmount', 'remainingBalance', 'staffId', 'status']) &&
+             data.originalAmount is number && data.originalAmount > 0 &&
+             data.remainingBalance is number && data.remainingBalance >= 0 &&
+             data.remainingBalance <= data.originalAmount &&
+             data.staffId is string && data.staffId.size() > 0 &&
+             data.status in ['active', 'completed', 'suspended'];
+    }
+    
+    function validatePayrollData(data) {
+      return data.keys().hasAll(['period', 'status', 'staffCount', 'totalGrossPay', 'totalNetPay']) &&
+             data.period is string && data.period.size() > 0 &&
+             data.status in ['draft', 'pending', 'completed'] &&
+             data.staffCount is number && data.staffCount >= 0 &&
+             data.totalGrossPay is number && data.totalGrossPay >= 0 &&
+             data.totalNetPay is number && data.totalNetPay >= 0;
     }
   }
 }

@@ -7,6 +7,11 @@ interface FirebaseErrorMap {
   [key: string]: string;
 }
 
+interface FirebaseErrorLike {
+  code?: string;
+  message?: string;
+}
+
 const firebaseErrorMessages: FirebaseErrorMap = {
   // Authentication errors
   'auth/user-not-found': 'No account found with this email address. Please check your email or sign up for a new account.',
@@ -65,7 +70,7 @@ const firebaseErrorMessages: FirebaseErrorMap = {
 /**
  * Converts Firebase error to user-friendly message
  */
-export const getFirebaseErrorMessage = (error: any): string => {
+export const getFirebaseErrorMessage = (error: unknown): string => {
   if (!error) {
     return 'An unexpected error occurred. Please try again.';
   }
@@ -76,7 +81,8 @@ export const getFirebaseErrorMessage = (error: any): string => {
   }
 
   // Handle Firebase error objects
-  const errorCode = error.code || error.message || '';
+  const errorLike = error as FirebaseErrorLike;
+  const errorCode = errorLike.code || errorLike.message || '';
   
   // Check for exact match first
   if (firebaseErrorMessages[errorCode]) {
@@ -108,7 +114,7 @@ export const getFirebaseErrorMessage = (error: any): string => {
   }
   
   // Extract readable message from Firebase error format
-  let message = error.message || errorCode;
+  let message = errorLike.message || errorCode;
   
   // Clean up Firebase error format: "Firebase: Error (auth/code)."
   message = message.replace(/^Firebase:\s*Error\s*\(/i, '');
@@ -123,8 +129,9 @@ export const getFirebaseErrorMessage = (error: any): string => {
 /**
  * Determines if an error should trigger a retry suggestion
  */
-export const isRetryableError = (error: any): boolean => {
-  const errorCode = error?.code || error?.message || '';
+export const isRetryableError = (error: unknown): boolean => {
+  const errorLike = error as FirebaseErrorLike;
+  const errorCode = errorLike?.code || errorLike?.message || '';
   
   const retryableErrors = [
     'network-request-failed',
@@ -145,8 +152,9 @@ export const isRetryableError = (error: any): boolean => {
 /**
  * Determines if an error is related to user credentials
  */
-export const isCredentialError = (error: any): boolean => {
-  const errorCode = error?.code || error?.message || '';
+export const isCredentialError = (error: unknown): boolean => {
+  const errorLike = error as FirebaseErrorLike;
+  const errorCode = errorLike?.code || errorLike?.message || '';
   
   const credentialErrors = [
     'wrong-password',

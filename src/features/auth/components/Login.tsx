@@ -30,7 +30,7 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [globalLogoUrl, setGlobalLogoUrl] = useState<string>('');
 
-  const { } = useThemeContext(); // Theme context used by parent components
+  useThemeContext(); // Theme context used by parent components
 
   // Load global logo settings
   useEffect(() => {
@@ -74,8 +74,8 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
       await signInUser(email, password);
       logger.info('Login successful');
       // Auth state change will handle the redirect
-    } catch (err: any) {
-      logger.error('Login failed', err);
+    } catch (err: unknown) {
+      logger.error('Login failed', err as Error);
       const userFriendlyMessage = getFirebaseErrorMessage(err);
       setError(userFriendlyMessage);
       

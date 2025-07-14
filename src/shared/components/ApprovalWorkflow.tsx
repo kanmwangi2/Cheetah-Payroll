@@ -48,7 +48,7 @@ export default function ApprovalWorkflow({
     try {
       await submitPayrollForApproval(companyId, payrollId, mockUser.id);
       setRefresh(r => r + 1);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setActionError(e.message || 'Failed to submit payroll');
     }
   };
@@ -57,7 +57,7 @@ export default function ApprovalWorkflow({
     try {
       await approvePayroll(companyId, payrollId, mockUser.id);
       setRefresh(r => r + 1);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setActionError(e.message || 'Failed to approve payroll');
     }
   };
@@ -67,7 +67,7 @@ export default function ApprovalWorkflow({
       await rejectPayroll(companyId, payrollId, mockUser.id, rejectReason);
       setRefresh(r => r + 1);
       setRejectReason('');
-    } catch (e: any) {
+    } catch (e: unknown) {
       setActionError(e.message || 'Failed to reject payroll');
     }
   };

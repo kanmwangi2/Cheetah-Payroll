@@ -52,8 +52,8 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
       await updateStaff({ companyId, staffId, data: form });
       setProfile(form);
       setEdit(false);
-    } catch (err: any) {
-      setError(err.message || 'Failed to update profile');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to update profile');
     } finally {
       setLoading(false);
     }

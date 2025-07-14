@@ -13,7 +13,7 @@ export interface User {
   name: string;
   role: UserRole;
   companyIds: string[];
-  profileData?: any;
+  profileData?: Record<string, unknown>;
   phone?: string;
   department?: string;
   uid?: string;
@@ -34,8 +34,8 @@ export interface PayrollTaxSettings {
 export interface Company {
   id: string;
   name: string;
-  settings?: any;
-  taxConfig?: any;
+  settings?: Record<string, unknown>;
+  taxConfig?: Record<string, unknown>;
   payrollTaxSettings?: PayrollTaxSettings;
   structure?: {
     departments: string[];
@@ -114,7 +114,7 @@ export interface StaffInput {
   startDate: string;
   endDate?: string;
   status?: 'active' | 'inactive';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Payment Types
@@ -242,7 +242,7 @@ export interface StatutoryReport {
   companyId: string;
   type: 'paye' | 'pension' | 'maternity' | 'cbhi' | 'rama';
   period: string;
-  data: any;
+  data: Record<string, unknown>;
   totalAmount: number;
   status: 'draft' | 'generated' | 'submitted';
   generatedAt: string;
@@ -256,7 +256,7 @@ export interface AuditLog {
   entityType: 'staff' | 'payment' | 'deduction' | 'payroll' | 'company';
   entityId: string;
   action: 'create' | 'update' | 'delete' | 'approve' | 'process';
-  changes: any;
+  changes: Record<string, unknown>;
   userId: string;
   userName: string;
   timestamp: string;
@@ -270,12 +270,12 @@ export interface ImportResult {
   successCount: number;
   errorCount: number;
   errors: ImportError[];
-  data?: any[];
+  data?: unknown[];
 }
 
 export interface ImportError {
   row: number;
   field: string;
   message: string;
-  value: any;
+  value: unknown;
 }

@@ -70,8 +70,8 @@ export default function AdvancedUtilities({ companyId, companyName }: AdvancedUt
       URL.revokeObjectURL(url);
       
       setSuccess('JSON backup downloaded successfully!');
-    } catch (e: any) {
-      setError(e.message || 'Backup failed');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Backup failed');
     } finally {
       setLoading(false);
     }
@@ -128,8 +128,8 @@ export default function AdvancedUtilities({ companyId, companyName }: AdvancedUt
       XLSX.writeFile(workbook, `${companyName || 'company'}_backup_${new Date().toISOString().split('T')[0]}.xlsx`);
       
       setSuccess('XLSX backup downloaded successfully!');
-    } catch (e: any) {
-      setError(e.message || 'XLSX backup failed');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'XLSX backup failed');
     } finally {
       setLoading(false);
     }
@@ -153,8 +153,8 @@ export default function AdvancedUtilities({ companyId, companyName }: AdvancedUt
       // For now, just show success
       setSuccess(`Backup file validated successfully. Contains ${data.staff?.length || 0} staff, ${data.payments?.length || 0} payments, ${data.deductions?.length || 0} deductions, and ${data.payrolls?.length || 0} payrolls from ${data.company.name}.`);
       
-    } catch (e: any) {
-      setError(e.message || 'Restore failed');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Restore failed');
     } finally {
       setLoading(false);
     }

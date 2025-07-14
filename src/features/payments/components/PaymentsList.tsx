@@ -49,8 +49,8 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               updatedAt: s.updatedAt
             }));
         setStaff(sharedStaff);
-      } catch (e: any) {
-        setError(e.message || 'Failed to load data');
+      } catch (e: unknown) {
+        setError((e as Error).message || 'Failed to load data');
       } finally {
         setLoading(false);
       }
@@ -72,8 +72,8 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
         updatedAt: new Date().toISOString()
       });
       setRefresh(r => r + 1);
-    } catch (e: any) {
-      setError(e.message || 'Failed to update payment status');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to update payment status');
     }
   };
 
@@ -82,25 +82,25 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
     try {
       await deletePayment(companyId, paymentId);
       setRefresh(r => r + 1);
-    } catch (e: any) {
-      setError(e.message || 'Failed to delete payment');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Failed to delete payment');
     }
   };
 
-  const filtered = payments.filter(p => {
-    const staffName = getStaffName(p.staffId);
+  const filtered = payments.filter(p => p !== null).filter(p => {
+    const staffName = getStaffName(p?.staffId);
     const matchesSearch =
       !search ||
-      p.type?.toLowerCase().includes(search.toLowerCase()) ||
+      p?.type?.toLowerCase().includes(search.toLowerCase()) ||
       staffName.toLowerCase().includes(search.toLowerCase()) ||
-      p.description?.toLowerCase().includes(search.toLowerCase());
-    const matchesType = !filterType || p.type === filterType;
-    const matchesStatus = !filterStatus || p.status === filterStatus;
+      p?.description?.toLowerCase().includes(search.toLowerCase());
+    const matchesType = !filterType || p?.type === filterType;
+    const matchesStatus = !filterStatus || p?.status === filterStatus;
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  const uniqueTypes = Array.from(new Set(payments.map(p => p.type))).filter(Boolean);
-  const uniqueStatuses = Array.from(new Set(payments.map(p => p.status))).filter(Boolean);
+  const uniqueTypes = Array.from(new Set(payments.filter(p => p?.type).map(p => p.type))).filter(Boolean);
+  const uniqueStatuses = Array.from(new Set(payments.filter(p => p?.status).map(p => p.status))).filter(Boolean);
 
   return (
     <div>
@@ -409,22 +409,22 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               </thead>
               <tbody>
                 {filtered.map(p => (
-                  <tr key={p.id} style={{ borderBottom: '1px solid var(--color-table-border)' }}>
+                  <tr key={p?.id || `payment-${Math.random()}`} style={{ borderBottom: '1px solid var(--color-table-border)' }}>
                     <td style={{ padding: '16px' }}>
                       <div style={{ fontWeight: 500, color: 'var(--color-text-primary)', marginBottom: '4px' }}>
-                        {p.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        {p?.type ? p.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Unknown Type'}
                       </div>
-                      {p.description && (
+                      {p?.description && (
                         <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
                           {p.description}
                         </div>
                       )}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'right', fontWeight: '500', color: 'var(--color-text-primary)' }}>
-                      RWF {p.amount.toLocaleString()}
+                      RWF {(p?.amount || 0).toLocaleString()}
                     </td>
                     <td style={{ padding: '16px', color: 'var(--color-text-primary)' }}>
-                      {getStaffName(p.staffId)}
+                      {getStaffName(p?.staffId)}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <span style={{ 
@@ -432,14 +432,14 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                         borderRadius: '16px',
                         fontSize: '12px',
                         fontWeight: 500,
-                        background: p.isGross ? 'var(--color-info-100)' : 'var(--color-warning-100)',
-                        color: p.isGross ? 'var(--color-info-700)' : 'var(--color-warning-700)'
+                        background: p?.isGross ? 'var(--color-info-100)' : 'var(--color-warning-100)',
+                        color: p?.isGross ? 'var(--color-info-700)' : 'var(--color-warning-700)'
                       }}>
-                        {p.isGross ? 'Gross' : 'Net'}
+                        {p?.isGross ? 'Gross' : 'Net'}
                       </span>
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center', color: 'var(--color-text-primary)' }}>
-                      {p.isRecurring ? '✓' : '✗'}
+                      {p?.isRecurring ? '✓' : '✗'}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <button

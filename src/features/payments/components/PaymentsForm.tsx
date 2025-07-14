@@ -108,8 +108,8 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
       await createPayment(companyId, paymentData);
       setForm(initialState);
       onAdded();
-    } catch (err: any) {
-      setError(err.message || 'Failed to add payment');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to add payment');
     } finally {
       setLoading(false);
     }
@@ -176,9 +176,9 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
             <option value="">
               {loadingStaff ? 'Loading employees...' : 'Select employee...'}
             </option>
-            {staff.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.personalDetails?.firstName} {s.personalDetails?.lastName} ({s.personalDetails?.employeeId || s.id})
+            {staff.filter(s => s !== null).map(s => (
+              <option key={s?.id} value={s?.id}>
+                {s?.personalDetails?.firstName} {s?.personalDetails?.lastName} ({s?.personalDetails?.employeeId || s?.id})
               </option>
             ))}
           </select>

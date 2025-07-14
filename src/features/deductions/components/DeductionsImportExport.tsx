@@ -106,8 +106,8 @@ const DeductionsImportExport: React.FC<{
             };
             await createDeduction(companyId, deductionData);
             success++;
-          } catch (err: any) {
-            errors.push({ row: i + 2, error: err.message || 'Import failed' });
+          } catch (err: unknown) {
+            errors.push({ row: i + 2, error: (err as Error).message || 'Import failed' });
             setRowErrors([...errors]);
           }
           setImportProgress(p => ({ ...p, processed: i + 1 }));
@@ -132,7 +132,7 @@ const DeductionsImportExport: React.FC<{
         }
       },
       error: err => {
-        setError(err.message || 'CSV parse error');
+        setError((err as Error).message || 'CSV parse error');
         setImporting(false);
       },
     });

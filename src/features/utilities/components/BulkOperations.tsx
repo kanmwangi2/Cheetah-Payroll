@@ -24,8 +24,8 @@ export default function BulkOperations({ type, companyId }: { type: string; comp
       if (type === 'staff') {await bulkUpdateStaff(companyId!, idArr, { [field]: value });}
       else if (type === 'payroll') {await bulkUpdatePayrolls(companyId!, idArr, { [field]: value });}
       setResult('Update successful');
-    } catch (e: any) {
-      setError(e.message || 'Update failed');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Update failed');
     }
   };
   const handleDelete = async () => {
@@ -39,8 +39,8 @@ export default function BulkOperations({ type, companyId }: { type: string; comp
       if (type === 'staff') {await bulkDeleteStaff(companyId!, idArr);}
       else if (type === 'payroll') {await bulkDeletePayrolls(companyId!, idArr);}
       setResult('Delete successful');
-    } catch (e: any) {
-      setError(e.message || 'Delete failed');
+    } catch (e: unknown) {
+      setError((e as Error).message || 'Delete failed');
     }
   };
 

@@ -3,7 +3,7 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase
 import { createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '../../../core/config/firebase.config';
 import { User, Company } from '../../../shared/types';
-import { isPayrollPreparerOrHigher, getRoleDisplayName } from '../../../shared/constants/app.constants';
+import { isPayrollPreparerOrHigher, getRoleDisplayName, type UserRole } from '../../../shared/constants/app.constants';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -318,7 +318,7 @@ const UserManagement: React.FC = () => {
                 />
               </div>
 
-              {formData.role && isPayrollPreparerOrHigher(formData.role as any) && (
+              {formData.role && isPayrollPreparerOrHigher(formData.role as UserRole) && (
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
                     Assign to Companies

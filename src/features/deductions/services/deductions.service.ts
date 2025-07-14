@@ -15,6 +15,7 @@ import {
 import { db } from '../../../core/config/firebase.config';
 import { Deduction, DeductionType } from '../../../shared/types';
 import { logAuditAction } from '../../../shared/services/audit.service';
+import { validateDeductionRecord, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
 
 // Deduction type labels
 export const DEDUCTION_TYPE_LABELS: Record<DeductionType, string> = {
@@ -34,7 +35,12 @@ export async function getDeductions(companyId: string): Promise<Deduction[]> {
     orderBy('createdAt', 'desc')
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Deduction));
+  const rawData = snapshot.docs.map(doc => ({ 
+    id: doc.id, 
+    ...sanitizeFirestoreData(doc.data()) 
+  }));
+  
+  return validateAndFilterRecords<Deduction>(rawData, validateDeductionRecord, 'Deduction');
 }
 
 export async function getActiveDeductions(companyId: string): Promise<Deduction[]> {

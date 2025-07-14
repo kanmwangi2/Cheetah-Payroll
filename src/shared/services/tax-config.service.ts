@@ -36,7 +36,7 @@ export async function loadTaxConfiguration(): Promise<TaxConfiguration> {
       
       // Transform database format to TaxConfiguration interface format
       const taxConfig: TaxConfiguration = {
-        payeBrackets: data.paye_brackets?.map((bracket: any) => ({
+        payeBrackets: data.paye_brackets?.map((bracket: Record<string, unknown>) => ({
           min: bracket.min,
           max: bracket.max,
           rate: bracket.rate

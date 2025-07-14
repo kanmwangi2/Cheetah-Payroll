@@ -28,6 +28,7 @@ import {
   Staff,
   PayrollTaxSettings 
 } from '../../../shared/types';
+import { validatePayrollRecord, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
 
 // Note: Tax configuration is now loaded dynamically from database
 // See tax-config.service.ts for configuration management
@@ -432,7 +433,12 @@ export async function getPayrolls(companyId: string): Promise<Payroll[]> {
     orderBy('createdAt', 'desc')
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payroll));
+  const rawData = snapshot.docs.map(doc => ({ 
+    id: doc.id, 
+    ...sanitizeFirestoreData(doc.data()) 
+  }));
+  
+  return validateAndFilterRecords<Payroll>(rawData, validatePayrollRecord, 'Payroll');
 }
 
 export async function getPayrollsByStatus(companyId: string, status: string): Promise<Payroll[]> {

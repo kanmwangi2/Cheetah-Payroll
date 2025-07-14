@@ -2,7 +2,7 @@ import { getFirestore, writeBatch, doc } from 'firebase/firestore';
 
 const db = getFirestore();
 
-export async function bulkUpdateStaff(companyId: string, staffIds: string[], updates: any) {
+export async function bulkUpdateStaff(companyId: string, staffIds: string[], updates: Record<string, unknown>) {
   const batch = writeBatch(db);
   staffIds.forEach(id => {
     batch.update(doc(db, 'companies', companyId, 'staff', id), updates);
@@ -18,7 +18,7 @@ export async function bulkDeleteStaff(companyId: string, staffIds: string[]) {
   await batch.commit();
 }
 
-export async function bulkUpdatePayrolls(companyId: string, payrollIds: string[], updates: any) {
+export async function bulkUpdatePayrolls(companyId: string, payrollIds: string[], updates: Record<string, unknown>) {
   const batch = writeBatch(db);
   payrollIds.forEach(id => {
     batch.update(doc(db, 'companies', companyId, 'payrolls', id), updates);

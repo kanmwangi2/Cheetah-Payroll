@@ -13,11 +13,11 @@ export interface ServiceResult<T> {
   success: boolean;
 }
 
-export interface ServiceOptions {
+export interface ServiceOptions<T = unknown> {
   retries?: number;
   retryDelay?: number;
   logOperation?: string;
-  validateInput?: (input: any) => string | null;
+  validateInput?: (input: T) => string | null;
 }
 
 /**
@@ -25,7 +25,7 @@ export interface ServiceOptions {
  */
 export async function withErrorHandling<T>(
   operation: () => Promise<T>,
-  options: ServiceOptions = {}
+  options: ServiceOptions<unknown> = {}
 ): Promise<ServiceResult<T>> {
   const {
     retries = 2,
@@ -34,13 +34,13 @@ export async function withErrorHandling<T>(
     validateInput,
   } = options;
 
-  let lastError: any;
+  let lastError: Error = new Error('Unknown error');
   
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       // Validate input if validator provided
       if (validateInput) {
-        const validationError = validateInput(arguments);
+        const validationError = validateInput(undefined as unknown as T);
         if (validationError) {
           return {
             error: validationError,
@@ -61,9 +61,9 @@ export async function withErrorHandling<T>(
         loading: false,
         success: true,
       };
-    } catch (error: any) {
-      lastError = error;
-      logger.error(`${logOperation} failed on attempt ${attempt + 1}`, error);
+    } catch (error: unknown) {
+      lastError = error as Error;
+      logger.error(`${logOperation} failed on attempt ${attempt + 1}`, error as Error);
       
       // If this is the last attempt or error is not retryable, break
       if (attempt === retries || !isRetryableError(error)) {
@@ -93,10 +93,10 @@ export async function withErrorHandling<T>(
  */
 export function createServiceFunction<TInput, TOutput>(
   operation: (input: TInput) => Promise<TOutput>,
-  options: ServiceOptions = {}
+  options: ServiceOptions<TInput> = {}
 ) {
   return async (input: TInput): Promise<ServiceResult<TOutput>> => {
-    return withErrorHandling(() => operation(input), options);
+    return withErrorHandling(() => operation(input), options as ServiceOptions<unknown>);
   };
 }
 
@@ -104,7 +104,7 @@ export function createServiceFunction<TInput, TOutput>(
  * Input validation helpers
  */
 export const validators = {
-  required: (value: any, fieldName: string): string | null => {
+  required: (value: unknown, fieldName: string): string | null => {
     if (value === null || value === undefined || value === '') {
       return `${fieldName} is required.`;
     }
@@ -133,7 +133,7 @@ export const validators = {
     return null;
   },
 
-  numeric: (value: any, fieldName: string): string | null => {
+  numeric: (value: unknown, fieldName: string): string | null => {
     if (value !== null && value !== undefined && value !== '' && isNaN(Number(value))) {
       return `${fieldName} must be a valid number.`;
     }
@@ -147,7 +147,7 @@ export const validators = {
     return null;
   },
 
-  companyId: (_companyId: string): string | null => {
+  companyId: (): string | null => {
     // Company ID validation removed - if we're in a company context, the ID is assumed valid
     return null;
   },

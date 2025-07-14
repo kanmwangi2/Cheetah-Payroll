@@ -5,28 +5,28 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
-interface VirtualizationConfig {
+interface VirtualizationConfig<T = unknown> {
   itemHeight: number;
   containerHeight: number;
-  items: any[];
+  items: T[];
   overscan?: number;
 }
 
-interface VirtualizationResult {
+interface VirtualizationResult<T = unknown> {
   startIndex: number;
   endIndex: number;
-  visibleItems: any[];
+  visibleItems: T[];
   totalHeight: number;
   offsetY: number;
   handleScroll: (event: React.UIEvent<HTMLDivElement>) => void;
 }
 
-export const useVirtualization = ({
+export const useVirtualization = <T = unknown>({
   itemHeight,
   containerHeight,
   items,
   overscan = 5,
-}: VirtualizationConfig): VirtualizationResult => {
+}: VirtualizationConfig<T>): VirtualizationResult<T> => {
   const [scrollTop, setScrollTop] = useState(0);
 
   const totalHeight = useMemo(() => items.length * itemHeight, [items.length, itemHeight]);

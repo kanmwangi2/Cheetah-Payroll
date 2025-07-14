@@ -25,7 +25,7 @@ const ForgotPassword: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [globalLogoUrl, setGlobalLogoUrl] = useState<string>('');
 
-  const { } = useThemeContext(); // Theme context is used by parent components
+  useThemeContext(); // Theme context is used by parent components
 
   // Load global logo settings
   useEffect(() => {
@@ -59,8 +59,8 @@ const ForgotPassword: React.FC = () => {
       await resetPassword(email);
       setMessage('Password reset email sent successfully! Please check your inbox and follow the instructions to reset your password.');
       logger.info('Password reset email sent successfully');
-    } catch (err: any) {
-      logger.error('Password reset failed', err);
+    } catch (err: unknown) {
+      logger.error('Password reset failed', err as Error);
       const userFriendlyMessage = getFirebaseErrorMessage(err);
       setError(userFriendlyMessage);
       
