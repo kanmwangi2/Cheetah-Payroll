@@ -51,34 +51,40 @@ export class ErrorBoundary extends Component<Props, State> {
           style={{
             padding: '20px',
             textAlign: 'center',
-            border: '2px solid #ff4444',
+            border: '2px solid var(--color-error-border)',
             borderRadius: '8px',
-            backgroundColor: '#ffe6e6',
+            backgroundColor: 'var(--color-error-bg)',
             margin: '20px',
+            color: 'var(--color-error-text)',
           }}
         >
-          <h2>Something went wrong</h2>
+          <h2>Something went wrong!</h2>
           <p>We're sorry, but there was an error displaying this content.</p>
-          <details style={{ marginTop: '10px', textAlign: 'left' }}>
-            <summary>Error Details</summary>
-            <pre
-              style={{
-                backgroundColor: '#f5f5f5',
-                padding: '10px',
-                borderRadius: '4px',
-                fontSize: '12px',
-                overflow: 'auto',
-              }}
-            >
-              {this.state.error?.message}
-            </pre>
-          </details>
+          <p>Please try refreshing the page or contact support if the problem persists.</p>
+          {/* Only show error details in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <details style={{ marginTop: '10px', textAlign: 'left' }}>
+              <summary>Error Details (Development only)</summary>
+              <pre
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  overflow: 'auto',
+                  color: '#333',
+                }}
+              >
+                {this.state.error?.message}
+              </pre>
+            </details>
+          )}
           <button
             onClick={() => window.location.reload()}
             style={{
               marginTop: '15px',
               padding: '10px 20px',
-              backgroundColor: '#007bff',
+              backgroundColor: 'var(--color-button-primary)',
               color: 'white',
               border: 'none',
               borderRadius: '4px',

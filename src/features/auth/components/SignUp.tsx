@@ -49,7 +49,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSuccess }) => {
           }
         }
       } catch (error) {
-        console.error('Error loading global logo:', error);
+        // Silently fail logo loading - not critical for functionality
       }
     };
 

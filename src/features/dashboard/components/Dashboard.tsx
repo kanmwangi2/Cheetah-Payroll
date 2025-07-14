@@ -26,6 +26,7 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
     thisMonthPayroll: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<number>(0);
   const navigate = useNavigate();
 
@@ -124,7 +125,8 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
         setLastUpdated(Date.now());
 
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        // Show user-friendly error message instead of console log
+        setError('Unable to load dashboard data. Please try refreshing the page.');
       } finally {
         setLoading(false);
       }

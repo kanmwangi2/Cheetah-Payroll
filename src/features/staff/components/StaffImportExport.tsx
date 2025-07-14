@@ -107,17 +107,29 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
     }
     
     // Email format check
-    if (!/^\S+@\S+\.\S+$/.test(row.email)) {
-      return `Invalid email address`;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email)) {
+      return `Invalid email address format`;
     }
-    // Phone validation (simple number check)
-    if (!/^\+?[\d\s\-\(\)]+$/.test(row.phone.toString().trim())) {
-      return `Invalid phone number format`;
+    
+    // ID number validation (16 digits for Rwanda)
+    if (!/^\d{16}$/.test(row.idNumber)) {
+      return `Invalid ID number format (must be 16 digits)`;
+    }
+    
+    // RSSB number validation
+    if (row.rssbNumber && !/^RSSB\d{6}$/.test(row.rssbNumber)) {
+      return `Invalid RSSB number format (must be RSSB followed by 6 digits)`;
+    }
+    // Phone validation (more comprehensive)
+    const phoneStr = row.phone.toString().trim();
+    if (!/^\+?[\d\s\-\(\)]{7,15}$/.test(phoneStr) || phoneStr.length < 7) {
+      return `Invalid phone number format (must be 7-15 digits)`;
     }
     
     // Emergency contact phone validation
-    if (!/^\+?[\d\s\-\(\)]+$/.test(row.emergencyContactPhone.toString().trim())) {
-      return `Invalid emergency contact phone number format`;
+    const emergencyPhoneStr = row.emergencyContactPhone.toString().trim();
+    if (!/^\+?[\d\s\-\(\)]{7,15}$/.test(emergencyPhoneStr) || emergencyPhoneStr.length < 7) {
+      return `Invalid emergency contact phone number format (must be 7-15 digits)`;
     }
     
     return null;
@@ -166,12 +178,9 @@ const StaffImportExport: React.FC<{ companyId: string; onImported: () => void; s
               // Keep all original fields for backward compatibility
               ...row,
               // Combine emergency contact fields for backward compatibility
-              emergencyContact: `${row.emergencyContactName} (${row.emergencyContactRelationship}) - ${row.emergencyContactPhone}`
+              emergencyContact: `${row.emergencyContactName || ''} (${row.emergencyContactRelationship || ''}) - ${row.emergencyContactPhone || ''}`
             };
-            const result = await createStaff({ companyId, data: transformedData });
-            if (!result.success) {
-              throw new Error(result.error || 'Failed to create staff');
-            }
+            await createStaff({ companyId, data: transformedData });
             success++;
           } catch (err: unknown) {
             errors.push({ row: i + 2, error: (err as Error).message || 'Import failed' });

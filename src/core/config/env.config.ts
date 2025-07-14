@@ -50,8 +50,10 @@ function validateEnv(): void {
 
   required.forEach(key => {
     if (!env[key as keyof typeof env]) {
-      // eslint-disable-next-line no-console
-      console.warn(`Missing environment variable: ${key}`);
+      // Environment variable validation - warn in development only
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Missing environment variable: ${key}`);
+      }
     }
   });
 }

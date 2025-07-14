@@ -73,7 +73,7 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
         const allDepartments = [...new Set([...commonDepartments, ...existingDepartments])].sort();
         setDepartments(allDepartments);
       } catch (error) {
-        console.error('Error loading departments:', error);
+        // Silently fall back to default departments if loading fails
         setDepartments(commonDepartments);
       }
     };
@@ -126,9 +126,9 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
         ...form.personalDetails,
         ...form.employmentDetails,
         ...form.bankDetails,
-        name: `${form.personalDetails.firstName} ${form.personalDetails.lastName}`.trim(),
+        name: `${form.personalDetails?.firstName || ''} ${form.personalDetails?.lastName || ''}`.trim(),
         // Create legacy emergencyContact for backward compatibility
-        emergencyContact: `${form.personalDetails.emergencyContactName} (${form.personalDetails.emergencyContactRelationship}) - ${form.personalDetails.emergencyContactPhone}`
+        emergencyContact: `${form.personalDetails?.emergencyContactName || ''} (${form.personalDetails?.emergencyContactRelationship || ''}) - ${form.personalDetails?.emergencyContactPhone || ''}`
       };
       
       await createStaff({ companyId, data: flatData });

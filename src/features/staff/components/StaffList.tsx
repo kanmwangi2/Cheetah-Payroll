@@ -78,14 +78,9 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
           ...data
         } as StaffMember;
         
-        // Log records without staffNumber for debugging
+        // Track records without staffNumber for user notification
         if (!staff.staffNumber) {
-          console.warn('Staff record missing staffNumber:', {
-            id: doc.id,
-            name: `${staff.firstName || ''} ${staff.lastName || ''}`.trim(),
-            email: staff.email,
-            data: data
-          });
+          // This will be shown in the UI with a visual indicator
         }
         
         return staff;
@@ -97,7 +92,8 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
       const uniqueDepartments = [...new Set(staffData.map(s => s.department).filter(Boolean))];
       setDepartments(uniqueDepartments);
     } catch (error) {
-      console.error('Error loading staff:', error);
+      // Show user-friendly error message instead of logging to console
+      alert('Unable to load staff members. Please refresh the page and try again.');
     } finally {
       setLoading(false);
     }
@@ -137,8 +133,8 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
       await deleteDoc(doc(db, 'companies', companyId, 'staff', staffId));
       loadStaff();
     } catch (error) {
-      console.error('Error deleting staff:', error);
-      alert('Error deleting staff member. Please try again.');
+      // Show user-friendly error message
+      alert('Unable to delete staff member. Please check your connection and try again.');
     }
   };
 

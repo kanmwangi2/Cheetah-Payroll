@@ -424,7 +424,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                       RWF {(p?.amount || 0).toLocaleString()}
                     </td>
                     <td style={{ padding: '16px', color: 'var(--color-text-primary)' }}>
-                      {getStaffName(p?.staffId)}
+                      {getStaffName(p?.staffId || '')}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <span style={{ 

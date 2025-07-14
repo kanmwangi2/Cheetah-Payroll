@@ -564,7 +564,7 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                       {d.type === 'loan' && (
                         <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
                           {d.monthlyInstallment && (
-                            <div>Monthly: RWF {d.monthlyInstallment.toLocaleString()}</div>
+                            <div>Monthly: RWF {d.monthlyInstallment?.toLocaleString() || 'N/A'}</div>
                           )}
                           {d.remainingInstallments && (
                             <div>Remaining: {d.remainingInstallments} payments</div>
@@ -687,9 +687,9 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                   fontSize: '14px',
                   color: 'var(--color-text-secondary)'
                 }}>
-                  <div><strong>Remaining Balance:</strong> RWF {deduction.remainingBalance.toLocaleString()}</div>
+                  <div><strong>Remaining Balance:</strong> RWF {deduction?.remainingBalance?.toLocaleString() || '0'}</div>
                   {deduction.monthlyInstallment && (
-                    <div><strong>Monthly Installment:</strong> RWF {deduction.monthlyInstallment.toLocaleString()}</div>
+                    <div><strong>Monthly Installment:</strong> RWF {deduction?.monthlyInstallment?.toLocaleString() || 'N/A'}</div>
                   )}
                 </div>
               );

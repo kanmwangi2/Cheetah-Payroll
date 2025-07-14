@@ -61,7 +61,8 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
             }));
         setStaff(sharedStaff);
       } catch (error) {
-        console.error('Failed to load staff:', error);
+        // Silently handle staff loading error - form can still work without staff list
+        setStaff([]);
       } finally {
         setLoadingStaff(false);
       }

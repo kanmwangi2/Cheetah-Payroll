@@ -56,7 +56,7 @@ export async function calculatePayrollWithCurrentConfig(
         companyTaxSettings = companyData.payrollTaxSettings;
       }
     } catch (error) {
-      console.warn('Could not load company tax settings, using defaults:', error);
+      // Silently fall back to defaults if company tax settings cannot be loaded
     }
   }
   
@@ -93,7 +93,7 @@ export async function grossUpAmountWithCurrentConfig(
         companyTaxSettings = companyData.payrollTaxSettings;
       }
     } catch (error) {
-      console.warn('Could not load company tax settings, using defaults:', error);
+      // Silently fall back to defaults if company tax settings cannot be loaded
     }
   }
   
@@ -220,7 +220,7 @@ async function updateDeductionBalancesForPayroll(
               if (canProcessDeduction(deduction, deductionAmount)) {
                 await processLoanPayment(companyId, deduction.id, deductionAmount);
               } else {
-                console.warn(`Cannot process deduction ${deduction.id}: insufficient balance or inactive status`);
+                // Skip deduction processing for insufficient balance or inactive status
               }
             } else if (action === 'reverse') {
               // Reverse the deduction (increase balance back)

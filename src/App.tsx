@@ -10,6 +10,7 @@ import { Company } from './shared/types';
 import LoadingSpinner from './shared/components/ui/LoadingSpinner';
 import MainLayout from './shared/components/layout/MainLayout';
 import { APP_CONSTANTS } from './shared/constants/app.constants';
+import { ErrorBoundary } from './shared/components/ErrorBoundary';
 
 // Lazy load feature modules with webpack chunk names for better splitting
 const Dashboard = lazy(() => 
@@ -57,14 +58,46 @@ const AppContent: React.FC = () => {
       <Suspense fallback={<LoadingSpinner message={APP_CONSTANTS.LOADING_MESSAGES.GENERIC} />}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<Dashboard companyId={company.id} />} />
-          <Route path="/staff" element={<StaffList companyId={company.id} />} />
-          <Route path="/payments" element={<PaymentsList companyId={company.id} />} />
-          <Route path="/deductions" element={<DeductionsList companyId={company.id} />} />
-          <Route path="/payroll" element={<PayrollList companyId={company.id} />} />
-          <Route path="/reports" element={<Reports companyId={company.id} />} />
-          <Route path="/utilities" element={<Utilities companyId={company.id} companyName={company.name} />} />
-          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/dashboard" element={
+            <ErrorBoundary>
+              <Dashboard companyId={company.id} />
+            </ErrorBoundary>
+          } />
+          <Route path="/staff" element={
+            <ErrorBoundary>
+              <StaffList companyId={company.id} />
+            </ErrorBoundary>
+          } />
+          <Route path="/payments" element={
+            <ErrorBoundary>
+              <PaymentsList companyId={company.id} />
+            </ErrorBoundary>
+          } />
+          <Route path="/deductions" element={
+            <ErrorBoundary>
+              <DeductionsList companyId={company.id} />
+            </ErrorBoundary>
+          } />
+          <Route path="/payroll" element={
+            <ErrorBoundary>
+              <PayrollList companyId={company.id} />
+            </ErrorBoundary>
+          } />
+          <Route path="/reports" element={
+            <ErrorBoundary>
+              <Reports companyId={company.id} />
+            </ErrorBoundary>
+          } />
+          <Route path="/utilities" element={
+            <ErrorBoundary>
+              <Utilities companyId={company.id} companyName={company.name} />
+            </ErrorBoundary>
+          } />
+          <Route path="/admin" element={
+            <ErrorBoundary>
+              <AdminPanel />
+            </ErrorBoundary>
+          } />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Suspense>

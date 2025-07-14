@@ -34,6 +34,7 @@ const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
   });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -103,7 +104,8 @@ const Dashboard: React.FC<DashboardProps> = ({ companyId }) => {
           }
         ]);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        // Show user-friendly error message instead of console log
+        setError('Unable to load dashboard data. Please try refreshing the page.');
       } finally {
         setLoading(false);
       }

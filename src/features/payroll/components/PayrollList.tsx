@@ -423,12 +423,12 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                         RWF {p?.totalNetPay?.toLocaleString() || '0'}
                       </td>
                       <td style={{ padding: '16px', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '13px' }}>
-                        {p?.createdAt ? new Date(p.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                        {p?.createdAt?.seconds ? new Date(p.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
                       </td>
                       <td style={{ padding: '16px', textAlign: 'center' }}>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
                           <button
-                            onClick={() => console.log('View payroll:', p.id)}
+                            onClick={() => alert('View payroll functionality not yet implemented')}
                             style={{
                               padding: '6px 12px',
                               borderRadius: 4,
@@ -444,7 +444,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                           </button>
                           {canEditPayroll(p) && (
                             <button
-                              onClick={() => console.log('Edit payroll:', p.id)}
+                              onClick={() => alert('Edit payroll functionality not yet implemented')}
                               style={{
                                 padding: '6px 12px',
                                 borderRadius: 4,

@@ -4,25 +4,31 @@ import { createRoot } from 'react-dom/client';
 import RootRoutes from './RootRoutes';
 import { AppProvider } from './core/providers/AppProvider';
 
-console.log('React app starting...');
+// React app starting
 
 const container = document.getElementById('root');
 if (container) {
-  console.log('Root container found, rendering app...');
+  // Root container found, rendering app
   try {
     createRoot(container).render(
       <AppProvider>
         <RootRoutes />
       </AppProvider>
     );
-    console.log('App rendered successfully');
+    // App rendered successfully
   } catch (error) {
-    console.error('Error rendering app:', error);
+    // Log error for debugging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error rendering app:', error);
+    }
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     container.innerHTML = `<div style="padding: 20px; color: red;">Error loading app: ${errorMessage}</div>`;
   }
 } else {
-  console.error('Root container not found!');
+  // Log error for debugging (only in development)
+  if (process.env.NODE_ENV === 'development') {
+    console.error('Root container not found!');
+  }
   document.body.innerHTML =
     '<div style="padding: 20px; color: red;">Error: Root container not found!</div>';
 }
