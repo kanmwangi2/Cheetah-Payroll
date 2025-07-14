@@ -128,14 +128,15 @@ const UserProfile: React.FC = () => {
       setEmailChangeForm({ newEmail: '', currentPassword: '' });
       setShowEmailChange(false);
     } catch (err: unknown) {
-      if (err.code === 'auth/wrong-password') {
+      const firebaseError = err as { code?: string; message?: string };
+      if (firebaseError.code === 'auth/wrong-password') {
         setError('Current password is incorrect');
-      } else if (err.code === 'auth/email-already-in-use') {
+      } else if (firebaseError.code === 'auth/email-already-in-use') {
         setError('This email is already in use by another account');
-      } else if (err.code === 'auth/invalid-email') {
+      } else if (firebaseError.code === 'auth/invalid-email') {
         setError('Invalid email address');
       } else {
-        setError((err as Error).message || 'Failed to update email');
+        setError(firebaseError.message || 'Failed to update email');
       }
     } finally {
       setLoading(false);

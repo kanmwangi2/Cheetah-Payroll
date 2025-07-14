@@ -15,7 +15,7 @@ import {
 import { db } from '../../../core/config/firebase.config';
 import { Deduction, DeductionType } from '../../../shared/types';
 import { logAuditAction } from '../../../shared/services/audit.service';
-import { validateDeductionRecord, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
+import { validateDeductionRecordAsDeduction, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
 
 // Deduction type labels
 export const DEDUCTION_TYPE_LABELS: Record<DeductionType, string> = {
@@ -40,7 +40,7 @@ export async function getDeductions(companyId: string): Promise<Deduction[]> {
     ...sanitizeFirestoreData(doc.data()) 
   }));
   
-  return validateAndFilterRecords<Deduction>(rawData, validateDeductionRecord, 'Deduction');
+  return validateAndFilterRecords<Deduction>(rawData, validateDeductionRecordAsDeduction, 'Deduction');
 }
 
 export async function getActiveDeductions(companyId: string): Promise<Deduction[]> {

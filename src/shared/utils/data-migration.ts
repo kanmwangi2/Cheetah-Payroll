@@ -225,7 +225,7 @@ async function migrateCollection(
             if (!options.dryRun) {
               // Remove id from data before updating
               const { id: _, ...updateData } = fixedData;
-              batch.update(doc(db, 'companies', options.companyId, collectionName, docRef.id), updateData);
+              batch.update(doc(db, 'companies', options.companyId, collectionName, docRef.id), updateData as any);
               batchCount++;
               
               // Commit batch every 400 operations (Firestore limit is 500)
@@ -284,7 +284,7 @@ async function migrateCollection(
       await batch.commit();
     }
     
-    logger.info(`Migration completed for ${collectionName}`, report);
+    logger.info(`Migration completed for ${collectionName}`, report as any);
     
   } catch (error) {
     logger.error(`Migration failed for ${collectionName}`, error as Error);

@@ -28,7 +28,7 @@ import {
   Staff,
   PayrollTaxSettings 
 } from '../../../shared/types';
-import { validatePayrollRecord, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
+import { validatePayrollRecordAsPayroll, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
 
 // Note: Tax configuration is now loaded dynamically from database
 // See tax-config.service.ts for configuration management
@@ -438,7 +438,7 @@ export async function getPayrolls(companyId: string): Promise<Payroll[]> {
     ...sanitizeFirestoreData(doc.data()) 
   }));
   
-  return validateAndFilterRecords<Payroll>(rawData, validatePayrollRecord, 'Payroll');
+  return validateAndFilterRecords<Payroll>(rawData, validatePayrollRecordAsPayroll, 'Payroll');
 }
 
 export async function getPayrollsByStatus(companyId: string, status: string): Promise<Payroll[]> {

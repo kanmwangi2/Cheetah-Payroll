@@ -18,7 +18,7 @@ export function validateRequiredFields<T>(data: Record<string, unknown>, require
   const sanitizedData = { ...data };
 
   for (const field of requiredFields) {
-    const value = data[field];
+    const value = data[field as string];
     if (value === null || value === undefined || value === '') {
       errors.push(`Missing required field: ${String(field)}`);
     }
@@ -35,7 +35,7 @@ export function validateRequiredFields<T>(data: Record<string, unknown>, require
   return {
     isValid: errors.length === 0,
     errors,
-    sanitizedData: errors.length === 0 ? sanitizedData : undefined
+    sanitizedData: errors.length === 0 ? (sanitizedData as unknown as T) : undefined
   };
 }
 
@@ -134,22 +134,24 @@ export function validateStaffRecord(data: Record<string, unknown>): ValidationRe
   return {
     isValid: errors.length === 0,
     errors,
-    sanitizedData: errors.length === 0 ? sanitizedData : undefined
+    sanitizedData: errors.length === 0 ? (sanitizedData as unknown as StaffValidationSchema) : undefined
   };
 }
 
 // Payment validation schema
 export interface PaymentValidationSchema {
   id: string;
+  companyId: string;
   type: string;
   amount: number;
   staffId: string;
   isGross: boolean;
   isRecurring: boolean;
+  effectiveDate: string;
   status: 'active' | 'inactive';
   description?: string;
-  createdAt: string | Date;
-  updatedAt: string | Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export function validatePaymentRecord(data: Record<string, unknown>): ValidationResult<PaymentValidationSchema> {
@@ -181,7 +183,7 @@ export function validatePaymentRecord(data: Record<string, unknown>): Validation
 
   // Validate status
   const validStatuses = ['active', 'inactive'];
-  if (!validStatuses.includes(data.status)) {
+  if (typeof data.status === 'string' && !validStatuses.includes(data.status)) {
     errors.push('Invalid status value');
   }
 
@@ -196,22 +198,23 @@ export function validatePaymentRecord(data: Record<string, unknown>): Validation
   return {
     isValid: errors.length === 0,
     errors,
-    sanitizedData: errors.length === 0 ? data : undefined
+    sanitizedData: errors.length === 0 ? (data as unknown as PaymentValidationSchema) : undefined
   };
 }
 
 // Deduction validation schema
 export interface DeductionValidationSchema {
   id: string;
+  companyId: string;
   type: string;
   originalAmount: number;
   remainingBalance: number;
   monthlyInstallment?: number;
   staffId: string;
-  status: 'active' | 'completed' | 'suspended';
+  status: 'active' | 'completed' | 'cancelled';
   description?: string;
-  createdAt: string | Date;
-  updatedAt: string | Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export function validateDeductionRecord(data: Record<string, unknown>): ValidationResult<DeductionValidationSchema> {
@@ -237,13 +240,13 @@ export function validateDeductionRecord(data: Record<string, unknown>): Validati
   }
 
   // Validate remaining balance doesn't exceed original amount
-  if (data.remainingBalance > data.originalAmount) {
+  if (typeof data.remainingBalance === 'number' && typeof data.originalAmount === 'number' && data.remainingBalance > data.originalAmount) {
     errors.push('Remaining balance cannot exceed original amount');
   }
 
   // Validate status
-  const validStatuses = ['active', 'completed', 'suspended'];
-  if (!validStatuses.includes(data.status)) {
+  const validStatuses = ['active', 'completed', 'cancelled'];
+  if (typeof data.status === 'string' && !validStatuses.includes(data.status)) {
     errors.push('Invalid status value');
   }
 
@@ -258,20 +261,24 @@ export function validateDeductionRecord(data: Record<string, unknown>): Validati
   return {
     isValid: errors.length === 0,
     errors,
-    sanitizedData: errors.length === 0 ? data : undefined
+    sanitizedData: errors.length === 0 ? (data as unknown as DeductionValidationSchema) : undefined
   };
 }
 
 // Payroll validation schema
 export interface PayrollValidationSchema {
   id: string;
+  companyId: string;
   period: string;
-  status: 'draft' | 'pending' | 'completed';
+  status: 'draft' | 'pending_approval' | 'approved' | 'processed';
   staffCount: number;
   totalGrossPay: number;
   totalNetPay: number;
-  createdAt: string | Date;
-  updatedAt: string | Date;
+  totalEmployeeTax: number;
+  totalEmployerContributions: number;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export function validatePayrollRecord(data: Record<string, unknown>): ValidationResult<PayrollValidationSchema> {
@@ -317,7 +324,7 @@ export function validatePayrollRecord(data: Record<string, unknown>): Validation
   return {
     isValid: errors.length === 0,
     errors,
-    sanitizedData: errors.length === 0 ? data as PayrollValidationSchema : undefined
+    sanitizedData: errors.length === 0 ? (data as unknown as PayrollValidationSchema) : undefined
   };
 }
 
@@ -379,4 +386,44 @@ export function sanitizeFirestoreData(data: Record<string, unknown>): Record<str
   });
   
   return sanitized;
+}
+
+// Import the actual types for wrapper functions
+import { Payment, Deduction, Payroll, Staff } from '../types';
+
+// Wrapper functions to bridge validation schemas to actual types
+export function validatePaymentRecordAsPayment(data: Record<string, unknown>): ValidationResult<Payment> {
+  const result = validatePaymentRecord(data);
+  return {
+    isValid: result.isValid,
+    errors: result.errors,
+    sanitizedData: result.sanitizedData ? (result.sanitizedData as unknown as Payment) : undefined
+  };
+}
+
+export function validateDeductionRecordAsDeduction(data: Record<string, unknown>): ValidationResult<Deduction> {
+  const result = validateDeductionRecord(data);
+  return {
+    isValid: result.isValid,
+    errors: result.errors,
+    sanitizedData: result.sanitizedData ? (result.sanitizedData as unknown as Deduction) : undefined
+  };
+}
+
+export function validatePayrollRecordAsPayroll(data: Record<string, unknown>): ValidationResult<Payroll> {
+  const result = validatePayrollRecord(data);
+  return {
+    isValid: result.isValid,
+    errors: result.errors,
+    sanitizedData: result.sanitizedData ? (result.sanitizedData as unknown as Payroll) : undefined
+  };
+}
+
+export function validateStaffRecordAsStaff(data: Record<string, unknown>): ValidationResult<Staff> {
+  const result = validateStaffRecord(data);
+  return {
+    isValid: result.isValid,
+    errors: result.errors,
+    sanitizedData: result.sanitizedData ? (result.sanitizedData as unknown as Staff) : undefined
+  };
 }

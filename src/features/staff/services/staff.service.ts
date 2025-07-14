@@ -17,7 +17,7 @@ import { createServiceFunction, validators } from '../../../shared/utils/service
 import { logger } from '../../../shared/utils/logger';
 import { logAuditAction } from '../../../shared/services/audit.service';
 import { Staff, StaffInput } from '../../../shared/types';
-import { validateStaffRecord, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
+import { validateStaffRecordAsStaff, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
 
 // Validation functions
 const validateStaffInput = (data: StaffInput): string | null => {
@@ -75,7 +75,7 @@ export const getStaff = createServiceFunction(
     }));
     
     // Apply strict validation and filter out invalid records
-    return validateAndFilterRecords<Staff>(rawData, validateStaffRecord, 'Staff');
+    return validateAndFilterRecords<Staff>(rawData, validateStaffRecordAsStaff, 'Staff');
   },
   {
     logOperation: 'Get staff list',

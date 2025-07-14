@@ -15,7 +15,7 @@ import {
 import { db } from '../../../core/config/firebase.config';
 import { Payment, PaymentType } from '../../../shared/types';
 import { logAuditAction } from '../../../shared/services/audit.service';
-import { validatePaymentRecord, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
+import { validatePaymentRecordAsPayment, validateAndFilterRecords, sanitizeFirestoreData } from '../../../shared/utils/data-validation';
 
 // Export utility functions
 export const PAYMENT_TYPE_LABELS: Record<PaymentType, string> = {
@@ -58,7 +58,7 @@ export async function getPayments(companyId: string): Promise<Payment[]> {
   }));
   
   // Apply strict validation and filter out invalid records
-  return validateAndFilterRecords<Payment>(rawData, validatePaymentRecord, 'Payment');
+  return validateAndFilterRecords<Payment>(rawData, validatePaymentRecordAsPayment, 'Payment');
 }
 
 export async function getActivePayments(companyId: string): Promise<Payment[]> {
@@ -84,7 +84,7 @@ export async function getPaymentsByStaff(companyId: string, staffId: string): Pr
     ...sanitizeFirestoreData(doc.data()) 
   }));
   
-  return validateAndFilterRecords<Payment>(rawData, validatePaymentRecord, 'Payment');
+  return validateAndFilterRecords<Payment>(rawData, validatePaymentRecordAsPayment, 'Payment');
 }
 
 export async function getPaymentsByType(companyId: string, type: PaymentType): Promise<Payment[]> {
