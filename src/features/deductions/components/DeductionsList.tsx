@@ -4,6 +4,7 @@ import { getStaff } from '../../staff/services/staff.service';
 import { Deduction, Staff } from '../../../shared/types';
 import DeductionsForm from './DeductionsForm';
 import DeductionsImportExport from './DeductionsImportExport';
+import DeductionProfile from './DeductionProfile';
 import EmailSender from '../../../shared/components/ui/EmailSender';
 import { ReportEmailData } from '../../../shared/services/email.service';
 import Button from '../../../shared/components/ui/Button';
@@ -21,6 +22,7 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
+  const [selectedDeduction, setSelectedDeduction] = useState<Deduction | null>(null);
   const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
 
@@ -574,6 +576,20 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => setSelectedDeduction(d)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: 4,
+                            border: '1px solid var(--color-button-primary)',
+                            background: 'var(--color-card-bg)',
+                            color: 'var(--color-button-primary)',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          View
+                        </button>
                         {d.type === 'loan' && d.status === 'active' && d.remainingBalance > 0 && (
                           <button
                             onClick={() => setPaymentModalOpen(d.id)}
@@ -800,6 +816,18 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
             />
           </div>
         </div>
+      )}
+
+      {/* Deduction Profile Modal */}
+      {selectedDeduction && (
+        <DeductionProfile
+          companyId={companyId}
+          deductionId={selectedDeduction.id}
+          onClose={() => setSelectedDeduction(null)}
+          onUpdated={() => {
+            setRefresh(r => r + 1);
+          }}
+        />
       )}
     </div>
   );

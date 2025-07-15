@@ -172,6 +172,11 @@ export async function getPayment(companyId: string, paymentId: string): Promise<
   return d.exists() ? { id: d.id, ...d.data() } as Payment : null;
 }
 
+// Alias for consistency with other components
+export async function getPaymentById(companyId: string, paymentId: string): Promise<Payment | null> {
+  return getPayment(companyId, paymentId);
+}
+
 // Bulk operations
 export async function bulkCreatePayments(companyId: string, payments: Omit<Payment, 'id'>[]): Promise<void> {
   const batch = writeBatch(db);

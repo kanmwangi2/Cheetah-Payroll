@@ -167,6 +167,11 @@ export async function getDeduction(companyId: string, deductionId: string): Prom
   return d.exists() ? { id: d.id, ...d.data() } as Deduction : null;
 }
 
+// Alias for consistency with other components
+export async function getDeductionById(companyId: string, deductionId: string): Promise<Deduction | null> {
+  return getDeduction(companyId, deductionId);
+}
+
 // Loan management functions
 export async function processLoanPayment(companyId: string, deductionId: string, paymentAmount: number): Promise<void> {
   const deduction = await getDeduction(companyId, deductionId);

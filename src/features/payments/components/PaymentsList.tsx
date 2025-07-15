@@ -4,6 +4,7 @@ import { getStaff } from '../../staff/services/staff.service';
 import { Payment, Staff } from '../../../shared/types';
 import PaymentsForm from './PaymentsForm';
 import PaymentsImportExport from './PaymentsImportExport';
+import PaymentProfile from './PaymentProfile';
 import Button from '../../../shared/components/ui/Button';
 
 const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
@@ -18,6 +19,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -467,20 +469,36 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                       )}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        style={{
-                          padding: '6px 12px',
-                          borderRadius: 4,
-                          border: '1px solid var(--color-error-500)',
-                          background: 'var(--color-bg-primary)',
-                          color: 'var(--color-error-500)',
-                          fontSize: '12px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Delete
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                        <button
+                          onClick={() => setSelectedPayment(p)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: 4,
+                            border: '1px solid var(--color-button-primary)',
+                            background: 'var(--color-card-bg)',
+                            color: 'var(--color-button-primary)',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p.id)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: 4,
+                            border: '1px solid var(--color-error-500)',
+                            background: 'var(--color-bg-primary)',
+                            color: 'var(--color-error-500)',
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -570,6 +588,18 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
             />
           </div>
         </div>
+      )}
+
+      {/* Payment Profile Modal */}
+      {selectedPayment && (
+        <PaymentProfile
+          companyId={companyId}
+          paymentId={selectedPayment.id}
+          onClose={() => setSelectedPayment(null)}
+          onUpdated={() => {
+            setRefresh(r => r + 1);
+          }}
+        />
       )}
     </div>
   );
