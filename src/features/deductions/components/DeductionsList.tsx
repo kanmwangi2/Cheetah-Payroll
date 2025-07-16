@@ -570,16 +570,10 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <div className="table-actions">
                         <button
-                          onClick={() => setSelectedDeduction(d)}
-                          className="btn btn-info btn-sm"
-                        >
-                          View
-                        </button>
-                        <button
                           onClick={() => setEditingDeduction(d)}
                           className="btn btn-warning btn-sm"
                         >
-                          Edit
+                          View/Edit
                         </button>
                         {d.type === 'loan' && d.status === 'active' && d.remainingBalance > 0 && (
                           <button

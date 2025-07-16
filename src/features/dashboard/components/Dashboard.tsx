@@ -177,7 +177,7 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
           Dashboard
         </h1>
         <div className="dashboard-timestamp">
-          Last updated: {new Date().toLocaleString()}
+          Last updated: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}, {new Date().toLocaleTimeString()}
         </div>
       </div>
 

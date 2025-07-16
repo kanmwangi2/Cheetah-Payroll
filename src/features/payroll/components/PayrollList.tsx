@@ -3,7 +3,7 @@ import { getPayrolls, createComprehensivePayroll, deletePayroll } from '../servi
 import { useAuthContext } from '../../../core/providers/AuthProvider';
 import { isPayrollPreparerOrHigher, isCompanyAdminOrHigher } from '../../../shared/constants/app.constants';
 import PayrollImportExport from './PayrollImportExport';
-import EmailSender, { BulkEmailSender } from '../../../shared/components/ui/EmailSender';
+import { BulkEmailSender } from '../../../shared/components/ui/EmailSender';
 import { PayslipEmailData } from '../../../shared/services/email.service';
 import Button from '../../../shared/components/ui/Button';
 
@@ -418,18 +418,12 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                       </td>
                       <td style={{ padding: '16px', textAlign: 'center' }}>
                         <div className="table-actions">
-                          <button
-                            onClick={() => alert('View payroll functionality not yet implemented')}
-                            className="btn btn-info btn-sm"
-                          >
-                            View
-                          </button>
                           {canEditPayroll(p) && (
                             <button
-                              onClick={() => alert('Edit payroll functionality not yet implemented')}
+                              onClick={() => alert('View/Edit payroll functionality not yet implemented')}
                               className="btn btn-warning btn-sm"
                             >
-                              Edit
+                              View/Edit
                             </button>
                           )}
                           {canSendEmails(p) && createPayslipEmailData(p).length > 0 && (

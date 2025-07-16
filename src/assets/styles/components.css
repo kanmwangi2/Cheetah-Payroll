@@ -301,7 +301,7 @@ button[type="submit"]:disabled {
 /* Modal Styling */
 .modal-overlay {
   position: fixed;
-  top: 0;
+  top: 60px; /* Position below top header */
   left: 0;
   right: 0;
   bottom: 0;
@@ -507,6 +507,12 @@ button[type="submit"]:disabled {
   padding: var(--spacing-lg) var(--spacing-xl);
   font-size: var(--font-size-base);
   min-height: 48px;
+}
+
+.btn-xl {
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  font-size: var(--font-size-lg);
+  min-height: 56px;
 }
 
 /* Button Groups */
@@ -734,7 +740,7 @@ label {
 /* Staff Profile Modal Styles */
 .staff-profile-modal {
   position: fixed;
-  top: 0;
+  top: 60px; /* Position below top header */
   left: 0;
   right: 0;
   bottom: 0;

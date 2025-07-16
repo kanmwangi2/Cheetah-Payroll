@@ -122,33 +122,13 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
             onClick={() => setShowImportExport(true)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 6,
-              border: 'none',
-              background: 'var(--color-primary-600)',
-              color: 'var(--color-text-inverse)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px',
-              transition: 'all var(--transition-normal)'
-            }}
+            className="btn btn-primary btn-md"
           >
             📤 Import/Export
           </button>
           <button
             onClick={() => setShowForm(true)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 6,
-              border: 'none',
-              background: 'var(--color-primary-600)',
-              color: 'var(--color-text-inverse)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              fontSize: '14px',
-              transition: 'all var(--transition-normal)'
-            }}
+            className="btn btn-primary btn-md"
           >
             + Add Payment
           </button>
@@ -462,16 +442,10 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                     <td style={{ padding: '16px', textAlign: 'center' }}>
                       <div className="table-actions">
                         <button
-                          onClick={() => setSelectedPayment(p)}
-                          className="btn btn-info btn-sm"
-                        >
-                          View
-                        </button>
-                        <button
                           onClick={() => setEditingPayment(p)}
                           className="btn btn-warning btn-sm"
                         >
-                          Edit
+                          View/Edit
                         </button>
                         <button
                           onClick={() => handleDelete(p.id)}

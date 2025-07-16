@@ -141,19 +141,23 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
 
         {/* Company Selection Card */}
         <div style={cardStyles}>
-          {/* Header with logo and logout */}
-          <div style={headerStyles}>
-            <div style={logoContainerStyles}>
-              <h1 style={titleStyles}>
-                Company Selection
-              </h1>
-            </div>
+          {/* Logout button */}
+          <div style={logoutContainerStyles}>
             <button
               onClick={handleLogout}
-              style={logoutButtonStyles}
+              className="btn btn-danger btn-sm"
             >
               Logout
             </button>
+          </div>
+          
+          {/* Header with title */}
+          <div style={headerStyles}>
+            <div style={logoContainerStyles}>
+              <h1 style={titleStyles}>
+                Select a Company
+              </h1>
+            </div>
           </div>
 
           {/* User info */}
@@ -265,7 +269,8 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
           <button
             onClick={handleProceedToCompany}
             disabled={!selectedCompany}
-            style={getProceedButtonStyles(!!selectedCompany)}
+            className="btn btn-primary btn-lg"
+            style={{ width: '100%' }}
           >
             Proceed to Company Dashboard
           </button>
@@ -281,7 +286,7 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
               </p>
               <button
                 onClick={() => navigate('/admin')}
-                style={adminButtonStyles}
+                className="btn btn-secondary btn-md"
               >
                 Open Admin Panel
               </button>
@@ -331,9 +336,15 @@ const cardStyles: React.CSSProperties = {
   transition: 'background-color var(--transition-normal), border-color var(--transition-normal)',
 };
 
+const logoutContainerStyles: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'flex-end',
+  marginBottom: 'var(--spacing-lg)',
+};
+
 const headerStyles: React.CSSProperties = {
   display: 'flex',
-  justifyContent: 'space-between',
+  justifyContent: 'center',
   alignItems: 'center',
   marginBottom: 'var(--spacing-4xl)',
 };
@@ -342,7 +353,6 @@ const logoContainerStyles: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  flex: 1,
   justifyContent: 'center',
 };
 
@@ -355,17 +365,6 @@ const titleStyles: React.CSSProperties = {
   transition: 'color var(--transition-normal)',
 };
 
-const logoutButtonStyles: React.CSSProperties = {
-  padding: 'var(--spacing-sm) var(--spacing-lg)',
-  borderRadius: 'var(--border-radius-md)',
-  border: '1px solid var(--color-error-border)',
-  backgroundColor: 'var(--color-bg-secondary)',
-  color: 'var(--color-error-text)',
-  cursor: 'pointer',
-  fontSize: 'var(--font-size-sm)',
-  fontWeight: 'var(--font-weight-medium)',
-  transition: 'all var(--transition-normal)',
-};
 
 const userInfoStyles: React.CSSProperties = {
   marginBottom: 'var(--spacing-4xl)',
@@ -418,20 +417,6 @@ const inputStyles: React.CSSProperties = {
 };
 
 
-const getProceedButtonStyles = (enabled: boolean): React.CSSProperties => ({
-  width: '100%',
-  padding: 'var(--spacing-md) var(--spacing-xl)',
-  borderRadius: 'var(--border-radius-md)',
-  border: 'none',
-  backgroundColor: enabled ? 'var(--color-primary-500)' : 'var(--color-gray-400)',
-  color: 'var(--color-text-inverse)',
-  fontWeight: 'var(--font-weight-semibold)',
-  cursor: enabled ? 'pointer' : 'not-allowed',
-  fontSize: 'var(--font-size-base)',
-  marginBottom: 'var(--spacing-xl)',
-  transition: 'all var(--transition-normal)',
-  opacity: enabled ? 1 : 0.6,
-});
 
 const adminPanelStyles: React.CSSProperties = {
   padding: 'var(--spacing-xl)',
@@ -459,17 +444,6 @@ const adminDescriptionStyles: React.CSSProperties = {
   transition: 'color var(--transition-normal)',
 };
 
-const adminButtonStyles: React.CSSProperties = {
-  padding: 'var(--spacing-sm) var(--spacing-lg)',
-  borderRadius: 'var(--border-radius-md)',
-  border: '1px solid var(--color-primary-500)',
-  backgroundColor: 'var(--color-bg-secondary)',
-  color: 'var(--color-primary-600)',
-  fontWeight: 'var(--font-weight-medium)',
-  cursor: 'pointer',
-  fontSize: 'var(--font-size-sm)',
-  transition: 'all var(--transition-normal)',
-};
 
 const errorStyles: React.CSSProperties = {
   display: 'flex',

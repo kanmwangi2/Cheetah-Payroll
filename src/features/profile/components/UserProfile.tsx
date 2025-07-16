@@ -46,12 +46,7 @@ const UserProfile: React.FC = () => {
 
   // Profile picture state
   const [profilePicture, setProfilePicture] = useState<string | null>(user?.photoURL || null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [cropData, setCropData] = useState({ x: 0, y: 0, width: 200, height: 200 });
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -144,84 +139,19 @@ const UserProfile: React.FC = () => {
   };
 
   // Profile picture handlers
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError('File size must be less than 5MB');
-        return;
-      }
-      
-      if (!file.type.startsWith('image/')) {
-        setError('Please select an image file');
-        return;
-      }
-      
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviewUrl(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleCropChange = (field: string, value: number) => {
-    setCropData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const cropImage = (imageUrl: string): Promise<Blob> => {
-    return new Promise((resolve) => {
-      const canvas = canvasRef.current!;
-      const ctx = canvas.getContext('2d')!;
-      const image = new Image();
-      
-      image.onload = () => {
-        canvas.width = cropData.width;
-        canvas.height = cropData.height;
-        
-        ctx.drawImage(
-          image,
-          cropData.x,
-          cropData.y,
-          cropData.width,
-          cropData.height,
-          0,
-          0,
-          cropData.width,
-          cropData.height
-        );
-        
-        canvas.toBlob((blob: Blob | null) => {
-          resolve(blob!);
-        }, 'image/jpeg', 0.9);
-      };
-      
-      image.src = imageUrl;
-    });
-  };
-
-  const handleProfilePictureUpload = async () => {
-    if (!selectedFile || !user?.id) {return;}
+  const handleProfilePictureUpload = async (croppedImageBlob: Blob) => {
+    if (!user?.id) {return;}
     
     setUploading(true);
     setError(null);
     setSuccess(null);
     
     try {
-      let imageBlob: Blob;
-      
-      if (previewUrl) {
-        imageBlob = await cropImage(previewUrl);
-      } else {
-        imageBlob = selectedFile;
-      }
-      
       // Upload to Firebase Storage
       const fileName = `profile-pictures/${user.id}/${Date.now()}.jpg`;
       const storageRef = ref(storage, fileName);
       
-      const uploadResult = await uploadBytes(storageRef, imageBlob);
+      const uploadResult = await uploadBytes(storageRef, croppedImageBlob);
       const downloadURL = await getDownloadURL(uploadResult.ref);
       
       // Update user profile in Firestore
@@ -235,8 +165,6 @@ const UserProfile: React.FC = () => {
       await updateProfile(user as any, { photoURL: downloadURL });
       
       setProfilePicture(downloadURL);
-      setSelectedFile(null);
-      setPreviewUrl(null);
       setSuccess('Profile picture updated successfully');
       
     } catch (err: unknown) {
@@ -265,8 +193,6 @@ const UserProfile: React.FC = () => {
       await updateProfile(user as any, { photoURL: null });
       
       setProfilePicture(null);
-      setSelectedFile(null);
-      setPreviewUrl(null);
       setSuccess('Profile picture removed successfully');
       
     } catch (err: unknown) {
@@ -722,165 +648,27 @@ const UserProfile: React.FC = () => {
             fontWeight: 'var(--font-weight-semibold)'
           }}>Profile Picture</h3>
 
-          {/* Current profile picture */}
-          <div style={{ marginBottom: 'var(--spacing-xl)' }}>
-            <div style={{
-              width: '150px',
-              height: '150px',
-              borderRadius: '50%',
-              overflow: 'hidden',
-              border: '3px solid var(--color-border-primary)',
-              margin: '0 auto var(--spacing-lg)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'var(--color-bg-tertiary)'
-            }}>
-              {profilePicture ? (
-                <img 
-                  src={profilePicture} 
-                  alt="Profile" 
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
-              ) : (
-                <div style={{
-                  fontSize: '48px',
-                  color: 'var(--color-text-tertiary)'
-                }}>
-                  👤
-                </div>
-              )}
-            </div>
-
-            {profilePicture && (
-              <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-lg)' }}>
-                <button
-                  onClick={handleRemoveProfilePicture}
-                  disabled={uploading}
-                  style={{
-                    padding: 'var(--spacing-sm) var(--spacing-md)',
-                    background: 'var(--color-error-500)',
-                    color: 'var(--color-text-inverse)',
-                    border: 'none',
-                    borderRadius: 'var(--border-radius-md)',
-                    fontSize: 'var(--font-size-sm)',
-                    cursor: uploading ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  {uploading ? 'Removing...' : 'Remove Picture'}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* File upload */}
-          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
+          {/* Profile Picture Component */}
+          <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-lg)' }}>
+            <ProfilePicture
+              src={profilePicture}
+              alt={user?.name || 'Profile picture'}
+              size="xl"
+              editable={true}
+              onUpload={handleProfilePictureUpload}
+              onRemove={handleRemoveProfilePicture}
+              loading={uploading}
             />
-            
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                padding: 'var(--spacing-md) var(--spacing-lg)',
-                background: 'var(--color-button-primary)',
-                color: 'var(--color-text-inverse)',
-                border: 'none',
-                borderRadius: 'var(--border-radius-md)',
-                cursor: 'pointer',
-                fontSize: 'var(--font-size-base)',
-                marginRight: 'var(--spacing-md)'
-              }}
-            >
-              Choose New Picture
-            </button>
-            
-            <small style={{ color: 'var(--color-text-tertiary)', fontSize: 'var(--font-size-xs)', display: 'block', marginTop: 'var(--spacing-sm)' }}>
-              Maximum file size: 5MB. Supported formats: JPG, PNG, GIF
-            </small>
           </div>
-
-          {/* Image preview */}
-          {previewUrl && (
-            <div style={{ marginBottom: 'var(--spacing-xl)' }}>
-              <div style={{
-                border: '1px solid var(--color-border-primary)',
-                borderRadius: 'var(--border-radius-md)',
-                padding: 'var(--spacing-lg)',
-                background: 'var(--color-bg-secondary)',
-                textAlign: 'center'
-              }}>
-                <div style={{
-                  width: '200px',
-                  height: '200px',
-                  margin: '0 auto var(--spacing-lg)',
-                  border: '1px solid var(--color-border-primary)',
-                  borderRadius: '50%',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <img 
-                    src={previewUrl} 
-                    alt="Preview" 
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                  />
-                </div>
-                
-                <div style={{ display: 'flex', gap: 'var(--spacing-md)', justifyContent: 'center' }}>
-                  <button
-                    onClick={handleProfilePictureUpload}
-                    disabled={uploading || !selectedFile}
-                    style={{
-                      padding: 'var(--spacing-md) var(--spacing-xl)',
-                      background: 'var(--color-success-500)',
-                      color: 'var(--color-text-inverse)',
-                      border: 'none',
-                      borderRadius: 'var(--border-radius-md)',
-                      fontSize: 'var(--font-size-base)',
-                      fontWeight: 'var(--font-weight-medium)',
-                      cursor: (uploading || !selectedFile) ? 'not-allowed' : 'pointer'
-                    }}
-                  >
-                    {uploading ? 'Uploading...' : 'Save Picture'}
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      setSelectedFile(null);
-                      setPreviewUrl(null);
-                    }}
-                    style={{
-                      padding: 'var(--spacing-md) var(--spacing-lg)',
-                      background: 'transparent',
-                      color: 'var(--color-button-secondary)',
-                      border: '1px solid var(--color-button-secondary)',
-                      borderRadius: 'var(--border-radius-md)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
           
-          {/* Hidden canvas for cropping */}
-          <canvas ref={canvasRef} style={{ display: 'none' }} />
+          <p style={{ 
+            color: 'var(--color-text-tertiary)', 
+            fontSize: 'var(--font-size-sm)',
+            textAlign: 'center',
+            marginTop: 'var(--spacing-md)'
+          }}>
+            Click the camera icon to upload a new picture. Maximum file size: 10MB.
+          </p>
         </div>
       )}
 

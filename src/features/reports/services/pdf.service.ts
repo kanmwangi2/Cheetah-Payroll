@@ -8,7 +8,7 @@ import {
   CBHIReportData, 
   RAMAReportData 
 } from './reports.service';
-import { StaffPayroll, Company, TaxConfiguration } from '../../../shared/types';
+import { StaffPayroll, Company, TaxConfiguration, Staff } from '../../../shared/types';
 import { getTaxConfiguration } from '../../../shared/services/tax-config.service';
 import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 
@@ -220,38 +220,64 @@ export class PDFReportGenerator {
   }
 
   // Generate Individual Payslip
-  async generatePayslip(staffPayroll: StaffPayroll, company: Company, period: string): Promise<Blob> {
+  async generatePayslip(staffPayroll: StaffPayroll, company: Company, period: string, staff?: Staff): Promise<Blob> {
     this.doc = new jsPDF(); // Reset for individual payslip
     
     // Header with company branding
     this.doc.setFillColor(25, 118, 210);
-    this.doc.rect(0, 0, this.pageWidth, 40, 'F');
+    this.doc.rect(0, 0, this.pageWidth, 50, 'F');
     
     this.doc.setTextColor(255, 255, 255);
     this.doc.setFontSize(20);
     this.doc.setFont('helvetica', 'bold');
     this.doc.text('PAYSLIP', this.pageWidth / 2, 20, { align: 'center' });
     
-    this.doc.setFontSize(12);
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
     this.doc.text(company.name, this.pageWidth / 2, 30, { align: 'center' });
+    
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'normal');
+    if (company.address) {
+      this.doc.text(company.address, this.pageWidth / 2, 38, { align: 'center' });
+    }
+    if (company.taxId) {
+      this.doc.text(`TIN: ${company.taxId}`, this.pageWidth / 2, 45, { align: 'center' });
+    }
 
     // Employee and period information
     this.doc.setTextColor(0, 0, 0);
-    let y = 60;
+    let y = 65;
     
     this.doc.setFontSize(14);
     this.doc.setFont('helvetica', 'bold');
     this.doc.text('Employee Information', this.margin, y);
     
-    y += 10;
+    y += 12;
     this.doc.setFontSize(11);
     this.doc.setFont('helvetica', 'normal');
-    this.doc.text(`Name: ${staffPayroll.staffName}`, this.margin, y);
+    
+    // Left column - Employee details
+    const staffName = staff?.personalDetails ? 
+      `${staff.personalDetails.firstName} ${staff.personalDetails.lastName}` : 
+      staffPayroll.staffName;
+    this.doc.text(`Name: ${staffName}`, this.margin, y);
+    
+    // Right column - Period and date
     this.doc.text(`Period: ${period}`, this.pageWidth - this.margin, y, { align: 'right' });
     
     y += 8;
-    this.doc.text(`Employee ID: ${staffPayroll.staffId}`, this.margin, y);
+    const staffNumber = staff?.employmentDetails?.staffNumber || staffPayroll.staffId;
+    this.doc.text(`Staff Number: ${staffNumber}`, this.margin, y);
     this.doc.text(`Date: ${new Date().toLocaleDateString()}`, this.pageWidth - this.margin, y, { align: 'right' });
+    
+    y += 8;
+    if (staff?.employmentDetails?.department) {
+      this.doc.text(`Department: ${staff.employmentDetails.department}`, this.margin, y);
+    }
+    if (staff?.employmentDetails?.position) {
+      this.doc.text(`Position: ${staff.employmentDetails.position}`, this.pageWidth - this.margin, y, { align: 'right' });
+    }
 
     // Earnings section
     y += 20;
@@ -259,13 +285,24 @@ export class PDFReportGenerator {
     this.doc.setFont('helvetica', 'bold');
     this.doc.text('Earnings', this.margin, y);
 
+    // Build earnings data with individual allowances
     const earningsData = [
       ['Basic Pay', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.basicPay.toLocaleString()}`],
       ['Transport Allowance', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.transportAllowance.toLocaleString()}`],
-      ['Other Allowances', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.otherAllowances.toLocaleString()}`],
-      ['', ''],
-      ['GROSS PAY', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.grossPay.toLocaleString()}`]
     ];
+
+    // Add individual allowances
+    if (staffPayroll.calculations.individualAllowances) {
+      Object.entries(staffPayroll.calculations.individualAllowances).forEach(([allowanceType, amount]) => {
+        // Convert snake_case to proper display name
+        const displayName = allowanceType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        earningsData.push([displayName, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${amount.toLocaleString()}`]);
+      });
+    }
+
+    // Add separator and gross pay total
+    earningsData.push(['', '']);
+    earningsData.push(['GROSS PAY', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.grossPay.toLocaleString()}`]);
 
     this.doc.autoTable({
       startY: y + 5,
@@ -277,14 +314,15 @@ export class PDFReportGenerator {
       },
       margin: { left: this.margin, right: this.pageWidth / 2 + 10 },
       didParseCell: (data: any) => {
-        if (data.row.index === 4) { // GROSS PAY row
+        // Find the GROSS PAY row dynamically (it's the last row)
+        if (data.row.index === earningsData.length - 1) {
           data.cell.styles.fontStyle = 'bold';
           data.cell.styles.fillColor = [240, 240, 240];
         }
       }
     });
 
-    // Deductions section
+    // Deductions section - Split into Statutory and Other
     this.doc.setFontSize(12);
     this.doc.setFont('helvetica', 'bold');
     this.doc.text('Deductions', this.pageWidth / 2 + 10, y);
@@ -292,13 +330,37 @@ export class PDFReportGenerator {
     // Get current tax configuration for display
     const config = await this.ensureTaxConfig();
     
-    const deductionsData = [
+    // Statutory Deductions (Employee taxes only)
+    const statutoryDeductionsData = [
+      ['STATUTORY DEDUCTIONS', ''],
       ['PAYE Tax', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.payeBeforeReliefs.toLocaleString()}`],
-      [`Pension (${config.pensionRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.pensionEmployee.toLocaleString()}`],
-      [`Maternity (${config.maternityRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.maternityEmployee.toLocaleString()}`],
-      [`RAMA (${config.ramaRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.ramaEmployee.toLocaleString()}`],
+      [`Pension Employee (${config.pensionRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.pensionEmployee.toLocaleString()}`],
+      [`Maternity Employee (${config.maternityRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.maternityEmployee.toLocaleString()}`],
+      [`RAMA Employee (${config.ramaRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.ramaEmployee.toLocaleString()}`],
       [`CBHI (${config.cbhiRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.cbhiEmployee.toLocaleString()}`],
-      ['Other Deductions', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.otherDeductions.toLocaleString()}`],
+      ['', ''],
+      ['TOTAL STATUTORY', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${(
+        staffPayroll.calculations.payeBeforeReliefs +
+        staffPayroll.calculations.pensionEmployee +
+        staffPayroll.calculations.maternityEmployee +
+        staffPayroll.calculations.ramaEmployee +
+        staffPayroll.calculations.cbhiEmployee
+      ).toLocaleString()}`]
+    ];
+    
+    // Other Deductions (if any)
+    const otherDeductionsData = [];
+    if (staffPayroll.calculations.otherDeductions > 0) {
+      otherDeductionsData.push(['OTHER DEDUCTIONS', '']);
+      otherDeductionsData.push(['Loans & Advances', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.otherDeductions.toLocaleString()}`]);
+      otherDeductionsData.push(['', '']);
+      otherDeductionsData.push(['TOTAL OTHER', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.otherDeductions.toLocaleString()}`]);
+    }
+    
+    // Combine all deductions
+    const allDeductionsData = [
+      ...statutoryDeductionsData,
+      ...otherDeductionsData,
       ['', ''],
       ['TOTAL DEDUCTIONS', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${(
         staffPayroll.calculations.payeBeforeReliefs +
@@ -312,7 +374,7 @@ export class PDFReportGenerator {
 
     this.doc.autoTable({
       startY: y + 5,
-      body: deductionsData,
+      body: allDeductionsData,
       theme: 'plain',
       columnStyles: {
         0: { fontStyle: 'normal', cellWidth: 100 },
@@ -320,7 +382,20 @@ export class PDFReportGenerator {
       },
       margin: { left: this.pageWidth / 2 + 10, right: this.margin },
       didParseCell: (data: any) => {
-        if (data.row.index === 7) { // TOTAL DEDUCTIONS row
+        // Style section headers and totals
+        if (data.cell.text[0] && (
+          data.cell.text[0].includes('STATUTORY DEDUCTIONS') ||
+          data.cell.text[0].includes('OTHER DEDUCTIONS')
+        )) {
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fillColor = [230, 230, 230];
+        } else if (data.cell.text[0] && (
+          data.cell.text[0].includes('TOTAL STATUTORY') ||
+          data.cell.text[0].includes('TOTAL OTHER')
+        )) {
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fillColor = [250, 250, 250];
+        } else if (data.cell.text[0] && data.cell.text[0].includes('TOTAL DEDUCTIONS')) {
           data.cell.styles.fontStyle = 'bold';
           data.cell.styles.fillColor = [240, 240, 240];
         }

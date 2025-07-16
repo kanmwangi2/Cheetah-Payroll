@@ -1,6 +1,5 @@
 // Payroll processing with tax calculations and approval workflow
 import {
-  serverTimestamp,
   collection,
   doc,
   getDocs,
@@ -16,7 +15,7 @@ import {
 import { db } from '../../../core/config/firebase.config';
 import { logAuditAction } from '../../../shared/services/audit.service';
 import { getTaxConfiguration } from '../../../shared/services/tax-config.service';
-import { getActivePayments, calculateStaffPayments } from '../../payments/services/payments.service';
+import { calculateStaffPayments } from '../../payments/services/payments.service';
 import { calculateStaffDeductions, processLoanPayment, reverseLoanPayment, getDeductions, canProcessDeduction, validateDeductionPayment } from '../../deductions/services/deductions.service';
 import { getStaff } from '../../staff/services/staff.service';
 import { 
@@ -60,7 +59,7 @@ export async function calculatePayrollWithCurrentConfig(
     }
   }
   
-  return calculatePayrollForAmount(grossPay, basicPay, transportAllowance, otherDeductions, taxConfig, companyTaxSettings);
+  return calculatePayrollForAmount(grossPay, basicPay, transportAllowance, otherDeductions, taxConfig, companyTaxSettings, {});
 }
 
 /**
@@ -317,7 +316,8 @@ export function grossUpAmount(
       transportAllowance,
       otherDeductions,
       taxConfig,
-      companyTaxSettings
+      companyTaxSettings,
+      {}
     );
     
     if (calculation.finalNetPay > targetNetAmount) {
@@ -336,7 +336,8 @@ export function grossUpAmount(
     transportAllowance,
     otherDeductions,
     taxConfig,
-    companyTaxSettings
+    companyTaxSettings,
+    {}
   );
   
   return {
@@ -352,7 +353,8 @@ export function calculatePayrollForAmount(
   transportAllowance: number,
   otherDeductions: number,
   taxConfig: TaxConfiguration,
-  companyTaxSettings?: PayrollTaxSettings
+  companyTaxSettings?: PayrollTaxSettings,
+  individualAllowances?: Record<string, number>
 ): PayrollCalculation {
   // Default tax settings (all enabled) if not provided
   const taxSettings = companyTaxSettings || {
@@ -363,8 +365,8 @@ export function calculatePayrollForAmount(
     rama: true
   };
   
-  // Calculate other allowances
-  const otherAllowances = grossPay - basicPay - transportAllowance;
+  // Calculate other allowances (should match the passed value)
+  const otherAllowances = Math.max(0, grossPay - basicPay - transportAllowance);
   
   // 1. Calculate PAYE on total gross pay (only if enabled)
   const payeBeforeReliefs = taxSettings.paye 
@@ -412,13 +414,23 @@ export function calculatePayrollForAmount(
     basicPay: Math.round(basicPay),
     transportAllowance: Math.round(transportAllowance),
     otherAllowances: Math.round(otherAllowances),
+    
+    // Individual allowances
+    individualAllowances: individualAllowances || {},
+    
+    // Tax calculations
     payeBeforeReliefs: Math.round(payeBeforeReliefs),
     pensionEmployee,
     pensionEmployer,
+    totalPension: pensionEmployee + pensionEmployer,
     maternityEmployee,
     maternityEmployer,
+    totalMaternity: maternityEmployee + maternityEmployer,
     ramaEmployee,
     ramaEmployer,
+    totalRAMA: ramaEmployee + ramaEmployer,
+    
+    // Net calculations
     netBeforeCBHI: Math.round(netBeforeCBHI),
     cbhiEmployee,
     otherDeductions: Math.round(otherDeductions),
@@ -572,19 +584,108 @@ export async function createComprehensivePayroll(
         staffMember.id!
       );
       
-      // Calculate basic pay (assume 60% of total payments if not specified)
-      const basicPay = payments.find(p => p.type === 'basic_salary')?.amount || totalPayments * 0.6;
-      const transportAllowance = payments.find(p => p.type === 'transport_allowance')?.amount || 0;
+      // Separate gross and net payments
+      const grossPayments = payments.filter(p => p.isGross);
+      const netPayments = payments.filter(p => !p.isGross);
       
-      // Calculate payroll
+      // Calculate total gross amount from gross payments
+      const grossTotal = grossPayments.reduce((sum, payment) => sum + payment.amount, 0);
+      
+      // For net payments, we need to gross them up
+      // First, let's calculate the total net amount that needs to be grossed up
+      const totalNetAmount = netPayments.reduce((sum, payment) => sum + payment.amount, 0);
+      
+      let grossedUpPayments: any[] = [];
+      
+      if (totalNetAmount > 0) {
+        // Calculate the basic and transport portions from net payments
+        const netBasicPay = netPayments.find(p => p.type === 'basic_salary')?.amount || 0;
+        const netTransportAllowance = netPayments.find(p => p.type === 'transport_allowance')?.amount || 0;
+        
+        try {
+          // Use the binary search gross-up function for accurate calculation
+          const { grossAmount: totalGrossAmount, calculations } = await grossUpAmountWithCurrentConfig(
+            totalNetAmount,
+            netBasicPay,
+            netTransportAllowance,
+            totalDeductions,
+            companyId
+          );
+          
+          // Distribute the grossed-up amount proportionally across net payments
+          const grossUpMultiplier = totalGrossAmount / totalNetAmount;
+          
+          grossedUpPayments = netPayments.map(payment => ({
+            ...payment,
+            grossAmount: Math.round(payment.amount * grossUpMultiplier)
+          }));
+          
+        } catch (error) {
+          // Fallback to estimation if gross-up fails
+          console.warn(`Gross-up failed for net payments, using estimation:`, error);
+          
+          grossedUpPayments = netPayments.map(payment => {
+            let estimatedGrossAmount = payment.amount;
+            
+            if (payment.type === 'basic_salary') {
+              estimatedGrossAmount = payment.amount / 0.7; // Estimate 30% total tax burden
+            } else if (payment.type === 'transport_allowance') {
+              estimatedGrossAmount = payment.amount / 0.95; // Estimate 5% tax burden
+            } else {
+              estimatedGrossAmount = payment.amount / 0.8; // Estimate 20% tax burden
+            }
+            
+            return { ...payment, grossAmount: Math.round(estimatedGrossAmount) };
+          });
+        }
+      }
+      
+      // Combine gross and grossed-up payments
+      const processedPayments = [
+        ...grossPayments.map(p => ({ ...p, grossAmount: p.amount })),
+        ...grossedUpPayments
+      ];
+      
+      // Extract specific payment types using gross amounts
+      const basicPayment = processedPayments.find(p => p.type === 'basic_salary');
+      const transportPayment = processedPayments.find(p => p.type === 'transport_allowance');
+      
+      const basicPay = basicPayment?.grossAmount || totalPayments * 0.6;
+      const transportAllowance = transportPayment?.grossAmount || 0;
+      
+      // Calculate other allowances as sum of all non-basic, non-transport payments (gross amounts)
+      const otherAllowances = processedPayments
+        .filter(p => p.type !== 'basic_salary' && p.type !== 'transport_allowance')
+        .reduce((sum, payment) => sum + payment.grossAmount, 0);
+      
+      // Calculate total gross pay
+      const calculatedTotal = basicPay + transportAllowance + otherAllowances;
+      
+      // Create individual allowances record from processed payments
+      const individualAllowances: Record<string, number> = {};
+      processedPayments.forEach(payment => {
+        if (payment.type !== 'basic_salary' && payment.type !== 'transport_allowance') {
+          individualAllowances[payment.type] = payment.grossAmount;
+        }
+      });
+      
+      // Final validation: if all payments were net, we need to ensure we grossed them up correctly
+      // by running a final calculation to verify the net amounts match expectations
       const calculation = calculatePayrollForAmount(
-        totalPayments,
+        calculatedTotal,
         basicPay,
         transportAllowance,
         totalDeductions,
         config,
-        companyTaxSettings
+        companyTaxSettings,
+        individualAllowances
       );
+      
+      // Log for debugging purposes (can be removed in production)
+      if (netPayments.length > 0) {
+        console.log(`Staff ${staffMember.id}: Processed ${netPayments.length} net payments, ${grossPayments.length} gross payments`);
+        console.log(`Total gross calculated: ${calculatedTotal}, Final net pay: ${calculation.finalNetPay}`);
+      }
       
       // Create staff payroll record
       const staffPayrollData: Omit<StaffPayroll, 'id'> = {

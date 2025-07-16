@@ -179,7 +179,14 @@ const Login: React.FC<LoginProps> = ({ onSuccess }) => {
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
-                style={passwordToggleStyles}
+                className="btn btn-ghost btn-sm"
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  padding: '4px 8px'
+                }}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? (
@@ -384,20 +391,6 @@ const passwordInputStyles: React.CSSProperties = {
   width: '100%',
 };
 
-const passwordToggleStyles: React.CSSProperties = {
-  position: 'absolute',
-  right: 'var(--spacing-md)',
-  background: 'none',
-  border: 'none',
-  color: 'var(--color-text-tertiary)',
-  cursor: 'pointer',
-  padding: 'var(--spacing-xs)',
-  borderRadius: 'var(--border-radius-sm)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'color var(--transition-normal)',
-};
 
 const checkboxGroupStyles: React.CSSProperties = {
   display: 'flex',

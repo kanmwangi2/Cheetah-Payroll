@@ -190,14 +190,24 @@ export interface PayrollCalculation {
   grossPay: number;
   basicPay: number;
   transportAllowance: number;
-  otherAllowances: number;
+  otherAllowances: number; // Backward compatibility - sum of all individual allowances
+  
+  // Individual allowance fields (dynamic)
+  individualAllowances: Record<string, number>; // e.g., { "housing_allowance": 100000, "medical_allowance": 50000 }
+  
+  // Tax calculations
   payeBeforeReliefs: number;
   pensionEmployee: number;
   pensionEmployer: number;
+  totalPension: number; // pensionEmployee + pensionEmployer
   maternityEmployee: number;
   maternityEmployer: number;
+  totalMaternity: number; // maternityEmployee + maternityEmployer
   ramaEmployee: number;
   ramaEmployer: number;
+  totalRAMA: number; // ramaEmployee + ramaEmployer
+  
+  // Net calculations
   netBeforeCBHI: number;
   cbhiEmployee: number;
   otherDeductions: number;

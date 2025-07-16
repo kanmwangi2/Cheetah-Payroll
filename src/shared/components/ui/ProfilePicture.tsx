@@ -87,6 +87,9 @@ const ProfilePicture: React.FC<ProfilePictureProps> = ({
     try {
       await onUpload(croppedBlob);
       setShowCropper(false);
+      if (selectedFile) {
+        URL.revokeObjectURL(selectedFile);
+      }
       setSelectedFile(null);
     } catch (error) {
       console.error('Upload failed:', error);
@@ -94,7 +97,7 @@ const ProfilePicture: React.FC<ProfilePictureProps> = ({
     } finally {
       setUploading(false);
     }
-  }, [onUpload]);
+  }, [onUpload, selectedFile]);
 
   const handleCropCancel = useCallback(() => {
     setShowCropper(false);

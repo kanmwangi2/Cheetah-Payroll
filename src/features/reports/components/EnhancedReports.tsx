@@ -12,6 +12,7 @@ import {
 } from '../services/reports.service';
 import { PDFReportGenerator } from '../services/pdf.service';
 import { getPayrolls, getStaffPayrollData } from '../../payroll/services/payroll.service';
+import { getStaff } from '../../staff/services/staff.service';
 import { Company, Payroll } from '../../../shared/types';
 import Papa from 'papaparse';
 
@@ -153,7 +154,10 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
       
       if (type === 'individual' && staffPayrolls.length > 0) {
         // Generate for first employee as example - in real app, user would select specific employee
-        const blob = await pdfGenerator.generatePayslip(staffPayrolls[0], company, period);
+        const staffData = await getStaff(companyId);
+        const staffList = Array.isArray(staffData) ? staffData : staffData.data || [];
+        const selectedStaff = staffList.find(s => s.id === staffPayrolls[0].staffId);
+        const blob = await pdfGenerator.generatePayslip(staffPayrolls[0], company, period, selectedStaff);
         PDFReportGenerator.downloadBlob(blob, `Payslip_${staffPayrolls[0].staffName}_${period}.pdf`);
       } else if (type === 'bulk') {
         const blob = pdfGenerator.generateBulkPayslips(staffPayrolls, company, period);

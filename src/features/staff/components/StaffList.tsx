@@ -173,13 +173,13 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
             onClick={() => setShowImportExport(true)}
-            className="btn-primary"
+            className="btn btn-primary btn-md"
           >
             📤 Import/Export
           </button>
           <button
             onClick={() => setShowForm(true)}
-            className="btn-primary"
+            className="btn btn-primary btn-md"
           >
             + Add Staff
           </button>
@@ -486,16 +486,10 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                     <td style={{ padding: '16px' }}>
                       <div className="table-actions">
                         <button
-                          onClick={() => setSelectedStaff(member)}
-                          className="btn btn-info btn-sm"
-                        >
-                          View
-                        </button>
-                        <button
                           onClick={() => setEditingStaff(member)}
                           className="btn btn-warning btn-sm"
                         >
-                          Edit
+                          View/Edit
                         </button>
                         <button
                           onClick={() => handleDeleteStaff(member.id)}

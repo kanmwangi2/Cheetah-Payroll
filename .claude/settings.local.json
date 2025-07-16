@@ -31,7 +31,8 @@
       "Bash(npm test:*)",
       "Bash(rg:*)",
       "Bash(npm install:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(/dev/null)"
     ],
     "deny": []
   }

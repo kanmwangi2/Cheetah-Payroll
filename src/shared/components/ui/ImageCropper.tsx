@@ -83,38 +83,52 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
     const canvas = canvasRef.current;
     const image = imageRef.current;
     
-    if (!canvas || !image) {return;}
+    if (!canvas || !image) {
+      console.error('Canvas or image not available');
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) {return;}
+    if (!ctx) {
+      console.error('Unable to get canvas context');
+      return;
+    }
 
-    // Set canvas size to desired output size
-    canvas.width = cropSize.width;
-    canvas.height = cropSize.height;
+    try {
+      // Set canvas size to desired output size
+      canvas.width = cropSize.width;
+      canvas.height = cropSize.height;
 
-    // Calculate scale factors
-    const scaleX = image.naturalWidth / image.offsetWidth;
-    const scaleY = image.naturalHeight / image.offsetHeight;
+      // Calculate scale factors
+      const scaleX = image.naturalWidth / image.offsetWidth;
+      const scaleY = image.naturalHeight / image.offsetHeight;
 
-    // Draw cropped image
-    ctx.drawImage(
-      image,
-      cropArea.x * scaleX,
-      cropArea.y * scaleY,
-      cropArea.width * scaleX,
-      cropArea.height * scaleY,
-      0,
-      0,
-      cropSize.width,
-      cropSize.height
-    );
+      // Draw cropped image
+      ctx.drawImage(
+        image,
+        cropArea.x * scaleX,
+        cropArea.y * scaleY,
+        cropArea.width * scaleX,
+        cropArea.height * scaleY,
+        0,
+        0,
+        cropSize.width,
+        cropSize.height
+      );
 
-    // Convert to blob
-    canvas.toBlob((blob) => {
-      if (blob) {
-        onCrop(blob);
-      }
-    }, 'image/jpeg', 0.9);
+      // Convert to blob
+      canvas.toBlob((blob) => {
+        if (blob) {
+          onCrop(blob);
+        } else {
+          console.error('Failed to create blob from canvas');
+          alert('Failed to process image. Please try again.');
+        }
+      }, 'image/jpeg', 0.9);
+    } catch (error) {
+      console.error('Error during crop operation:', error);
+      alert('Failed to crop image. Please try again.');
+    }
   };
 
   return (
