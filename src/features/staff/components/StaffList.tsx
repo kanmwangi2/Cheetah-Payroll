@@ -53,6 +53,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
   const [showForm, setShowForm] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
   const [departments, setDepartments] = useState<string[]>([]);
 
   useEffect(() => {
@@ -301,15 +302,7 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                 setDepartmentFilter('');
                 setStatusFilter('');
               }}
-              style={{
-                padding: '4px 8px',
-                borderRadius: 4,
-                border: '1px solid var(--color-border-secondary)',
-                background: 'var(--color-card-bg)',
-                color: 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
+              className="btn btn-ghost btn-xs"
             >
               Clear Filters
             </button>
@@ -491,32 +484,22 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
                       </span>
                     </td>
                     <td style={{ padding: '16px' }}>
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div className="table-actions">
                         <button
                           onClick={() => setSelectedStaff(member)}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: 4,
-                            border: '1px solid var(--color-button-primary)',
-                            background: 'var(--color-card-bg)',
-                            color: 'var(--color-button-primary)',
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                          }}
+                          className="btn btn-info btn-sm"
                         >
                           View
                         </button>
                         <button
+                          onClick={() => setEditingStaff(member)}
+                          className="btn btn-warning btn-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
                           onClick={() => handleDeleteStaff(member.id)}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: 4,
-                            border: '1px solid var(--color-error-border)',
-                            background: 'var(--color-card-bg)',
-                            color: 'var(--color-error-text)',
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                          }}
+                          className="btn btn-danger btn-sm"
                         >
                           Delete
                         </button>
@@ -563,6 +546,48 @@ const StaffList: React.FC<StaffListProps> = ({ companyId }) => {
               companyId={companyId}
               onAdded={() => {
                 setShowForm(false);
+                loadStaff();
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Edit Staff Modal */}
+      {editingStaff && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'var(--color-bg-overlay)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'var(--color-card-bg)',
+            borderRadius: '8px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setEditingStaff(null)}
+              className="modal-close-btn"
+            >
+              ×
+            </button>
+            <StaffForm
+              companyId={companyId}
+              staffData={editingStaff}
+              isEditMode={true}
+              onAdded={() => {
+                setEditingStaff(null);
                 loadStaff();
               }}
             />

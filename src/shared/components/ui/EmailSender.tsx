@@ -46,13 +46,15 @@ const EmailSender: React.FC<EmailSenderProps> = ({
 
   const getConfirmationMessage = () => {
     switch (type) {
-      case 'payslip':
+      case 'payslip': {
         const payslipData = data as PayslipEmailData;
         return `Send payslip for ${payslipData.payrollPeriod} to ${payslipData.staffName} (${payslipData.staffEmail})?`;
+      }
       case 'deduction_report':
-      case 'payment_report':
+      case 'payment_report': {
         const reportData = data as ReportEmailData;
         return `Send ${type.replace('_', ' ')} for ${reportData.reportPeriod} to ${reportData.recipientName} (${reportData.recipientEmail})?`;
+      }
       default:
         return 'Send this email?';
     }

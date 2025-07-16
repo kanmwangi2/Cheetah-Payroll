@@ -106,7 +106,7 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
   
   // Helper function to normalize staff data structure
   const normalizeStaffData = (data: any): StaffData | null => {
-    if (!data) return null;
+    if (!data) {return null;}
     
     // Handle both flat and nested data structures
     return {
@@ -185,18 +185,18 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
     // Focus first focusable element in modal
     const focusFirst = () => {
       const modal = modalRef.current;
-      if (!modal) return;
+      if (!modal) {return;}
       const focusable = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      if (focusable.length) focusable[0].focus();
+      if (focusable.length) {focusable[0].focus();}
     };
     setTimeout(focusFirst, 0);
   }, [companyId, staffId]);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev: StaffData | null) => {
-      if (!prev) return null;
+      if (!prev) {return null;}
       
       return {
         ...prev,
@@ -206,12 +206,12 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
   };
 
   const validate = () => {
-    if (!form) return false;
+    if (!form) {return false;}
     
-    if (!form.firstName || !form.lastName || !form.idNumber || !form.rssbNumber || !form.staffNumber) return false;
-    if (!form.nationality || !form.emergencyContactName || !form.emergencyContactPhone || !form.emergencyContactRelationship) return false;
-    if (!form.department || !form.startDate || !form.position || !form.employmentType) return false;
-    if (!form.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) return false;
+    if (!form.firstName || !form.lastName || !form.idNumber || !form.rssbNumber || !form.staffNumber) {return false;}
+    if (!form.nationality || !form.emergencyContactName || !form.emergencyContactPhone || !form.emergencyContactRelationship) {return false;}
+    if (!form.department || !form.startDate || !form.position || !form.employmentType) {return false;}
+    if (!form.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {return false;}
     
     // Validate end date is after start date (if both are provided)
     if (form.endDate && form.startDate && new Date(form.endDate) <= new Date(form.startDate)) {
@@ -287,14 +287,14 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
 
   // Focus trap logic
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Escape') onClose();
+    if (e.key === 'Escape') {onClose();}
     if (e.key === 'Tab') {
       const modal = modalRef.current;
-      if (!modal) return;
+      if (!modal) {return;}
       const focusable = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      if (!focusable.length) return;
+      if (!focusable.length) {return;}
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (e.shiftKey) {
@@ -400,7 +400,7 @@ const StaffProfile: React.FC<{ companyId: string; staffId: string; onClose: () =
           &times;
         </button>
         
-        <form className="staff-form" onSubmit={(e) => { e.preventDefault(); if (editMode) handleSave(); }}>
+        <form className="staff-form" onSubmit={(e) => { e.preventDefault(); if (editMode) {handleSave();} }}>
           <h3 id="staff-profile-title">{editMode ? 'Edit Staff' : 'Staff Profile'}</h3>
           
           <div className="staff-form-row">

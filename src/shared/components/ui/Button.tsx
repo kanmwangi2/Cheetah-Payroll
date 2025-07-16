@@ -36,6 +36,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const { isDark, themeValue } = useThemeValues();
+    void isDark;
+    void themeValue;
 
     const sizeStyles = {
       xs: {

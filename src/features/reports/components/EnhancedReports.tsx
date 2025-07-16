@@ -377,10 +377,7 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
       <h2>Reports & Analytics</h2>
       
       {/* Tab Navigation */}
-      <div className="tab-navigation" style={{ 
-        borderBottom: '1px solid var(--color-border-primary)',
-        marginBottom: '24px'
-      }}>
+      <div className="tab-navigation">
         {[
           { key: 'statutory', label: 'Statutory Reports' },
           { key: 'payslips', label: 'Payslips' },
@@ -389,16 +386,7 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
-            style={{
-              padding: '12px 24px',
-              border: 'none',
-              background: 'none',
-              borderBottom: activeTab === tab.key ? '2px solid var(--color-primary-600)' : '2px solid transparent',
-              color: activeTab === tab.key ? 'var(--color-primary-600)' : 'var(--color-text-secondary)',
-              fontWeight: activeTab === tab.key ? '600' : 'normal',
-              cursor: 'pointer',
-              fontSize: '0.9rem'
-            }}
+            className={`tab-button ${activeTab === tab.key ? 'active' : ''}`}
           >
             {tab.label}
           </button>

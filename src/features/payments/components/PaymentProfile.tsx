@@ -113,31 +113,31 @@ const PaymentProfile: React.FC<{
     // Focus first focusable element in modal
     const focusFirst = () => {
       const modal = modalRef.current;
-      if (!modal) return;
+      if (!modal) {return;}
       const focusable = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      if (focusable.length) focusable[0].focus();
+      if (focusable.length) {focusable[0].focus();}
     };
     setTimeout(focusFirst, 0);
   }, [companyId, paymentId]);
 
   const getStaffName = (staffId: string) => {
     const staffMember = staff.find(s => s.id === staffId);
-    if (!staffMember) return 'Unknown Employee';
+    if (!staffMember) {return 'Unknown Employee';}
     return `${staffMember.personalDetails?.firstName || ''} ${staffMember.personalDetails?.lastName || ''}`.trim();
   };
 
   const validate = () => {
-    if (!form) return {};
+    if (!form) {return {};}
     
     const errs: { [k: string]: string } = {};
-    if (!form.type?.trim()) errs.type = 'Payment type is required';
+    if (!form.type?.trim()) {errs.type = 'Payment type is required';}
     if (!form.amount || isNaN(Number(form.amount)) || Number(form.amount) <= 0) {
       errs.amount = 'Amount must be a positive number';
     }
-    if (!form.staffId?.trim()) errs.staffId = 'Employee is required';
-    if (!form.effectiveDate) errs.effectiveDate = 'Effective date is required';
+    if (!form.staffId?.trim()) {errs.staffId = 'Employee is required';}
+    if (!form.effectiveDate) {errs.effectiveDate = 'Effective date is required';}
     if (form.endDate && form.endDate <= form.effectiveDate) {
       errs.endDate = 'End date must be after effective date';
     }
@@ -146,11 +146,12 @@ const PaymentProfile: React.FC<{
 
   const handleChange = (field: string, value: string | boolean | number) => {
     setForm((prev: PaymentData | null) => {
-      if (!prev) return null;
+      if (!prev) {return null;}
       return { ...prev, [field]: value };
     });
     setFieldErrors(prev => {
-      const { [field]: _removed, ...rest } = prev;
+      const { [field]: _unused, ...rest } = prev;
+      void _unused;
       return rest;
     });
   };
@@ -163,7 +164,7 @@ const PaymentProfile: React.FC<{
 
     const errs = validate();
     setFieldErrors(errs);
-    if (Object.keys(errs).length > 0) return;
+    if (Object.keys(errs).length > 0) {return;}
 
     setSaving(true);
     setError(null);
@@ -177,7 +178,7 @@ const PaymentProfile: React.FC<{
       await updatePayment(companyId, paymentId, updateData);
       setOriginalPayment(form);
       setEditMode(false);
-      if (onUpdated) onUpdated();
+      if (onUpdated) {onUpdated();}
     } catch (err: unknown) {
       const errorMessage = (err as Error).message || 'Failed to update payment';
       setError(errorMessage);
@@ -195,14 +196,14 @@ const PaymentProfile: React.FC<{
 
   // Focus trap logic
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Escape') onClose();
+    if (e.key === 'Escape') {onClose();}
     if (e.key === 'Tab') {
       const modal = modalRef.current;
-      if (!modal) return;
+      if (!modal) {return;}
       const focusable = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      if (!focusable.length) return;
+      if (!focusable.length) {return;}
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (e.shiftKey) {
@@ -308,7 +309,7 @@ const PaymentProfile: React.FC<{
           &times;
         </button>
         
-        <form className="staff-form" onSubmit={(e) => { e.preventDefault(); if (editMode) handleSave(); }}>
+        <form className="staff-form" onSubmit={(e) => { e.preventDefault(); if (editMode) {handleSave();} }}>
           <h3 id="payment-profile-title">{editMode ? 'Edit Payment' : 'Payment Details'}</h3>
           
           <div className="staff-form-row">

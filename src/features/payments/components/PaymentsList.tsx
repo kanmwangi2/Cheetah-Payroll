@@ -5,7 +5,6 @@ import { Payment, Staff } from '../../../shared/types';
 import PaymentsForm from './PaymentsForm';
 import PaymentsImportExport from './PaymentsImportExport';
 import PaymentProfile from './PaymentProfile';
-import Button from '../../../shared/components/ui/Button';
 
 const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -16,10 +15,10 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -271,15 +270,7 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                 setFilterType('');
                 setFilterStatus('');
               }}
-              style={{
-                padding: '4px 8px',
-                borderRadius: 4,
-                border: '1px solid var(--color-border-primary)',
-                background: 'var(--color-bg-primary)',
-                color: 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
+              className="btn btn-ghost btn-xs"
             >
               Clear Filters
             </button>
@@ -469,32 +460,22 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                       )}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <div className="table-actions">
                         <button
                           onClick={() => setSelectedPayment(p)}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: 4,
-                            border: '1px solid var(--color-button-primary)',
-                            background: 'var(--color-card-bg)',
-                            color: 'var(--color-button-primary)',
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                          }}
+                          className="btn btn-info btn-sm"
                         >
                           View
                         </button>
                         <button
+                          onClick={() => setEditingPayment(p)}
+                          className="btn btn-warning btn-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
                           onClick={() => handleDelete(p.id)}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: 4,
-                            border: '1px solid var(--color-error-500)',
-                            background: 'var(--color-bg-primary)',
-                            color: 'var(--color-error-500)',
-                            fontSize: '12px',
-                            cursor: 'pointer'
-                          }}
+                          className="btn btn-danger btn-sm"
                         >
                           Delete
                         </button>
@@ -541,6 +522,48 @@ const PaymentsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               companyId={companyId} 
               onAdded={() => {
                 setShowForm(false);
+                setRefresh(r => r + 1);
+              }} 
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Edit Payment Modal */}
+      {editingPayment && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'var(--color-bg-overlay)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'var(--color-card-bg)',
+            borderRadius: '8px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setEditingPayment(null)}
+              className="modal-close-btn"
+            >
+              ×
+            </button>
+            <PaymentsForm 
+              companyId={companyId}
+              paymentData={editingPayment}
+              isEditMode={true}
+              onAdded={() => {
+                setEditingPayment(null);
                 setRefresh(r => r + 1);
               }} 
             />

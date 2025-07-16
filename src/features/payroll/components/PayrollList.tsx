@@ -273,16 +273,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
           {search && (
             <button
               onClick={() => setSearch('')}
-              style={{
-                padding: '4px 8px',
-                borderRadius: 4,
-                border: '1px solid var(--color-border-primary)',
-                background: 'var(--color-bg-secondary)',
-                color: 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontSize: '12px',
-                transition: 'all var(--transition-normal)'
-              }}
+              className="btn btn-ghost btn-xs"
             >
               Clear Search
             </button>
@@ -426,35 +417,17 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                         {p?.createdAt?.seconds ? new Date(p.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
                       </td>
                       <td style={{ padding: '16px', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <div className="table-actions">
                           <button
                             onClick={() => alert('View payroll functionality not yet implemented')}
-                            style={{
-                              padding: '6px 12px',
-                              borderRadius: 4,
-                              border: '1px solid var(--color-info-500)',
-                              background: 'var(--color-bg-secondary)',
-                              color: 'var(--color-info-600)',
-                              cursor: 'pointer',
-                              fontSize: '12px',
-                              transition: 'all var(--transition-normal)'
-                            }}
+                            className="btn btn-info btn-sm"
                           >
                             View
                           </button>
                           {canEditPayroll(p) && (
                             <button
                               onClick={() => alert('Edit payroll functionality not yet implemented')}
-                              style={{
-                                padding: '6px 12px',
-                                borderRadius: 4,
-                                border: '1px solid var(--color-warning-500)',
-                                background: 'var(--color-bg-secondary)',
-                                color: 'var(--color-warning-600)',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                transition: 'all var(--transition-normal)'
-                              }}
+                              className="btn btn-warning btn-sm"
                             >
                               Edit
                             </button>
@@ -470,16 +443,7 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                           {canDeletePayroll(p) && (
                             <button
                               onClick={() => handleDeletePayroll(p.id, p.period)}
-                              style={{
-                                padding: '6px 12px',
-                                borderRadius: 4,
-                                border: '1px solid var(--color-error-500)',
-                                background: 'var(--color-bg-secondary)',
-                                color: 'var(--color-error-600)',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                transition: 'all var(--transition-normal)'
-                              }}
+                              className="btn btn-danger btn-sm"
                             >
                               Delete
                             </button>
@@ -605,76 +569,23 @@ const PayrollList: React.FC<{ companyId: string }> = ({ companyId }) => {
                 </div>
               )}
 
-              <div style={{ 
-                display: 'flex', 
-                gap: '12px', 
-                justifyContent: 'flex-end',
-                marginTop: '8px'
-              }}>
+              <div className="btn-group justify-end" style={{ marginTop: '8px' }}>
                 <button
                   onClick={() => {
                     setShowPayrollForm(false);
                     setPayrollPeriod('');
                     setError(null);
                   }}
-                  style={{
-                    padding: '10px 20px',
-                    borderRadius: 6,
-                    border: '1px solid var(--color-border-primary)',
-                    background: 'var(--color-bg-secondary)',
-                    color: 'var(--color-text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    transition: 'all var(--transition-normal)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)';
-                  }}
+                  className="btn btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreatePayroll}
                   disabled={creating || !payrollPeriod.trim()}
-                  style={{
-                    padding: '10px 20px',
-                    borderRadius: 6,
-                    border: 'none',
-                    background: creating || !payrollPeriod.trim() ? 'var(--color-neutral-400)' : 'var(--color-primary-600)',
-                    color: 'var(--color-text-inverse)',
-                    cursor: creating || !payrollPeriod.trim() ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    transition: 'all var(--transition-normal)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!creating && payrollPeriod.trim()) {
-                      e.currentTarget.style.backgroundColor = 'var(--color-primary-700)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!creating && payrollPeriod.trim()) {
-                      e.currentTarget.style.backgroundColor = 'var(--color-primary-600)';
-                    }
-                  }}
+                  className="btn btn-primary"
                 >
-                  {creating && (
-                    <div style={{
-                      width: '16px',
-                      height: '16px',
-                      border: '2px solid transparent',
-                      borderTop: '2px solid currentColor',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite'
-                    }} />
-                  )}
+                  {creating && <div className="spinner" />}
                   {creating ? 'Creating...' : 'Create Payroll'}
                 </button>
               </div>

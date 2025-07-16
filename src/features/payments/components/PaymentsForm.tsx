@@ -24,9 +24,18 @@ const initialState = {
   description: '',
 };
 
-const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
+interface PaymentsFormProps {
+  companyId: string;
+  onAdded: () => void;
+  paymentData?: any;
+  isEditMode?: boolean;
+}
+
+const PaymentsForm: React.FC<PaymentsFormProps> = ({
   companyId,
   onAdded,
+  paymentData,
+  isEditMode = false,
 }) => {
   const [form, setForm] = useState<any>(initialState);
   const [loading, setLoading] = useState(false);
@@ -70,6 +79,22 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
     loadStaff();
   }, [companyId]);
 
+  // Populate form with existing data in edit mode
+  useEffect(() => {
+    if (isEditMode && paymentData) {
+      setForm({
+        type: paymentData.type || '',
+        amount: paymentData.amount?.toString() || '',
+        staffId: paymentData.staffId || '',
+        isGross: paymentData.isGross ?? true,
+        isRecurring: paymentData.isRecurring ?? false,
+        effectiveDate: paymentData.effectiveDate || '',
+        endDate: paymentData.endDate || '',
+        description: paymentData.description || '',
+      });
+    }
+  }, [isEditMode, paymentData]);
+
   const validate = () => {
     const errs: { [k: string]: string } = {};
     if (!form.type.trim()) {errs.type = 'Payment type is required';}
@@ -86,7 +111,8 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const handleChange = (field: string, value: string | boolean) => {
     setForm((prev: any) => ({ ...prev, [field]: value }));
     setFieldErrors(prev => {
-      const { [field]: _removed, ...rest } = prev;
+      const { [field]: _unused, ...rest } = prev;
+      void _unused;
       return rest;
     });
   };
@@ -99,26 +125,44 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
     setLoading(true);
     setError(null);
     try {
-      const paymentData = {
+      const submitData = {
         ...form,
         amount: parseFloat(form.amount),
         status: 'active' as const,
-        createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      await createPayment(companyId, paymentData);
-      setForm(initialState);
+
+      if (isEditMode && paymentData) {
+        // Update existing payment
+        const { updatePayment } = await import('../services/payments.service');
+        await updatePayment(companyId, paymentData.id, submitData);
+      } else {
+        // Create new payment
+        submitData.createdAt = new Date().toISOString();
+        await createPayment(companyId, submitData);
+      }
+      
+      if (!isEditMode) {
+        setForm(initialState);
+      }
       onAdded();
     } catch (err: unknown) {
-      setError((err as Error).message || 'Failed to add payment');
+      setError((err as Error).message || `Failed to ${isEditMode ? 'update' : 'add'} payment`);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCancel = () => {
+    if (!isEditMode) {
+      setForm(initialState);
+    }
+    onAdded(); // This closes the modal
+  };
+
   return (
     <form className="payments-form" onSubmit={handleSubmit} autoComplete="off">
-      <h3>Add Payment</h3>
+      <h3>{isEditMode ? 'Edit Payment' : 'Add Payment'}</h3>
       <div className="form-row">
         <label>
           Payment Type
@@ -263,9 +307,14 @@ const PaymentsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
         </label>
       </div>
       <div className="form-row">
-        <Button type="submit" disabled={loading} variant="primary" loading={loading}>
-          Add Payment
-        </Button>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <Button type="button" variant="secondary" onClick={handleCancel} disabled={loading}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={loading} variant="primary" loading={loading}>
+            {isEditMode ? 'Update Payment' : 'Add Payment'}
+          </Button>
+        </div>
       </div>
       {error && (
         <div className="form-error" role="alert">

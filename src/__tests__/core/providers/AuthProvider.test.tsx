@@ -7,7 +7,6 @@ import React from 'react';
 import { render, screen, waitFor } from '../../../shared/utils/test-utils';
 import { AuthProvider, useAuthContext } from '../../../core/providers/AuthProvider';
 import { auth } from '../../../core/config/firebase.config';
-// Removed unused import: onUserChanged
 import { getUserProfile } from '../../../shared/services/user.service';
 
 // Mock the auth provider service

@@ -23,6 +23,7 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
   const [showForm, setShowForm] = useState(false);
   const [showImportExport, setShowImportExport] = useState(false);
   const [selectedDeduction, setSelectedDeduction] = useState<Deduction | null>(null);
+  const [editingDeduction, setEditingDeduction] = useState<Deduction | null>(null);
   const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
 
@@ -348,15 +349,7 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                 setFilterType('');
                 setFilterStatus('');
               }}
-              style={{
-                padding: '4px 8px',
-                borderRadius: 4,
-                border: '1px solid var(--color-border-primary)',
-                background: 'var(--color-bg-primary)',
-                color: 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
+              className="btn btn-ghost btn-xs"
             >
               Clear Filters
             </button>
@@ -575,48 +568,30 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                       )}
                     </td>
                     <td style={{ padding: '16px', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <div className="table-actions">
                         <button
                           onClick={() => setSelectedDeduction(d)}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: 4,
-                            border: '1px solid var(--color-button-primary)',
-                            background: 'var(--color-card-bg)',
-                            color: 'var(--color-button-primary)',
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                          }}
+                          className="btn btn-info btn-sm"
                         >
                           View
+                        </button>
+                        <button
+                          onClick={() => setEditingDeduction(d)}
+                          className="btn btn-warning btn-sm"
+                        >
+                          Edit
                         </button>
                         {d.type === 'loan' && d.status === 'active' && d.remainingBalance > 0 && (
                           <button
                             onClick={() => setPaymentModalOpen(d.id)}
-                            style={{
-                              padding: '6px 12px',
-                              borderRadius: 4,
-                              border: '1px solid var(--color-primary-500)',
-                              background: 'var(--color-bg-primary)',
-                              color: 'var(--color-primary-500)',
-                              fontSize: '12px',
-                              cursor: 'pointer'
-                            }}
+                            className="btn btn-success btn-sm"
                           >
                             Record Payment
                           </button>
                         )}
                         <button
                           onClick={() => handleDelete(d.id)}
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: 4,
-                            border: '1px solid var(--color-error-500)',
-                            background: 'var(--color-bg-primary)',
-                            color: 'var(--color-error-500)',
-                            fontSize: '12px',
-                            cursor: 'pointer'
-                          }}
+                          className="btn btn-danger btn-sm"
                         >
                           Cancel
                         </button>
@@ -662,6 +637,48 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
               companyId={companyId} 
               onAdded={() => {
                 setShowForm(false);
+                setRefresh(r => r + 1);
+              }} 
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Edit Deduction Modal */}
+      {editingDeduction && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'var(--color-bg-overlay)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'var(--color-card-bg)',
+            borderRadius: '8px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setEditingDeduction(null)}
+              className="modal-close-btn"
+            >
+              ×
+            </button>
+            <DeductionsForm 
+              companyId={companyId}
+              deductionData={editingDeduction}
+              isEditMode={true}
+              onAdded={() => {
+                setEditingDeduction(null);
                 setRefresh(r => r + 1);
               }} 
             />
@@ -739,35 +756,19 @@ const DeductionsList: React.FC<{ companyId: string }> = ({ companyId }) => {
                 }}
               />
             </div>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <div className="btn-group justify-end">
               <button
                 onClick={() => {
                   setPaymentModalOpen(null);
                   setPaymentAmount('');
                 }}
-                style={{
-                  padding: '10px 16px',
-                  borderRadius: 4,
-                  border: '1px solid var(--color-border-primary)',
-                  background: 'var(--color-bg-primary)',
-                  color: 'var(--color-text-secondary)',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
+                className="btn btn-secondary"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleLoanPayment(paymentModalOpen)}
-                style={{
-                  padding: '10px 16px',
-                  borderRadius: 4,
-                  border: 'none',
-                  background: 'var(--color-button-primary)',
-                  color: 'var(--color-text-inverse)',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
+                className="btn btn-primary"
               >
                 Record Payment
               </button>

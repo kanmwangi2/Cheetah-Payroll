@@ -58,13 +58,7 @@ const Utilities: React.FC<UtilitiesProps> = ({ companyId, companyName }) => {
       <h2 style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-xl)' }}>Utilities & Support</h2>
       
       {/* Horizontal Tab Navigation */}
-      <div className="tab-navigation" style={{ 
-        display: 'flex',
-        borderBottom: '2px solid var(--color-border-primary)',
-        marginBottom: 'var(--spacing-xl)',
-        gap: '4px',
-        flexWrap: 'wrap'
-      }}>
+      <div className="tab-navigation">
         {[
           { key: 'faq', label: 'FAQ', icon: '❓' },
           { key: 'docs', label: 'Documentation', icon: '📄' },
@@ -74,31 +68,7 @@ const Utilities: React.FC<UtilitiesProps> = ({ companyId, companyName }) => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
-            style={{
-              padding: '12px 20px',
-              border: 'none',
-              background: 'none',
-              borderBottom: activeTab === tab.key ? '3px solid var(--color-primary-500)' : '3px solid transparent',
-              color: activeTab === tab.key ? 'var(--color-primary-600)' : 'var(--color-text-secondary)',
-              fontWeight: activeTab === tab.key ? '600' : 'normal',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all var(--transition-fast)',
-              borderRadius: '8px 8px 0 0'
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== tab.key) {
-                (e.target as HTMLButtonElement).style.backgroundColor = 'var(--color-bg-secondary)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== tab.key) {
-                (e.target as HTMLButtonElement).style.backgroundColor = 'transparent';
-              }
-            }}
+            className={`tab-button ${activeTab === tab.key ? 'active' : ''}`}
           >
             <span>{tab.icon}</span>
             {tab.label}

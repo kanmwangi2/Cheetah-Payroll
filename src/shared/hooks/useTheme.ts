@@ -89,20 +89,13 @@ export const useTheme = (config: ThemeConfig = {}): ThemeState => {
       });
     };
 
-    // Use the newer addEventListener if available, fallback to deprecated addListener
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener('change', handleChange);
-    } else {
-      // @ts-ignore - For older browsers
-      mediaQuery.addListener(handleChange);
     }
 
     return () => {
       if (mediaQuery.removeEventListener) {
         mediaQuery.removeEventListener('change', handleChange);
-      } else {
-        // @ts-ignore - For older browsers
-        mediaQuery.removeListener(handleChange);
       }
     };
   }, [enableSystem, theme]);

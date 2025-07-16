@@ -35,9 +35,18 @@ const initialState = {
   },
 };
 
-const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
+interface StaffFormProps {
+  companyId: string;
+  onAdded: () => void;
+  staffData?: any;
+  isEditMode?: boolean;
+}
+
+const StaffForm: React.FC<StaffFormProps> = ({
   companyId,
   onAdded,
+  staffData,
+  isEditMode = false,
 }) => {
   const [form, setForm] = useState<any>(initialState);
   const [loading, setLoading] = useState(false);
@@ -80,6 +89,42 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
 
     loadDepartments();
   }, [companyId]);
+
+  // Populate form with existing data in edit mode
+  useEffect(() => {
+    if (isEditMode && staffData) {
+      setForm({
+        personalDetails: {
+          firstName: staffData.firstName || '',
+          lastName: staffData.lastName || '',
+          idNumber: staffData.idNumber || '',
+          rssbNumber: staffData.rssbNumber || '',
+          staffNumber: staffData.staffNumber || '',
+          dateOfBirth: staffData.dateOfBirth || '',
+          gender: staffData.gender || '',
+          maritalStatus: staffData.maritalStatus || '',
+          nationality: staffData.nationality || '',
+          phone: staffData.phone || '',
+          email: staffData.email || '',
+          address: staffData.address || '',
+          emergencyContactName: staffData.emergencyContact?.name || '',
+          emergencyContactPhone: staffData.emergencyContact?.phone || '',
+          emergencyContactRelationship: staffData.emergencyContact?.relationship || '',
+        },
+        employmentDetails: {
+          startDate: staffData.startDate || '',
+          endDate: staffData.endDate || '',
+          position: staffData.position || '',
+          employmentType: staffData.employmentType || '',
+          department: staffData.department || '',
+        },
+        bankDetails: {
+          bankName: staffData.bankDetails?.bankName || '',
+          accountNumber: staffData.bankDetails?.accountNumber || '',
+        },
+      });
+    }
+  }, [isEditMode, staffData]);
 
   const handleChange = (section: string, field: string, value: string) => {
     setForm((prev: any) => ({
@@ -131,19 +176,36 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
         emergencyContact: `${form.personalDetails?.emergencyContactName || ''} (${form.personalDetails?.emergencyContactRelationship || ''}) - ${form.personalDetails?.emergencyContactPhone || ''}`
       };
       
-      await createStaff({ companyId, data: flatData });
-      setForm(initialState);
+      if (isEditMode && staffData) {
+        // Update existing staff
+        const { updateStaff } = await import('../services/staff.service');
+        await updateStaff({ companyId, staffId: staffData.id, data: flatData });
+      } else {
+        // Create new staff
+        await createStaff({ companyId, data: flatData });
+      }
+      
+      if (!isEditMode) {
+        setForm(initialState);
+      }
       onAdded();
     } catch (err: unknown) {
-      setError((err as Error).message || 'Failed to add staff');
+      setError((err as Error).message || `Failed to ${isEditMode ? 'update' : 'add'} staff`);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCancel = () => {
+    if (!isEditMode) {
+      setForm(initialState);
+    }
+    onAdded(); // This closes the modal
+  };
+
   return (
     <form className="staff-form" onSubmit={handleSubmit}>
-      <h3>Add Staff</h3>
+      <h3>{isEditMode ? 'Edit Staff' : 'Add Staff'}</h3>
       <div className="staff-form-row">
         <input
           placeholder="First Name*"
@@ -313,9 +375,14 @@ const StaffForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
           onChange={e => handleChange('bankDetails', 'accountNumber', e.target.value)}
         />
       </div>
-      <Button type="submit" disabled={loading} variant="primary" loading={loading}>
-        Add Staff
-      </Button>
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+        <Button type="button" variant="secondary" onClick={handleCancel} disabled={loading}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={loading} variant="primary" loading={loading}>
+          {isEditMode ? 'Update Staff' : 'Add Staff'}
+        </Button>
+      </div>
       {error && (
         <div className="staff-form-error" role="alert" aria-live="assertive">
           {error}

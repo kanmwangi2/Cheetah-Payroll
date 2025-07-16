@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getDeductionById, updateDeduction } from '../services/deductions.service';
 import { getStaff } from '../../staff/services/staff.service';
-import { DeductionType, Deduction, Staff } from '../../../shared/types';
+import { DeductionType, Staff } from '../../../shared/types';
 import Button from '../../../shared/components/ui/Button';
 
 const DEDUCTION_TYPES: { value: DeductionType; label: string }[] = [
@@ -104,30 +104,30 @@ const DeductionProfile: React.FC<{
     // Focus first focusable element in modal
     const focusFirst = () => {
       const modal = modalRef.current;
-      if (!modal) return;
+      if (!modal) {return;}
       const focusable = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      if (focusable.length) focusable[0].focus();
+      if (focusable.length) {focusable[0].focus();}
     };
     setTimeout(focusFirst, 0);
   }, [companyId, deductionId]);
 
   const getStaffName = (staffId: string) => {
     const staffMember = staff.find(s => s.id === staffId);
-    if (!staffMember) return 'Unknown Employee';
+    if (!staffMember) {return 'Unknown Employee';}
     return `${staffMember.personalDetails?.firstName || ''} ${staffMember.personalDetails?.lastName || ''}`.trim();
   };
 
   const validate = () => {
-    if (!form) return {};
+    if (!form) {return {};}
     
     const errs: { [k: string]: string } = {};
-    if (!form.type?.trim()) errs.type = 'Deduction type is required';
+    if (!form.type?.trim()) {errs.type = 'Deduction type is required';}
     if (!form.originalAmount || isNaN(Number(form.originalAmount)) || Number(form.originalAmount) <= 0) {
       errs.originalAmount = 'Amount must be a positive number';
     }
-    if (!form.staffId?.trim()) errs.staffId = 'Employee is required';
+    if (!form.staffId?.trim()) {errs.staffId = 'Employee is required';}
     
     if (form.type === 'loan') {
       if (form.numberOfInstallments !== undefined) {
@@ -149,7 +149,7 @@ const DeductionProfile: React.FC<{
 
   const handleChange = (field: string, value: string | number) => {
     setForm((prev: DeductionData | null) => {
-      if (!prev) return null;
+      if (!prev) {return null;}
       
       const newValue = typeof value === 'string' && !isNaN(Number(value)) && field !== 'description' && field !== 'staffId' && field !== 'type' 
         ? Number(value) 
@@ -170,7 +170,8 @@ const DeductionProfile: React.FC<{
     });
     
     setFieldErrors(prev => {
-      const { [field]: _removed, ...rest } = prev;
+      const { [field]: _unused, ...rest } = prev;
+      void _unused;
       return rest;
     });
   };
@@ -183,7 +184,7 @@ const DeductionProfile: React.FC<{
 
     const errs = validate();
     setFieldErrors(errs);
-    if (Object.keys(errs).length > 0) return;
+    if (Object.keys(errs).length > 0) {return;}
 
     setSaving(true);
     setError(null);
@@ -196,7 +197,7 @@ const DeductionProfile: React.FC<{
       await updateDeduction(companyId, deductionId, updateData);
       setOriginalDeduction(form);
       setEditMode(false);
-      if (onUpdated) onUpdated();
+      if (onUpdated) {onUpdated();}
     } catch (err: unknown) {
       const errorMessage = (err as Error).message || 'Failed to update deduction';
       setError(errorMessage);
@@ -214,14 +215,14 @@ const DeductionProfile: React.FC<{
 
   // Focus trap logic
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Escape') onClose();
+    if (e.key === 'Escape') {onClose();}
     if (e.key === 'Tab') {
       const modal = modalRef.current;
-      if (!modal) return;
+      if (!modal) {return;}
       const focusable = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      if (!focusable.length) return;
+      if (!focusable.length) {return;}
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (e.shiftKey) {
@@ -329,7 +330,7 @@ const DeductionProfile: React.FC<{
           &times;
         </button>
         
-        <form className="staff-form" onSubmit={(e) => { e.preventDefault(); if (editMode) handleSave(); }}>
+        <form className="staff-form" onSubmit={(e) => { e.preventDefault(); if (editMode) {handleSave();} }}>
           <h3 id="deduction-profile-title">{editMode ? 'Edit Deduction' : 'Deduction Details'}</h3>
           
           <div className="staff-form-row">

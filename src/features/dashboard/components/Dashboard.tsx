@@ -26,7 +26,7 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
     thisMonthPayroll: 0
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<number>(0);
   const navigate = useNavigate();
 

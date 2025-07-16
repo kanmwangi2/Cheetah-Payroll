@@ -29,9 +29,18 @@ const initialState: DeductionFormState = {
   monthlyInstallment: '',
 };
 
-const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
+interface DeductionsFormProps {
+  companyId: string;
+  onAdded: () => void;
+  deductionData?: any;
+  isEditMode?: boolean;
+}
+
+const DeductionsForm: React.FC<DeductionsFormProps> = ({
   companyId,
   onAdded,
+  deductionData,
+  isEditMode = false,
 }) => {
   const [form, setForm] = useState<DeductionFormState>(initialState);
   const [loading, setLoading] = useState(false);
@@ -53,6 +62,20 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
     };
     loadStaff();
   }, [companyId]);
+
+  // Populate form with existing data in edit mode
+  useEffect(() => {
+    if (isEditMode && deductionData) {
+      setForm({
+        type: deductionData.type || '',
+        originalAmount: deductionData.originalAmount?.toString() || '',
+        staffId: deductionData.staffId || '',
+        description: deductionData.description || '',
+        numberOfInstallments: deductionData.numberOfInstallments?.toString() || '',
+        monthlyInstallment: deductionData.monthlyInstallment?.toString() || '',
+      });
+    }
+  }, [isEditMode, deductionData]);
 
   // Auto-calculate monthly installment when loan details change
   useEffect(() => {
@@ -94,7 +117,8 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
     setFieldErrors(prev => {
-      const { [field]: _, ...rest } = prev;
+      const { [field]: _unused, ...rest } = prev;
+      void _unused;
       return rest;
     });
     
@@ -118,7 +142,7 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
     setLoading(true);
     setError(null);
     try {
-      const deductionData: Partial<Deduction> = {
+      const submitData: Partial<Deduction> = {
         type: form.type as DeductionType,
         staffId: form.staffId,
         originalAmount: parseFloat(form.originalAmount),
@@ -126,25 +150,43 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
       };
       if (form.type === 'loan') {
         if (form.numberOfInstallments) {
-          deductionData.numberOfInstallments = parseInt(form.numberOfInstallments, 10);
+          submitData.numberOfInstallments = parseInt(form.numberOfInstallments, 10);
         }
         if (form.monthlyInstallment) {
-          deductionData.monthlyInstallment = parseFloat(form.monthlyInstallment);
+          submitData.monthlyInstallment = parseFloat(form.monthlyInstallment);
         }
       }
-      await createDeduction(companyId, deductionData as Deduction);
-      setForm(initialState);
+
+      if (isEditMode && deductionData) {
+        // Update existing deduction
+        const { updateDeduction } = await import('../services/deductions.service');
+        await updateDeduction(companyId, deductionData.id, submitData);
+      } else {
+        // Create new deduction
+        await createDeduction(companyId, submitData as Deduction);
+      }
+      
+      if (!isEditMode) {
+        setForm(initialState);
+      }
       onAdded();
     } catch (err: unknown) {
-      setError((err as Error).message || 'Failed to add deduction');
+      setError((err as Error).message || `Failed to ${isEditMode ? 'update' : 'add'} deduction`);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCancel = () => {
+    if (!isEditMode) {
+      setForm(initialState);
+    }
+    onAdded(); // This closes the modal
+  };
+
   return (
     <form className="deductions-form" onSubmit={handleSubmit} autoComplete="off">
-      <h3>Add Deduction</h3>
+      <h3>{isEditMode ? 'Edit Deduction' : 'Add Deduction'}</h3>
       <div className="form-row">
         <label>
           Deduction Type
@@ -278,9 +320,14 @@ const DeductionsForm: React.FC<{ companyId: string; onAdded: () => void }> = ({
         </label>
       </div>
       <div className="form-row">
-        <Button type="submit" disabled={loading} variant="primary" loading={loading}>
-          Add Deduction
-        </Button>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <Button type="button" variant="secondary" onClick={handleCancel} disabled={loading}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={loading} variant="primary" loading={loading}>
+            {isEditMode ? 'Update Deduction' : 'Add Deduction'}
+          </Button>
+        </div>
       </div>
       {error && (
         <div className="form-error" role="alert">

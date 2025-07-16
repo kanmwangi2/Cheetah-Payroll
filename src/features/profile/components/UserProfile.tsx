@@ -329,7 +329,7 @@ const UserProfile: React.FC = () => {
       }}>User Profile</h2>
       
       {/* Tab Navigation */}
-      <div style={{ borderBottom: '1px solid var(--color-border-primary)', marginBottom: '24px' }}>
+      <div className="tab-navigation">
         {[
           { key: 'profile', label: 'Profile' },
           { key: 'picture', label: 'Profile Picture' },
@@ -338,16 +338,7 @@ const UserProfile: React.FC = () => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
-            style={{
-              padding: '12px 24px',
-              border: 'none',
-              background: 'none',
-              borderBottom: activeTab === tab.key ? '2px solid var(--color-primary-600)' : '2px solid transparent',
-              color: activeTab === tab.key ? 'var(--color-primary-600)' : 'var(--color-text-secondary)',
-              fontWeight: activeTab === tab.key ? '600' : 'normal',
-              cursor: 'pointer',
-              fontSize: '0.9rem'
-            }}
+            className={`tab-button ${activeTab === tab.key ? 'active' : ''}`}
           >
             {tab.label}
           </button>

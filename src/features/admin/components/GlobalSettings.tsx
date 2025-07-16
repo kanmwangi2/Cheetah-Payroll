@@ -35,12 +35,7 @@ interface GlobalSettingsData {
     systemAlerts: boolean;
     auditNotifications: boolean;
     reminderDaysBefore: number;
-  };
-  integrations: {
-    bankingAPI: boolean;
-    hrSystemAPI: boolean;
-    accountingAPI: boolean;
-    reportsAPI: boolean;
+    payrollDay: number;
   };
   updatedAt: Date;
 }
@@ -76,13 +71,8 @@ const GlobalSettings: React.FC = () => {
       payrollReminders: true,
       systemAlerts: true,
       auditNotifications: true,
-      reminderDaysBefore: 3
-    },
-    integrations: {
-      bankingAPI: false,
-      hrSystemAPI: false,
-      accountingAPI: false,
-      reportsAPI: false
+      reminderDaysBefore: 3,
+      payrollDay: 28
     },
     updatedAt: new Date()
   });
@@ -731,6 +721,28 @@ const GlobalSettings: React.FC = () => {
               />
             </div>
             
+            <div>
+              <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
+                Payroll Day (Day of Month)
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="31"
+                value={settings.notifications.payrollDay}
+                onChange={(e) => updateSetting('notifications', 'payrollDay', Number(e.target.value))}
+                style={{
+                  width: '100%',
+                  padding: 'var(--spacing-md)',
+                  border: '1px solid var(--color-input-border)',
+                  borderRadius: 'var(--border-radius-sm)',
+                  fontSize: 'var(--font-size-sm)',
+                  backgroundColor: 'var(--color-input-bg)',
+                  color: 'var(--color-text-primary)'
+                }}
+              />
+            </div>
+            
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
                 <input
@@ -783,64 +795,6 @@ const GlobalSettings: React.FC = () => {
           </div>
         </div>
 
-        {/* Integration Settings */}
-        <div style={{
-          background: 'var(--color-card-bg)',
-          border: '1px solid var(--color-card-border)',
-          borderRadius: 'var(--border-radius-lg)',
-          padding: 'var(--spacing-2xl)'
-        }}>
-          <h3 style={{ margin: '0 0 var(--spacing-lg) 0', color: 'var(--color-text-primary)' }}>Integration Settings</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-              <input
-                type="checkbox"
-                id="bankingAPI"
-                checked={settings.integrations.bankingAPI}
-                onChange={(e) => updateSetting('integrations', 'bankingAPI', e.target.checked)}
-              />
-              <label htmlFor="bankingAPI" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
-                Banking API Integration
-              </label>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-              <input
-                type="checkbox"
-                id="hrSystemAPI"
-                checked={settings.integrations.hrSystemAPI}
-                onChange={(e) => updateSetting('integrations', 'hrSystemAPI', e.target.checked)}
-              />
-              <label htmlFor="hrSystemAPI" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
-                HR System API Integration
-              </label>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-              <input
-                type="checkbox"
-                id="accountingAPI"
-                checked={settings.integrations.accountingAPI}
-                onChange={(e) => updateSetting('integrations', 'accountingAPI', e.target.checked)}
-              />
-              <label htmlFor="accountingAPI" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
-                Accounting API Integration
-              </label>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-              <input
-                type="checkbox"
-                id="reportsAPI"
-                checked={settings.integrations.reportsAPI}
-                onChange={(e) => updateSetting('integrations', 'reportsAPI', e.target.checked)}
-              />
-              <label htmlFor="reportsAPI" style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}>
-                Reports API Integration
-              </label>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

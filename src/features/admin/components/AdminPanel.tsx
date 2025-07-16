@@ -112,16 +112,18 @@ const AdminPanel: React.FC = () => {
           </div>
           
           <div style={tabsContainerStyles}>
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={getTabStyles(activeTab === tab.id)}
-              >
-                <span style={tabIconStyles}>{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
+            <div className="tab-navigation style-pills">
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+                >
+                  <span>{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -202,24 +204,6 @@ const tabsContainerStyles: React.CSSProperties = {
   gap: 'var(--spacing-sm)',
 };
 
-const getTabStyles = (isActive: boolean): React.CSSProperties => ({
-  padding: 'var(--spacing-md) var(--spacing-lg)',
-  borderRadius: 'var(--border-radius-lg) var(--border-radius-lg) 0 0',
-  border: 'none',
-  backgroundColor: isActive ? 'var(--color-primary-500)' : 'var(--color-bg-tertiary)',
-  color: isActive ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
-  cursor: 'pointer',
-  fontSize: 'var(--font-size-sm)',
-  fontWeight: 'var(--font-weight-medium)',
-  display: 'flex',
-  alignItems: 'center',
-  gap: 'var(--spacing-sm)',
-  transition: 'all var(--transition-normal)',
-});
-
-const tabIconStyles: React.CSSProperties = {
-  fontSize: '1.1rem',
-};
 
 const contentWrapperStyles: React.CSSProperties = {
   maxWidth: '1200px',

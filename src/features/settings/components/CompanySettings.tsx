@@ -60,16 +60,6 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
       rama: true
     },
     settings: {
-      timezone: 'Africa/Kigali',
-      currency: 'RWF',
-      fiscalYearStart: 'January',
-      payrollFrequency: 'monthly',
-      defaultWorkingDays: 22,
-      defaultWorkingHours: 8,
-      enableOvertimeCalculation: true,
-      overtimeMultiplier: 1.5,
-      enableAdvancePayments: true,
-      maxAdvancePercentage: 50,
       requirePayrollApproval: true,
       enableAuditTrail: true,
       backupFrequency: 'daily',
@@ -84,10 +74,21 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
     }
   });
 
+  // Edit and delete state management
+  const [editingItem, setEditingItem] = useState<{
+    type: 'departments' | 'paymentTypes' | 'deductionTypes';
+    index: number;
+    value: string;
+  } | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    type: 'departments' | 'paymentTypes' | 'deductionTypes';
+    index: number;
+    item: string;
+  } | null>(null);
+
   const tabs = [
     { id: 'general', label: 'General Information', icon: '🏢' },
     { id: 'structure', label: 'Structure', icon: '🏗️' },
-    { id: 'payroll', label: 'Payroll Settings', icon: '💰' },
     { id: 'security', label: 'Security & Access', icon: '🔒' },
     { id: 'backup', label: 'Backup & Audit', icon: '💾' }
   ];
@@ -99,19 +100,6 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
     'Transportation', 'Other'
   ];
 
-  const timezones = [
-    'Africa/Kigali', 'Africa/Nairobi', 'Africa/Kampala', 'Africa/Dar_es_Salaam',
-    'UTC', 'Africa/Lagos', 'Africa/Cairo'
-  ];
-
-  const currencies = [
-    { code: 'RWF', name: 'Rwandan Franc' },
-    { code: 'USD', name: 'US Dollar' },
-    { code: 'EUR', name: 'Euro' },
-    { code: 'KES', name: 'Kenyan Shilling' },
-    { code: 'UGX', name: 'Ugandan Shilling' },
-    { code: 'TZS', name: 'Tanzanian Shilling' }
-  ];
 
   useEffect(() => {
     loadCompanyData();
@@ -240,6 +228,60 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
     handleStructureChange(type, newItems);
   };
 
+  // Edit functionality
+  const startEditing = (type: 'departments' | 'paymentTypes' | 'deductionTypes', index: number) => {
+    setEditingItem({
+      type,
+      index,
+      value: formData.structure[type][index]
+    });
+  };
+
+  const saveEdit = () => {
+    if (!editingItem) {return;}
+    
+    const { type, index, value } = editingItem;
+    const trimmedValue = value.trim();
+    
+    // Check if the new value is different and not empty
+    if (trimmedValue && trimmedValue !== formData.structure[type][index]) {
+      // Check if the new value already exists (avoid duplicates)
+      const otherItems = formData.structure[type].filter((_, i) => i !== index);
+      if (!otherItems.includes(trimmedValue)) {
+        const newItems = [...formData.structure[type]];
+        newItems[index] = trimmedValue;
+        handleStructureChange(type, newItems);
+      }
+    }
+    
+    setEditingItem(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingItem(null);
+  };
+
+  // Delete confirmation functionality
+  const confirmDelete = (type: 'departments' | 'paymentTypes' | 'deductionTypes', index: number) => {
+    setDeleteConfirmation({
+      type,
+      index,
+      item: formData.structure[type][index]
+    });
+  };
+
+  const executeDelete = () => {
+    if (!deleteConfirmation) {return;}
+    
+    const { type, index } = deleteConfirmation;
+    removeStructureItem(type, index);
+    setDeleteConfirmation(null);
+  };
+
+  const cancelDelete = () => {
+    setDeleteConfirmation(null);
+  };
+
   if (loading) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
@@ -276,46 +318,67 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
       </div>
 
       {/* Tab Navigation */}
-      <div style={{ 
-        display: 'flex', 
-        borderBottom: '2px solid var(--color-border-primary)',
-        marginBottom: '24px',
-        gap: '4px'
-      }}>
+      <div className="tab-navigation style-pills">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            style={{
-              padding: '12px 20px',
-              background: activeTab === tab.id ? 'var(--color-primary-500)' : 'transparent',
-              color: activeTab === tab.id ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
-              border: 'none',
-              borderRadius: '8px 8px 0 0',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: activeTab === tab.id ? 600 : 400,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== tab.id) {
-                (e.target as HTMLButtonElement).style.background = 'var(--color-bg-secondary)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== tab.id) {
-                (e.target as HTMLButtonElement).style.background = 'transparent';
-              }
-            }}
+            className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
           >
             <span>{tab.icon}</span>
             {tab.label}
           </button>
         ))}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '400px' }}>
+            <h3 style={{ margin: '0 0 16px 0', color: 'var(--color-text-primary)' }}>
+              Confirm Deletion
+            </h3>
+            <p style={{ margin: '0 0 24px 0', color: 'var(--color-text-secondary)' }}>
+              Are you sure you want to delete <strong>"{deleteConfirmation.item}"</strong>?
+            </p>
+            <p style={{ margin: '0 0 24px 0', color: 'var(--color-warning-600)', fontSize: '0.9rem' }}>
+              ⚠️ This action cannot be undone. Make sure this item is not being used by any staff members, payments, or deductions.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={cancelDelete}
+                style={{
+                  padding: '8px 16px',
+                  background: 'var(--color-bg-secondary)',
+                  color: 'var(--color-text-primary)',
+                  border: '1px solid var(--color-border-primary)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeDelete}
+                style={{
+                  padding: '8px 16px',
+                  background: 'var(--color-error-500)',
+                  color: 'var(--color-text-inverse)',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         {/* General Information Tab */}
@@ -461,27 +524,129 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                     border: '1px solid var(--color-border-primary)',
                     borderRadius: '6px'
                   }}>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{dept}</span>
-                    {isAdmin && (
-                      <button
-                        type="button"
-                        onClick={() => removeStructureItem('departments', index)}
-                        style={{
-                          background: 'var(--color-error-500)',
-                          color: 'var(--color-text-inverse)',
-                          border: 'none',
-                          borderRadius: '50%',
-                          width: '20px',
-                          height: '20px',
-                          cursor: 'pointer',
-                          fontSize: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        ×
-                      </button>
+                    {editingItem && editingItem.type === 'departments' && editingItem.index === index ? (
+                      // Edit mode
+                      <>
+                        <input
+                          type="text"
+                          value={editingItem.value}
+                          onChange={(e) => setEditingItem({...editingItem, value: e.target.value})}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              saveEdit();
+                            } else if (e.key === 'Escape') {
+                              cancelEdit();
+                            }
+                          }}
+                          style={{
+                            fontSize: '0.9rem',
+                            padding: '4px 8px',
+                            border: '1px solid var(--color-primary-500)',
+                            borderRadius: '4px',
+                            background: 'var(--color-input-bg)',
+                            color: 'var(--color-text-primary)',
+                            minWidth: '120px'
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={saveEdit}
+                          style={{
+                            background: 'var(--color-success-500)',
+                            color: 'var(--color-text-inverse)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ✓
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          style={{
+                            background: 'var(--color-error-500)',
+                            color: 'var(--color-text-inverse)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ×
+                        </button>
+                      </>
+                    ) : (
+                      // View mode
+                      <>
+                        <span 
+                          style={{ 
+                            fontSize: '0.9rem', 
+                            color: 'var(--color-text-primary)',
+                            cursor: isAdmin ? 'pointer' : 'default'
+                          }}
+                          onClick={() => isAdmin && startEditing('departments', index)}
+                          title={isAdmin ? 'Click to edit' : ''}
+                        >
+                          {dept}
+                        </span>
+                        {isAdmin && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => startEditing('departments', index)}
+                              style={{
+                                background: 'var(--color-primary-500)',
+                                color: 'var(--color-text-inverse)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Edit"
+                            >
+                              ✎
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => confirmDelete('departments', index)}
+                              style={{
+                                background: 'var(--color-error-500)',
+                                color: 'var(--color-text-inverse)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Delete"
+                            >
+                              ×
+                            </button>
+                          </>
+                        )}
+                      </>
                     )}
                   </div>
                 ))}
@@ -540,27 +705,129 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                     border: '1px solid var(--color-border-primary)',
                     borderRadius: '6px'
                   }}>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{type}</span>
-                    {isAdmin && (
-                      <button
-                        type="button"
-                        onClick={() => removeStructureItem('paymentTypes', index)}
-                        style={{
-                          background: 'var(--color-error-500)',
-                          color: 'var(--color-text-inverse)',
-                          border: 'none',
-                          borderRadius: '50%',
-                          width: '20px',
-                          height: '20px',
-                          cursor: 'pointer',
-                          fontSize: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        ×
-                      </button>
+                    {editingItem && editingItem.type === 'paymentTypes' && editingItem.index === index ? (
+                      // Edit mode
+                      <>
+                        <input
+                          type="text"
+                          value={editingItem.value}
+                          onChange={(e) => setEditingItem({...editingItem, value: e.target.value})}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              saveEdit();
+                            } else if (e.key === 'Escape') {
+                              cancelEdit();
+                            }
+                          }}
+                          style={{
+                            fontSize: '0.9rem',
+                            padding: '4px 8px',
+                            border: '1px solid var(--color-primary-500)',
+                            borderRadius: '4px',
+                            background: 'var(--color-input-bg)',
+                            color: 'var(--color-text-primary)',
+                            minWidth: '120px'
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={saveEdit}
+                          style={{
+                            background: 'var(--color-success-500)',
+                            color: 'var(--color-text-inverse)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ✓
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          style={{
+                            background: 'var(--color-error-500)',
+                            color: 'var(--color-text-inverse)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ×
+                        </button>
+                      </>
+                    ) : (
+                      // View mode
+                      <>
+                        <span 
+                          style={{ 
+                            fontSize: '0.9rem', 
+                            color: 'var(--color-text-primary)',
+                            cursor: isAdmin ? 'pointer' : 'default'
+                          }}
+                          onClick={() => isAdmin && startEditing('paymentTypes', index)}
+                          title={isAdmin ? 'Click to edit' : ''}
+                        >
+                          {type}
+                        </span>
+                        {isAdmin && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => startEditing('paymentTypes', index)}
+                              style={{
+                                background: 'var(--color-primary-500)',
+                                color: 'var(--color-text-inverse)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Edit"
+                            >
+                              ✎
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => confirmDelete('paymentTypes', index)}
+                              style={{
+                                background: 'var(--color-error-500)',
+                                color: 'var(--color-text-inverse)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Delete"
+                            >
+                              ×
+                            </button>
+                          </>
+                        )}
+                      </>
                     )}
                   </div>
                 ))}
@@ -627,147 +894,140 @@ const CompanySettings: React.FC<CompanySettingsProps> = ({ companyId }) => {
                     border: '1px solid var(--color-border-primary)',
                     borderRadius: '6px'
                   }}>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{type}</span>
-                    {isAdmin && (
-                      <button
-                        type="button"
-                        onClick={() => removeStructureItem('deductionTypes', index)}
-                        style={{
-                          background: 'var(--color-error-500)',
-                          color: 'var(--color-text-inverse)',
-                          border: 'none',
-                          borderRadius: '50%',
-                          width: '20px',
-                          height: '20px',
-                          cursor: 'pointer',
-                          fontSize: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        ×
-                      </button>
+                    {editingItem && editingItem.type === 'deductionTypes' && editingItem.index === index ? (
+                      // Edit mode
+                      <>
+                        <input
+                          type="text"
+                          value={editingItem.value}
+                          onChange={(e) => setEditingItem({...editingItem, value: e.target.value})}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              saveEdit();
+                            } else if (e.key === 'Escape') {
+                              cancelEdit();
+                            }
+                          }}
+                          style={{
+                            fontSize: '0.9rem',
+                            padding: '4px 8px',
+                            border: '1px solid var(--color-primary-500)',
+                            borderRadius: '4px',
+                            background: 'var(--color-input-bg)',
+                            color: 'var(--color-text-primary)',
+                            minWidth: '120px'
+                          }}
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={saveEdit}
+                          style={{
+                            background: 'var(--color-success-500)',
+                            color: 'var(--color-text-inverse)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ✓
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          style={{
+                            background: 'var(--color-error-500)',
+                            color: 'var(--color-text-inverse)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ×
+                        </button>
+                      </>
+                    ) : (
+                      // View mode
+                      <>
+                        <span 
+                          style={{ 
+                            fontSize: '0.9rem', 
+                            color: 'var(--color-text-primary)',
+                            cursor: isAdmin ? 'pointer' : 'default'
+                          }}
+                          onClick={() => isAdmin && startEditing('deductionTypes', index)}
+                          title={isAdmin ? 'Click to edit' : ''}
+                        >
+                          {type}
+                        </span>
+                        {isAdmin && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => startEditing('deductionTypes', index)}
+                              style={{
+                                background: 'var(--color-primary-500)',
+                                color: 'var(--color-text-inverse)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Edit"
+                            >
+                              ✎
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => confirmDelete('deductionTypes', index)}
+                              style={{
+                                background: 'var(--color-error-500)',
+                                color: 'var(--color-text-inverse)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Delete"
+                            >
+                              ×
+                            </button>
+                          </>
+                        )}
+                      </>
                     )}
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Payroll Settings Tab */}
-        {activeTab === 'payroll' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            {/* Tax Exemptions Section */}
             <div>
-              <label style={getLabelStyle()}>
-                Timezone
-              </label>
-              <select
-                value={formData.settings.timezone}
-                onChange={(e) => handleSettingsChange('timezone', e.target.value)}
-                style={getInputStyle()}
-                disabled={!isAdmin}
-              >
-                {timezones.map(tz => (
-                  <option key={tz} value={tz}>{tz}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={getLabelStyle()}>
-                Currency
-              </label>
-              <select
-                value={formData.settings.currency}
-                onChange={(e) => handleSettingsChange('currency', e.target.value)}
-                style={getInputStyle()}
-                disabled={!isAdmin}
-              >
-                {currencies.map(currency => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.code} - {currency.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={getLabelStyle()}>
-                Default Working Days per Month
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="31"
-                value={formData.settings.defaultWorkingDays}
-                onChange={(e) => handleSettingsChange('defaultWorkingDays', parseInt(e.target.value))}
-                style={getInputStyle()}
-                disabled={!isAdmin}
-              />
-            </div>
-
-            <div>
-              <label style={getLabelStyle()}>
-                Default Working Hours per Day
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="24"
-                value={formData.settings.defaultWorkingHours}
-                onChange={(e) => handleSettingsChange('defaultWorkingHours', parseInt(e.target.value))}
-                style={getInputStyle()}
-                disabled={!isAdmin}
-              />
-            </div>
-
-            <div style={{ gridColumn: '1 / -1' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <input
-                  type="checkbox"
-                  id="enableOvertimeCalculation"
-                  checked={formData.settings.enableOvertimeCalculation}
-                  onChange={(e) => handleSettingsChange('enableOvertimeCalculation', e.target.checked)}
-                  disabled={!isAdmin}
-                />
-                <label htmlFor="enableOvertimeCalculation" style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                  Enable Overtime Calculation
-                </label>
-              </div>
-              
-              {formData.settings.enableOvertimeCalculation && (
-                <div style={{ marginLeft: '24px' }}>
-                  <label style={getLabelStyle()}>
-                    Overtime Multiplier
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="1"
-                    max="3"
-                    value={formData.settings.overtimeMultiplier}
-                    onChange={(e) => handleSettingsChange('overtimeMultiplier', parseFloat(e.target.value))}
-                    style={{...getInputStyle(), width: '200px'}}
-                    disabled={!isAdmin}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Tax Settings Section */}
-            <div style={{ gridColumn: '1 / -1', marginTop: '32px' }}>
-              <h3 style={{ 
-                margin: '0 0 16px 0', 
-                fontSize: '1.2rem', 
-                fontWeight: 600, 
-                color: 'var(--color-text-primary)',
-                borderBottom: '2px solid var(--color-primary-500)',
-                paddingBottom: '8px'
-              }}>
+              <h4 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
                 Tax Exemptions
-              </h3>
+              </h4>
               <p style={{ 
                 color: 'var(--color-text-secondary)', 
                 fontSize: '0.9rem', 

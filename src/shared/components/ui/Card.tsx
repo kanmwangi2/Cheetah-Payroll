@@ -37,6 +37,8 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     ref
   ) => {
     const { themeValue, isDark } = useThemeValues();
+    void themeValue;
+    void isDark;
 
     const sizeStyles = {
       sm: {

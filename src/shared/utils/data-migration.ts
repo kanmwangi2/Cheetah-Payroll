@@ -7,8 +7,6 @@ import {
   collection, 
   getDocs, 
   doc, 
-  updateDoc, 
-  deleteDoc, 
   writeBatch 
 } from 'firebase/firestore';
 import { db } from '../../core/config/firebase.config';
@@ -224,7 +222,8 @@ async function migrateCollection(
           if (fixedValidation.isValid) {
             if (!options.dryRun) {
               // Remove id from data before updating
-              const { id: _, ...updateData } = fixedData;
+              const { id: _unused, ...updateData } = fixedData;
+              void _unused;
               batch.update(doc(db, 'companies', options.companyId, collectionName, docRef.id), updateData as any);
               batchCount++;
               

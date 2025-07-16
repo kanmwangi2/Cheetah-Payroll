@@ -35,7 +35,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(screen.getByText('Something went wrong!')).toBeInTheDocument();
     expect(
       screen.getByText("We're sorry, but there was an error displaying this content.")
     ).toBeInTheDocument();
@@ -73,13 +73,20 @@ describe('ErrorBoundary', () => {
   });
 
   it('should display error details in details section', () => {
+    // Set NODE_ENV to development to show error details
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Error Details')).toBeInTheDocument();
+    expect(screen.getByText('Error Details (Development only)')).toBeInTheDocument();
     expect(screen.getByText('Test error')).toBeInTheDocument();
+    
+    // Restore original environment
+    process.env.NODE_ENV = originalEnv;
   });
 });

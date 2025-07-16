@@ -3,7 +3,7 @@
  * Provides performance monitoring and optimization utilities
  */
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { logger } from '../utils/logger';
 
 interface PerformanceMetrics {
