@@ -255,7 +255,7 @@ const UserProfile: React.FC = () => {
       }}>User Profile</h2>
       
       {/* Tab Navigation */}
-      <div className="tab-navigation">
+      <div className="tab-navigation style-pills">
         {[
           { key: 'profile', label: 'Profile' },
           { key: 'picture', label: 'Profile Picture' },

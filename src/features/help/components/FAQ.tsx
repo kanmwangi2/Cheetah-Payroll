@@ -96,6 +96,9 @@ const faqData = [
         
         <h4>Can I customize deductions?</h4>
         <p>Yes! You can add loans, advances, and other deductions with monthly installment amounts. The system includes balance validation to prevent over-payments and provides real-time balance tracking.</p>
+        
+        <h4>Can I disable specific taxes?</h4>
+        <p>Yes! Administrators can enable or disable specific taxes (PAYE, Pension, Maternity, CBHI, RAMA) in the Tax Configuration settings. When a tax is disabled, it won't appear in payroll calculations or payslips.</p>
       </div>
     )
   },

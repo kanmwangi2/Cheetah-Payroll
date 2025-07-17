@@ -270,7 +270,7 @@ const CompanySelector: React.FC<{ onSelect: (company: Company) => void }> = ({ o
             onClick={handleProceedToCompany}
             disabled={!selectedCompany}
             className="btn btn-primary btn-lg"
-            style={{ width: '100%' }}
+            style={{ width: '100%', marginBottom: 'var(--spacing-2xl)' }}
           >
             Proceed to Company Dashboard
           </button>

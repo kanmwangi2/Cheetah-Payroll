@@ -381,7 +381,7 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
       <h2>Reports & Analytics</h2>
       
       {/* Tab Navigation */}
-      <div className="tab-navigation">
+      <div className="tab-navigation style-pills">
         {[
           { key: 'statutory', label: 'Statutory Reports' },
           { key: 'payslips', label: 'Payslips' },

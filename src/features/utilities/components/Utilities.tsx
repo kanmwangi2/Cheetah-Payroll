@@ -58,7 +58,7 @@ const Utilities: React.FC<UtilitiesProps> = ({ companyId, companyName }) => {
       <h2 style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-xl)' }}>Utilities & Support</h2>
       
       {/* Horizontal Tab Navigation */}
-      <div className="tab-navigation">
+      <div className="tab-navigation style-pills">
         {[
           { key: 'faq', label: 'FAQ', icon: '❓' },
           { key: 'docs', label: 'Documentation', icon: '📄' },

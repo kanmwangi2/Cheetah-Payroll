@@ -330,23 +330,54 @@ export class PDFReportGenerator {
     // Get current tax configuration for display
     const config = await this.ensureTaxConfig();
     
-    // Statutory Deductions (Employee taxes only)
+    // Get company tax settings (default to all enabled if not specified)
+    const taxSettings = company.payrollTaxSettings || {
+      paye: true,
+      pension: true,
+      maternity: true,
+      cbhi: true,
+      rama: true
+    };
+    
+    // Statutory Deductions (Employee taxes only) - only show enabled taxes
     const statutoryDeductionsData = [
-      ['STATUTORY DEDUCTIONS', ''],
-      ['PAYE Tax', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.payeBeforeReliefs.toLocaleString()}`],
-      [`Pension Employee (${config.pensionRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.pensionEmployee.toLocaleString()}`],
-      [`Maternity Employee (${config.maternityRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.maternityEmployee.toLocaleString()}`],
-      [`RAMA Employee (${config.ramaRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.ramaEmployee.toLocaleString()}`],
-      [`CBHI (${config.cbhiRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.cbhiEmployee.toLocaleString()}`],
-      ['', ''],
-      ['TOTAL STATUTORY', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${(
-        staffPayroll.calculations.payeBeforeReliefs +
-        staffPayroll.calculations.pensionEmployee +
-        staffPayroll.calculations.maternityEmployee +
-        staffPayroll.calculations.ramaEmployee +
-        staffPayroll.calculations.cbhiEmployee
-      ).toLocaleString()}`]
+      ['STATUTORY DEDUCTIONS', '']
     ];
+    
+    let totalStatutoryDeductions = 0;
+    
+    if (taxSettings.paye) {
+      statutoryDeductionsData.push(['PAYE Tax', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.payeBeforeReliefs.toLocaleString()}`]);
+      totalStatutoryDeductions += staffPayroll.calculations.payeBeforeReliefs;
+    }
+    
+    if (taxSettings.pension) {
+      statutoryDeductionsData.push([`Pension Employee (${config.pensionRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.pensionEmployee.toLocaleString()}`]);
+      totalStatutoryDeductions += staffPayroll.calculations.pensionEmployee;
+    }
+    
+    if (taxSettings.maternity) {
+      statutoryDeductionsData.push([`Maternity Employee (${config.maternityRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.maternityEmployee.toLocaleString()}`]);
+      totalStatutoryDeductions += staffPayroll.calculations.maternityEmployee;
+    }
+    
+    if (taxSettings.rama) {
+      statutoryDeductionsData.push([`RAMA Employee (${config.ramaRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.ramaEmployee.toLocaleString()}`]);
+      totalStatutoryDeductions += staffPayroll.calculations.ramaEmployee;
+    }
+    
+    if (taxSettings.cbhi) {
+      statutoryDeductionsData.push([`CBHI (${config.cbhiRates.employee}%)`, `${APP_CONSTANTS.CURRENCY.SYMBOL} ${staffPayroll.calculations.cbhiEmployee.toLocaleString()}`]);
+      totalStatutoryDeductions += staffPayroll.calculations.cbhiEmployee;
+    }
+    
+    // Add total statutory deductions if any taxes are enabled
+    if (totalStatutoryDeductions > 0) {
+      statutoryDeductionsData.push(['', '']);
+      statutoryDeductionsData.push(['TOTAL STATUTORY', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${totalStatutoryDeductions.toLocaleString()}`]);
+    } else {
+      statutoryDeductionsData.push(['No statutory deductions configured', '']);
+    }
     
     // Other Deductions (if any)
     const otherDeductionsData = [];
@@ -363,11 +394,7 @@ export class PDFReportGenerator {
       ...otherDeductionsData,
       ['', ''],
       ['TOTAL DEDUCTIONS', `${APP_CONSTANTS.CURRENCY.SYMBOL} ${(
-        staffPayroll.calculations.payeBeforeReliefs +
-        staffPayroll.calculations.pensionEmployee +
-        staffPayroll.calculations.maternityEmployee +
-        staffPayroll.calculations.ramaEmployee +
-        staffPayroll.calculations.cbhiEmployee +
+        totalStatutoryDeductions +
         staffPayroll.calculations.otherDeductions
       ).toLocaleString()}`]
     ];

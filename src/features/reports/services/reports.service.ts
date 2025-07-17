@@ -7,6 +7,8 @@ import {
   getDocs,
   orderBy,
   Timestamp,
+  doc,
+  getDoc,
 } from 'firebase/firestore';
 import { getPayrolls, getStaffPayrollData } from '../../payroll/services/payroll.service';
 import { getStaff } from '../../staff/services/staff.service';
@@ -64,6 +66,19 @@ export async function generatePayeReturn(
   companyId: string,
   period: string
 ): Promise<{ data: PayeReturnData[]; totalPaye: number; totalGross: number }> {
+  // Check if PAYE is enabled for this company
+  const companyDoc = await getDoc(doc(db, 'companies', companyId));
+  if (!companyDoc.exists()) {
+    throw new Error('Company not found');
+  }
+  
+  const companyData = companyDoc.data();
+  const taxSettings = companyData.payrollTaxSettings || { paye: true };
+  
+  if (!taxSettings.paye) {
+    throw new Error('PAYE tax is disabled for this company');
+  }
+  
   const payrolls = await getPayrolls(companyId);
   const periodPayrolls = payrolls.filter(p => p.period === period && p.status === 'processed');
   
@@ -96,6 +111,19 @@ export async function generatePensionReport(
   companyId: string,
   period: string
 ): Promise<{ data: PensionReportData[]; totalEmployee: number; totalEmployer: number; grandTotal: number }> {
+  // Check if pension is enabled for this company
+  const companyDoc = await getDoc(doc(db, 'companies', companyId));
+  if (!companyDoc.exists()) {
+    throw new Error('Company not found');
+  }
+  
+  const companyData = companyDoc.data();
+  const taxSettings = companyData.payrollTaxSettings || { pension: true };
+  
+  if (!taxSettings.pension) {
+    throw new Error('Pension contribution is disabled for this company');
+  }
+  
   const payrolls = await getPayrolls(companyId);
   const periodPayrolls = payrolls.filter(p => p.period === period && p.status === 'processed');
   
@@ -130,6 +158,19 @@ export async function generateMaternityReport(
   companyId: string,
   period: string
 ): Promise<{ data: MaternityReportData[]; totalEmployee: number; totalEmployer: number; grandTotal: number }> {
+  // Check if maternity is enabled for this company
+  const companyDoc = await getDoc(doc(db, 'companies', companyId));
+  if (!companyDoc.exists()) {
+    throw new Error('Company not found');
+  }
+  
+  const companyData = companyDoc.data();
+  const taxSettings = companyData.payrollTaxSettings || { maternity: true };
+  
+  if (!taxSettings.maternity) {
+    throw new Error('Maternity contribution is disabled for this company');
+  }
+  
   const payrolls = await getPayrolls(companyId);
   const periodPayrolls = payrolls.filter(p => p.period === period && p.status === 'processed');
   
@@ -164,6 +205,19 @@ export async function generateCBHIReport(
   companyId: string,
   period: string
 ): Promise<{ data: CBHIReportData[]; totalContribution: number }> {
+  // Check if CBHI is enabled for this company
+  const companyDoc = await getDoc(doc(db, 'companies', companyId));
+  if (!companyDoc.exists()) {
+    throw new Error('Company not found');
+  }
+  
+  const companyData = companyDoc.data();
+  const taxSettings = companyData.payrollTaxSettings || { cbhi: true };
+  
+  if (!taxSettings.cbhi) {
+    throw new Error('CBHI contribution is disabled for this company');
+  }
+  
   const payrolls = await getPayrolls(companyId);
   const periodPayrolls = payrolls.filter(p => p.period === period && p.status === 'processed');
   
@@ -194,6 +248,19 @@ export async function generateRAMAReport(
   companyId: string,
   period: string
 ): Promise<{ data: RAMAReportData[]; totalEmployee: number; totalEmployer: number; grandTotal: number }> {
+  // Check if RAMA is enabled for this company
+  const companyDoc = await getDoc(doc(db, 'companies', companyId));
+  if (!companyDoc.exists()) {
+    throw new Error('Company not found');
+  }
+  
+  const companyData = companyDoc.data();
+  const taxSettings = companyData.payrollTaxSettings || { rama: true };
+  
+  if (!taxSettings.rama) {
+    throw new Error('RAMA contribution is disabled for this company');
+  }
+  
   const payrolls = await getPayrolls(companyId);
   const periodPayrolls = payrolls.filter(p => p.period === period && p.status === 'processed');
   
