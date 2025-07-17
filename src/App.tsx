@@ -29,7 +29,7 @@ const PayrollList = lazy(() =>
   import(/* webpackChunkName: "payroll" */ './features/payroll/components/PayrollList')
 );
 const Reports = lazy(() => 
-  import(/* webpackChunkName: "reports" */ './features/reports/components/EnhancedReports')
+  import(/* webpackChunkName: "reports" */ './features/reports/components/Reports')
 );
 const Utilities = lazy(() => 
   import(/* webpackChunkName: "utilities" */ './features/utilities/components/Utilities')

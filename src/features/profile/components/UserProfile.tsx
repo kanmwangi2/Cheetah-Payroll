@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { updatePassword, updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { doc, updateDoc, getFirestore } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuthContext } from '../../../core/providers/AuthProvider';
+import { uploadProfilePicture, removeProfilePicture } from '../../../shared/services/user.service';
 import ProfilePicture from '../../../shared/components/ui/ProfilePicture';
 import Button from '../../../shared/components/ui/Button';
 
 const db = getFirestore();
-const storage = getStorage();
 
 const UserProfile: React.FC = () => {
   const { user } = useAuthContext();
@@ -147,19 +146,8 @@ const UserProfile: React.FC = () => {
     setSuccess(null);
     
     try {
-      // Upload to Firebase Storage
-      const fileName = `profile-pictures/${user.id}/${Date.now()}.jpg`;
-      const storageRef = ref(storage, fileName);
-      
-      const uploadResult = await uploadBytes(storageRef, croppedImageBlob);
-      const downloadURL = await getDownloadURL(uploadResult.ref);
-      
-      // Update user profile in Firestore
-      const userRef = doc(db, 'users', user.id);
-      await updateDoc(userRef, {
-        photoURL: downloadURL,
-        updatedAt: new Date().toISOString(),
-      });
+      // Upload profile picture using the user service
+      const downloadURL = await uploadProfilePicture(user.id, croppedImageBlob);
       
       // Update Firebase Auth profile
       await updateProfile(user as any, { photoURL: downloadURL });
@@ -182,12 +170,8 @@ const UserProfile: React.FC = () => {
     setSuccess(null);
     
     try {
-      // Update user profile in Firestore
-      const userRef = doc(db, 'users', user.id);
-      await updateDoc(userRef, {
-        photoURL: null,
-        updatedAt: new Date().toISOString(),
-      });
+      // Remove profile picture using the user service
+      await removeProfilePicture(user.id);
       
       // Update Firebase Auth profile
       await updateProfile(user as any, { photoURL: null });

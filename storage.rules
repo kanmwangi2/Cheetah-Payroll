@@ -1,0 +1,36 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Profile pictures - users can read/write their own profile pictures
+    match /profile-pictures/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow other authenticated users to read profile pictures (for display purposes)
+    match /profile-pictures/{userId}/{allPaths=**} {
+      allow read: if request.auth != null;
+    }
+    
+    // Company logos and assets - accessible to company users
+    match /companies/{companyId}/{allPaths=**} {
+      allow read: if request.auth != null && isCompanyUser(companyId);
+      allow write: if request.auth != null && isCompanyAdminOrHigher(companyId);
+    }
+    
+    // Helper functions (similar to Firestore rules)
+    function getUserData() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isCompanyAdminOrHigher(companyId) {
+      let user = getUserData();
+      return user.role in ['primary_admin', 'app_admin', 'company_admin'] && 
+             (user.role in ['primary_admin', 'app_admin'] || companyId in user.companyIds);
+    }
+    
+    function isCompanyUser(companyId) {
+      let user = getUserData();
+      return user.role in ['primary_admin', 'app_admin'] || companyId in user.companyIds;
+    }
+  }
+}

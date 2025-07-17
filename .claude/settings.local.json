@@ -32,7 +32,11 @@
       "Bash(rg:*)",
       "Bash(npm install:*)",
       "Bash(true)",
-      "Bash(/dev/null)"
+      "Bash(/dev/null)",
+      "Bash(claude doctor)",
+      "Bash(claude doctor:*)",
+      "Bash(claude update)",
+      "Bash(claude migrate-installer:*)"
     ],
     "deny": []
   }

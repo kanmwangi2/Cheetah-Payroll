@@ -1,7 +1,6 @@
 import React, { useEffect, useState, memo, useCallback } from 'react';
-import { getFirestore, collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { APP_CONSTANTS } from '../../../shared/constants/app.constants';
 
 interface DashboardProps {
   companyId: string;
@@ -11,9 +10,7 @@ interface DashboardMetrics {
   staffCount: number;
   payrollCount: number;
   pendingApprovals: number;
-  totalPayments: number;
   totalDeductions: number;
-  thisMonthPayroll: number;
 }
 
 const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
@@ -21,9 +18,7 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
     staffCount: 0,
     payrollCount: 0,
     pendingApprovals: 0,
-    totalPayments: 0,
-    totalDeductions: 0,
-    thisMonthPayroll: 0
+    totalDeductions: 0
   });
   const [loading, setLoading] = useState(true);
   const [, setError] = useState<string | null>(null);
@@ -47,8 +42,6 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
       
       try {
         // Prepare all queries to run in parallel
-        const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
-        
         const queries = [
           // Staff count
           getDocs(collection(db, 'companies', companyId, 'staff')),
@@ -62,25 +55,10 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
             where('status', '==', 'pending_approval')
           )),
           
-          // Active payments (for amount calculation)
-          getDocs(query(
-            collection(db, 'companies', companyId, 'payments'),
-            where('status', '==', 'active')
-          )),
-          
           // Active deductions count
           getDocs(query(
             collection(db, 'companies', companyId, 'deductions'),
             where('status', '==', 'active')
-          )),
-          
-          // This month's payroll
-          getDocs(query(
-            collection(db, 'companies', companyId, 'payrolls'),
-            where('period', '>=', currentMonth + '-01'),
-            where('period', '<=', currentMonth + '-31'),
-            orderBy('period', 'desc'),
-            limit(1)
           ))
         ];
 
@@ -89,9 +67,7 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
           staffSnap,
           payrollSnap, 
           pendingApprovalsSnap,
-          activePaymentsSnap,
-          activeDeductionsSnap,
-          thisMonthPayrollSnap
+          activeDeductionsSnap
         ] = await Promise.all(queries);
 
         // Process results
@@ -100,27 +76,11 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
         const pendingApprovals = pendingApprovalsSnap.size;
         const totalDeductions = activeDeductionsSnap.size;
 
-        // Calculate total payments amount
-        let totalPaymentsAmount = 0;
-        activePaymentsSnap.forEach(doc => {
-          const payment = doc.data();
-          totalPaymentsAmount += payment.amount || 0;
-        });
-
-        // Calculate this month's payroll
-        let thisMonthPayroll = 0;
-        if (!thisMonthPayrollSnap.empty) {
-          const latestPayroll = thisMonthPayrollSnap.docs[0].data();
-          thisMonthPayroll = latestPayroll.totalNetPay || 0;
-        }
-
         setMetrics({
           staffCount,
           payrollCount,
           pendingApprovals,
-          totalPayments: totalPaymentsAmount,
-          totalDeductions,
-          thisMonthPayroll
+          totalDeductions
         });
         setLastUpdated(Date.now());
 
@@ -222,31 +182,6 @@ const Dashboard: React.FC<DashboardProps> = memo(({ companyId }) => {
           </div>
         </div>
 
-        <div className="dashboard-metric-card">
-          <div className="dashboard-metric-header">
-            <span className="dashboard-metric-icon">💰</span>
-            <h3 className="dashboard-metric-title">Active Payments</h3>
-          </div>
-          <div className="dashboard-metric-value">
-            {new Intl.NumberFormat('en-RW', { style: 'currency', currency: APP_CONSTANTS.CURRENCY.CODE }).format(metrics.totalPayments)}
-          </div>
-          <div className="dashboard-metric-change">
-            Total monthly amount
-          </div>
-        </div>
-
-        <div className="dashboard-metric-card">
-          <div className="dashboard-metric-header">
-            <span className="dashboard-metric-icon">📅</span>
-            <h3 className="dashboard-metric-title">This Month's Payroll</h3>
-          </div>
-          <div className="dashboard-metric-value">
-            {new Intl.NumberFormat('en-RW', { style: 'currency', currency: APP_CONSTANTS.CURRENCY.CODE }).format(metrics.thisMonthPayroll)}
-          </div>
-          <div className="dashboard-metric-change">
-            Net pay distributed
-          </div>
-        </div>
       </div>
 
       {/* Quick Actions */}

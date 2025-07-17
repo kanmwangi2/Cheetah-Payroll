@@ -264,7 +264,7 @@ All data operations follow strict company isolation:
 - **Theme Integration**: Personal theme preferences management with system-wide application
 
 ### Advanced Reports & Analytics System
-- **Enhanced Reports Interface**: Professional tabbed reporting system (`EnhancedReports.tsx`)
+- **Enhanced Reports Interface**: Professional tabbed reporting system (`Reports.tsx`)
 - **Comprehensive Report Types**: 
   - Statutory reports (PAYE, Pension, Maternity, CBHI, RAMA)
   - Individual and bulk payslip generation

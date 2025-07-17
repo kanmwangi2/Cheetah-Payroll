@@ -378,7 +378,7 @@ const Reports: React.FC<{ companyId: string }> = ({ companyId }) => {
 
   return (
     <div className="reports-module">
-      <h2>Reports & Analytics</h2>
+      <h2>Reports</h2>
       
       {/* Tab Navigation */}
       <div className="tab-navigation style-pills">

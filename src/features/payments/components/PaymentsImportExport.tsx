@@ -2,25 +2,28 @@ import React, { useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { createPayment } from '../services/payments.service';
 import { normalizeDate } from '../../../shared/utils/date.utils';
+import { isValidBoolean, parseBoolean, createBooleanValidationError, createNumberValidationError } from '../../../shared/utils/import-validation';
 import Button from '../../../shared/components/ui/Button';
 
 const paymentTemplate = [
-  'staff_id,basic_salary_amount,basic_salary_gross,transport_allowance_amount,transport_allowance_gross,overtime_allowance_amount,overtime_allowance_gross,housing_allowance_amount,housing_allowance_gross,medical_allowance_amount,medical_allowance_gross,performance_bonus_amount,performance_bonus_gross,commission_amount,commission_gross,effective_date,end_date,status',
-  'EMP001,500000,true,50000,false,25000,false,100000,false,50000,false,0,false,0,false,01/07/2025,,active',
-  'EMP002,600000,true,50000,false,0,false,0,false,0,false,100000,false,75000,false,01/07/2025,,active',
-  'EMP003,450000,true,50000,false,30000,false,80000,false,30000,false,50000,false,25000,false,01/07/2025,,active',
+  'staff_id,basic_salary_amount,basic_salary_gross,basic_salary_recurring,transport_allowance_amount,transport_allowance_gross,transport_allowance_recurring,overtime_allowance_amount,overtime_allowance_gross,overtime_allowance_recurring,housing_allowance_amount,housing_allowance_gross,housing_allowance_recurring,medical_allowance_amount,medical_allowance_gross,medical_allowance_recurring,performance_bonus_amount,performance_bonus_gross,performance_bonus_recurring,commission_amount,commission_gross,commission_recurring,effective_date,end_date,status',
+  'EMP001,500000,true,true,50000,false,true,25000,false,false,100000,false,true,50000,false,true,0,false,false,0,false,false,01/07/2025,,active',
+  'EMP002,600000,true,true,50000,false,true,0,false,false,0,false,false,0,false,false,100000,false,false,75000,false,false,01/07/2025,,active',
+  'EMP003,450000,true,true,50000,false,true,30000,false,false,80000,false,true,30000,false,true,50000,false,false,25000,false,false,01/07/2025,,active',
   '',
   '# Instructions:',
-  '# 1. Required columns: staff_id, basic_salary_amount, basic_salary_gross, transport_allowance_amount, transport_allowance_gross, effective_date, status',
-  '# 2. For any other allowances, add two columns: [allowance_name]_amount and [allowance_name]_gross',
-  '# 3. Example: housing_allowance_amount, housing_allowance_gross OR medical_allowance_amount, medical_allowance_gross',
-  '# 4. You can add as many allowances as needed - just follow the pattern: [name]_amount, [name]_gross',
+  '# 1. Required columns: staff_id, basic_salary_amount, basic_salary_gross, basic_salary_recurring, transport_allowance_amount, transport_allowance_gross, transport_allowance_recurring, effective_date, status',
+  '# 2. For any other allowances, add three columns: [allowance_name]_amount, [allowance_name]_gross, [allowance_name]_recurring',
+  '# 3. Example: housing_allowance_amount, housing_allowance_gross, housing_allowance_recurring',
+  '# 4. You can add as many allowances as needed - just follow the pattern: [name]_amount, [name]_gross, [name]_recurring',
   '# 5. Set amount to 0 if staff member does not receive that allowance',
-  '# 6. Set gross to true if amount is gross pay, false if net pay',
-  '# 7. All allowances except basic_salary and transport_allowance are treated as "other allowances" in tax calculations',
+  '# 6. Boolean columns (gross, recurring): Use TRUE/FALSE, true/false, yes/no, or 1/0',
+  '# 7. gross: true = gross pay, false = net pay',
+  '# 8. recurring: true = monthly recurring payment, false = one-time payment',
+  '# 9. All allowances except basic_salary and transport_allowance are treated as "other allowances" in tax calculations',
 ].join('\n');
 
-const REQUIRED_FIELDS = ['staff_id', 'basic_salary_amount', 'basic_salary_gross', 'transport_allowance_amount', 'transport_allowance_gross', 'effective_date', 'status'];
+const REQUIRED_FIELDS = ['staff_id', 'basic_salary_amount', 'basic_salary_gross', 'basic_salary_recurring', 'transport_allowance_amount', 'transport_allowance_gross', 'transport_allowance_recurring', 'effective_date', 'status'];
 
 // Helper function to detect allowance columns dynamically
 function detectAllowanceColumns(headers: string[]): string[] {
@@ -35,6 +38,7 @@ function detectAllowanceColumns(headers: string[]): string[] {
   
   return Array.from(allowanceTypes);
 }
+
 
 interface ImportHistoryEntry {
   date: string;
@@ -94,18 +98,24 @@ const PaymentsImportExport: React.FC<{
     // Validate basic salary and transport allowance (required)
     const basicSalaryAmount = Number(row.basic_salary_amount);
     if (isNaN(basicSalaryAmount) || basicSalaryAmount <= 0) {
-      return `basic_salary_amount must be a positive number`;
+      return createNumberValidationError('basic_salary_amount', row.basic_salary_amount, 'must be positive');
     }
-    if (!(row.basic_salary_gross === 'true' || row.basic_salary_gross === 'false' || typeof row.basic_salary_gross === 'boolean')) {
-      return `basic_salary_gross must be true or false`;
+    if (!isValidBoolean(row.basic_salary_gross)) {
+      return createBooleanValidationError('basic_salary_gross', row.basic_salary_gross);
+    }
+    if (!isValidBoolean(row.basic_salary_recurring)) {
+      return createBooleanValidationError('basic_salary_recurring', row.basic_salary_recurring);
     }
     
     const transportAmount = Number(row.transport_allowance_amount);
     if (isNaN(transportAmount) || transportAmount < 0) {
-      return `transport_allowance_amount must be a non-negative number`;
+      return createNumberValidationError('transport_allowance_amount', row.transport_allowance_amount, 'must be non-negative');
     }
-    if (!(row.transport_allowance_gross === 'true' || row.transport_allowance_gross === 'false' || typeof row.transport_allowance_gross === 'boolean')) {
-      return `transport_allowance_gross must be true or false`;
+    if (!isValidBoolean(row.transport_allowance_gross)) {
+      return createBooleanValidationError('transport_allowance_gross', row.transport_allowance_gross);
+    }
+    if (!isValidBoolean(row.transport_allowance_recurring)) {
+      return createBooleanValidationError('transport_allowance_recurring', row.transport_allowance_recurring);
     }
     
     // Dynamically validate other allowances
@@ -113,16 +123,22 @@ const PaymentsImportExport: React.FC<{
     for (const allowanceType of allowanceTypes) {
       const amountField = `${allowanceType}_amount`;
       const grossField = `${allowanceType}_gross`;
+      const recurringField = `${allowanceType}_recurring`;
       
       if (row[amountField] && row[amountField] !== '0') {
         const amount = Number(row[amountField]);
         if (isNaN(amount) || amount <= 0) {
-          return `Invalid ${amountField} (must be positive number)`;
+          return createNumberValidationError(amountField, row[amountField], 'must be positive');
         }
         
         // Check gross flag
-        if (!(row[grossField] === 'true' || row[grossField] === 'false' || typeof row[grossField] === 'boolean')) {
-          return `${grossField} must be true or false`;
+        if (!isValidBoolean(row[grossField])) {
+          return createBooleanValidationError(grossField, row[grossField]);
+        }
+        
+        // Check recurring flag
+        if (!isValidBoolean(row[recurringField])) {
+          return createBooleanValidationError(recurringField, row[recurringField]);
         }
       }
     }
@@ -180,8 +196,8 @@ const PaymentsImportExport: React.FC<{
                 type: 'basic_salary' as const,
                 amount: basicSalaryAmount,
                 staffId: row.staff_id,
-                isGross: row.basic_salary_gross === 'true' || row.basic_salary_gross === true,
-                isRecurring: true,
+                isGross: parseBoolean(row.basic_salary_gross),
+                isRecurring: parseBoolean(row.basic_salary_recurring),
                 effectiveDate: row.effective_date,
                 endDate: row.end_date && row.end_date.trim() ? row.end_date : undefined,
                 description: 'Basic salary payment',
@@ -200,8 +216,8 @@ const PaymentsImportExport: React.FC<{
                 type: 'transport_allowance' as const,
                 amount: transportAmount,
                 staffId: row.staff_id,
-                isGross: row.transport_allowance_gross === 'true' || row.transport_allowance_gross === true,
-                isRecurring: true,
+                isGross: parseBoolean(row.transport_allowance_gross),
+                isRecurring: parseBoolean(row.transport_allowance_recurring),
                 effectiveDate: row.effective_date,
                 endDate: row.end_date && row.end_date.trim() ? row.end_date : undefined,
                 description: 'Transport allowance payment',
@@ -216,6 +232,7 @@ const PaymentsImportExport: React.FC<{
             for (const allowanceType of allowanceTypes) {
               const amountField = `${allowanceType}_amount`;
               const grossField = `${allowanceType}_gross`;
+              const recurringField = `${allowanceType}_recurring`;
               
               if (row[amountField] && row[amountField] !== '0') {
                 const amount = parseFloat(row[amountField]);
@@ -225,8 +242,8 @@ const PaymentsImportExport: React.FC<{
                     type: 'other_allowance' as const,
                     amount: amount,
                     staffId: row.staff_id,
-                    isGross: row[grossField] === 'true' || row[grossField] === true,
-                    isRecurring: true,
+                    isGross: parseBoolean(row[grossField]),
+                    isRecurring: parseBoolean(row[recurringField]),
                     effectiveDate: row.effective_date,
                     endDate: row.end_date && row.end_date.trim() ? row.end_date : undefined,
                     description: `${allowanceType.replace(/_/g, ' ')} payment`,
@@ -289,8 +306,10 @@ const PaymentsImportExport: React.FC<{
           staff_id: staffId,
           basic_salary_amount: 0,
           basic_salary_gross: false,
+          basic_salary_recurring: false,
           transport_allowance_amount: 0,
           transport_allowance_gross: false,
+          transport_allowance_recurring: false,
           effective_date: payment.effectiveDate,
           end_date: payment.endDate || '',
           status: payment.status
@@ -301,15 +320,18 @@ const PaymentsImportExport: React.FC<{
           if (type !== 'basic_salary' && type !== 'transport_allowance') {
             acc[staffId][`${type}_amount`] = 0;
             acc[staffId][`${type}_gross`] = false;
+            acc[staffId][`${type}_recurring`] = false;
           }
         });
       }
       
-      // Add payment amount and gross flag for this payment type
+      // Add payment amount, gross flag, and recurring flag for this payment type
       const amountField = `${payment.type}_amount`;
       const grossField = `${payment.type}_gross`;
+      const recurringField = `${payment.type}_recurring`;
       acc[staffId][amountField] = payment.amount;
       acc[staffId][grossField] = payment.isGross;
+      acc[staffId][recurringField] = payment.isRecurring;
       
       return acc;
     }, {});

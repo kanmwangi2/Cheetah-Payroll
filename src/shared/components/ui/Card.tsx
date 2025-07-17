@@ -4,7 +4,6 @@
  */
 
 import React, { ReactNode, forwardRef } from 'react';
-import { useThemeValues } from '../../../core/providers/ThemeProvider';
 
 interface CardProps {
   children: ReactNode;
